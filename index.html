@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Kho Báu Tri Thức — Lớp 1</title>
+    <meta name="description" content="Ứng dụng học tập và rèn luyện toàn diện môn Tiếng Việt, Toán và Tiếng Anh dành cho học sinh lớp 1 với trò chơi giáo dục và lộ trình cá nhân hóa." />
+    <meta property="og:title" content="Kho Báu Tri Thức — Lớp 1" />
+    <meta property="og:description" content="Ứng dụng học tập và rèn luyện toàn diện môn Tiếng Việt, Toán và Tiếng Anh dành cho học sinh lớp 1 với trò chơi giáo dục và lộ trình cá nhân hóa." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#f59e0b" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- T01/B12: fonts are self-hosted in /public/fonts (offline-first). No Google Fonts. -->
+    <!-- FIX font-nhoe: 4 file variable (weight nội suy thật), thay cho 14 file
+         per-weight cũ vốn là cùng 1 file copy gây synthetic bold. -->
+    <link rel="preload" href="/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/nunito-vietnamese.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+  <body class="bg-amber-50/40 text-slate-800 antialiased select-none font-sans overflow-x-hidden">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

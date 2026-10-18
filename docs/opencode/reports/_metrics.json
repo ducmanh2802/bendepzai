@@ -1,0 +1,274 @@
+{
+  "perSubject": [
+    {
+      "subject": "tieng-viet",
+      "topics": 15,
+      "lessons": 58,
+      "questions": 612,
+      "minPerLesson": 10,
+      "maxPerLesson": 12,
+      "under10": 0,
+      "types": [
+        "audio-choice",
+        "drag-drop",
+        "fill-blank",
+        "image-choice",
+        "matching",
+        "multiple-choice",
+        "ordering",
+        "true-false"
+      ]
+    },
+    {
+      "subject": "toan",
+      "topics": 13,
+      "lessons": 26,
+      "questions": 192,
+      "minPerLesson": 2,
+      "maxPerLesson": 10,
+      "under10": 10,
+      "types": [
+        "drag-drop",
+        "fill-blank",
+        "image-choice",
+        "matching",
+        "math-expression",
+        "multiple-choice",
+        "ordering",
+        "true-false"
+      ]
+    },
+    {
+      "subject": "english",
+      "topics": 24,
+      "lessons": 40,
+      "questions": 326,
+      "minPerLesson": 2,
+      "maxPerLesson": 12,
+      "under10": 16,
+      "types": [
+        "audio-choice",
+        "drag-drop",
+        "fill-blank",
+        "image-choice",
+        "matching",
+        "multiple-choice",
+        "ordering",
+        "true-false"
+      ]
+    },
+    {
+      "subject": "cuoc-song",
+      "topics": 14,
+      "lessons": 26,
+      "questions": 264,
+      "minPerLesson": 10,
+      "maxPerLesson": 12,
+      "under10": 0,
+      "types": [
+        "fill-blank",
+        "image-choice",
+        "matching",
+        "multiple-choice",
+        "ordering",
+        "true-false"
+      ]
+    }
+  ],
+  "totalQuestions": 1394,
+  "games": 28,
+  "readingPassages": 36,
+  "readingQuestions": 192,
+  "notNfc": 0,
+  "banned": 0,
+  "noOptions": 0,
+  "answerOutside": 0,
+  "notNfcIds": [],
+  "bannedPrompts": [],
+  "noOptionsIds": [],
+  "answerOutsideIds": [],
+  "shortLessons": [
+    {
+      "subject": "toan",
+      "topic": "So SĂ¡nh: Lá»›n HÆ¡n, BĂ© HÆ¡n, Báº±ng Nhau",
+      "lesson": "CĂ¡ sáº¥u Ä‘Ă³i bá»¥ng thĂ­ch Äƒn sá»‘ lá»›n",
+      "id": "math-les-3",
+      "count": 5
+    },
+    {
+      "subject": "toan",
+      "topic": "HĂ¬nh Há»c Quanh Em",
+      "lesson": "Nhá»¯ng ngÆ°á»i báº¡n hĂ¬nh há»c",
+      "id": "math-les-6",
+      "count": 2
+    },
+    {
+      "subject": "toan",
+      "topic": "Äo LÆ°á»ng: DĂ i - Ngáº¯n, Náº·ng - Nháº¹",
+      "lesson": "DĂ i hÆ¡n vĂ  ngáº¯n hÆ¡n",
+      "id": "math-les-7",
+      "count": 3
+    },
+    {
+      "subject": "toan",
+      "topic": "Äo LÆ°á»ng, Giá» & Tiá»n Viá»‡t",
+      "lesson": "BĂ© xem giá» vĂ  Ä‘áº¿m ngĂ y",
+      "id": "math-les-11",
+      "count": 6
+    },
+    {
+      "subject": "toan",
+      "topic": "Äo LÆ°á»ng, Giá» & Tiá»n Viá»‡t",
+      "lesson": "BĂ© tiĂªu tiá»n Viá»‡t",
+      "id": "math-les-12",
+      "count": 6
+    },
+    {
+      "subject": "toan",
+      "topic": "CĂ¡c Dáº¡ng BĂ i Táº­p Má»›i",
+      "lesson": "Ná»‘i phĂ©p tĂ­nh vá»›i káº¿t quáº£",
+      "id": "math-les-new-1",
+      "count": 2
+    },
+    {
+      "subject": "toan",
+      "topic": "CĂ¡c Dáº¡ng BĂ i Táº­p Má»›i",
+      "lesson": "ÄĂºng hay Sai vá»›i phĂ©p tĂ­nh",
+      "id": "math-les-new-2",
+      "count": 2
+    },
+    {
+      "subject": "toan",
+      "topic": "CĂ¡c Dáº¡ng BĂ i Táº­p Má»›i",
+      "lesson": "KĂ©o tháº£ sá»‘ vĂ o nhĂ³m",
+      "id": "math-les-new-3",
+      "count": 2
+    },
+    {
+      "subject": "toan",
+      "topic": "CĂ¡c Dáº¡ng BĂ i Táº­p Má»›i",
+      "lesson": "Sáº¯p xáº¿p sá»‘ theo thá»© tá»±",
+      "id": "math-les-new-4",
+      "count": 2
+    },
+    {
+      "subject": "toan",
+      "topic": "CĂ¡c Dáº¡ng BĂ i Táº­p Má»›i",
+      "lesson": "Biá»ƒu thá»©c toĂ¡n há»c",
+      "id": "math-les-new-5",
+      "count": 2
+    },
+    {
+      "subject": "english",
+      "topic": "ABC Phonics & Letters",
+      "lesson": "Letters A, B, C and Friends",
+      "id": "eng-les-1",
+      "count": 4
+    },
+    {
+      "subject": "english",
+      "topic": "Magic Numbers 1 - 10",
+      "lesson": "Count 1 to 5 in English",
+      "id": "eng-les-2",
+      "count": 3
+    },
+    {
+      "subject": "english",
+      "topic": "Colors of the Rainbow",
+      "lesson": "Primary Colors",
+      "id": "eng-les-3",
+      "count": 3
+    },
+    {
+      "subject": "english",
+      "topic": "Cute Animals Zoo",
+      "lesson": "Pets and Friends",
+      "id": "eng-les-4",
+      "count": 3
+    },
+    {
+      "subject": "english",
+      "topic": "My Sweet Family",
+      "lesson": "I Love My Family",
+      "id": "eng-les-5",
+      "count": 3
+    },
+    {
+      "subject": "english",
+      "topic": "School Bag & Supplies",
+      "lesson": "In My Schoolbag",
+      "id": "eng-les-6",
+      "count": 3
+    },
+    {
+      "subject": "english",
+      "topic": "My Wonderful Body",
+      "lesson": "Two Eyes to See",
+      "id": "eng-les-7",
+      "count": 3
+    },
+    {
+      "subject": "english",
+      "topic": "Yummy Food & Fruits",
+      "lesson": "Sweet Fruits",
+      "id": "eng-les-8",
+      "count": 3
+    },
+    {
+      "subject": "english",
+      "topic": "Toys & Playground",
+      "lesson": "Let's Play Together",
+      "id": "eng-les-9",
+      "count": 3
+    },
+    {
+      "subject": "english",
+      "topic": "Greetings & Feelings",
+      "lesson": "Polite Words Every Day",
+      "id": "eng-les-10",
+      "count": 4
+    },
+    {
+      "subject": "english",
+      "topic": "Phonics Nâng Cao & Blends",
+      "lesson": "Digraphs SH, CH, TH, PH",
+      "id": "eng-les-11",
+      "count": 6
+    },
+    {
+      "subject": "english",
+      "topic": "Phonics Nâng Cao & Blends",
+      "lesson": "My Little Sentences",
+      "id": "eng-les-12",
+      "count": 6
+    },
+    {
+      "subject": "english",
+      "topic": "New Question Types",
+      "lesson": "Match Word to Picture",
+      "id": "eng-les-new-1",
+      "count": 2
+    },
+    {
+      "subject": "english",
+      "topic": "New Question Types",
+      "lesson": "True or False",
+      "id": "eng-les-new-2",
+      "count": 2
+    },
+    {
+      "subject": "english",
+      "topic": "New Question Types",
+      "lesson": "Drag and Drop Words",
+      "id": "eng-les-new-3",
+      "count": 2
+    },
+    {
+      "subject": "english",
+      "topic": "New Question Types",
+      "lesson": "Order Words to Make a Sentence",
+      "id": "eng-les-new-4",
+      "count": 2
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# P42 auto-runner (chi dung tren may nay)
+*.tgz
+docs/opencode/state/
+docs/opencode/logs/
+docs/opencode/TRANG_THAI*.md

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Kho Báu Tri Thức Lớp 1">
+  <rect width="64" height="64" rx="14" fill="#f59e0b"/>
+  <rect x="4" y="4" width="56" height="56" rx="11" fill="none" stroke="#fff7ed" stroke-width="2" opacity=".7"/>
+  <path
+    d="M32 11.5l5.36 10.86 11.99 1.74-8.68 8.46 2.05 11.94L32 38.95l-10.72 5.55 2.05-11.94-8.68-8.46 11.99-1.74z"
+    fill="#fffbeb"
+  />
+  <text
+    x="32"
+    y="55"
+    font-family="'Comfortaa','Nunito',system-ui,sans-serif"
+    font-size="16"
+    font-weight="700"
+    text-anchor="middle"
+    fill="#fffbeb"
+  >LỚP 1</text>
+</svg>
