@@ -35,8 +35,12 @@ export const AccountModal: React.FC<AccountModalProps> = ({
       setTimeout(() => setSuccessNotice(null), 3000);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Đăng nhập không thành công';
-      if (!msg.includes('popup-closed-by-user')) {
-        setErrorMsg('Không thể đăng nhập Google. Vui lòng kiểm tra kết nối mạng và thử lại.');
+      // Show the real reason (e.g. "not configured in this build") instead of a
+      // generic network message, so the user understands why login is unavailable.
+      if (msg.includes('popup-closed-by-user')) {
+        // user dismissed the popup — no error toast
+      } else {
+        setErrorMsg(msg);
       }
     } finally {
       setIsLoading(false);
@@ -90,10 +94,10 @@ export const AccountModal: React.FC<AccountModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="account-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in"
+      className="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-4 sm:pt-8 bg-slate-900/60 backdrop-blur-xs animate-fade-in overflow-y-auto"
     >
       <div
-        className="w-full max-w-md bg-white rounded-3xl shadow-2xl border-4 border-amber-300 p-5 sm:p-6 relative flex flex-col gap-4 text-slate-800"
+        className="w-full max-w-md bg-white rounded-3xl shadow-2xl border-4 border-amber-300 p-5 sm:p-6 relative flex flex-col gap-4 text-slate-800 max-h-[85vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}

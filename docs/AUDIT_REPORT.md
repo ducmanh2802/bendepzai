@@ -120,3 +120,4 @@ npm run audit:snapshot          # so sánh tree hiện tại với docs/audit-st
 | 2026-10-17 22:53 | src/services/kidBoxActivities.ts, tests/kidbox-bridge-practice.test.ts | 🟡 Cần audit phần liệt kê |
 | 2026-10-17 22:55 | Không có thay đổi mã nguồn | ✅ Sạch |
 | 2026-10-17 22:55 | Không có thay đổi mã nguồn | ✅ Sạch |
+| 2026-10-27 22:18 | src/components/auth/AccountModal.tsx, src/components/auth/AuthButton.tsx, src/data/englishSkillTaxonomy.ts, src/services/cloudSync.ts, src/services/englishAdaptiveEngine.ts, src/services/englishMasteryEngine.ts, src/services/englishMasteryStore.ts, src/services/firebase.ts, … | 🟡 Cần audit phần liệt kê |
