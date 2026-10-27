@@ -206,7 +206,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   }, [onSelectSubject]);
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-4 md:py-6 space-y-6 select-none">
+    <div className="w-full max-w-5xl mx-auto px-3 sm:px-4 py-4 md:py-6 space-y-5 sm:space-y-6 overflow-x-clip">
       {/* 1. HERO: Gấu Bút Chì (wave) + greeting bubble + 3 pills */}
       <div className="relative animate-gradient kb-hero-pattern bg-gradient-to-r from-amber-700 via-orange-700 to-rose-700 rounded-3xl p-4 sm:p-5 md:p-6 shadow-xl text-white overflow-hidden border-4 border-amber-200">
         {/* Background decorative shapes */}

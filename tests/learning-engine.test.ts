@@ -71,6 +71,9 @@ describe('Storage & Persistence Invariant Tests', () => {
 
   it('enforces lesson reward idempotency: does not duplicate stars or tickets on lesson retake', () => {
     // Complete lesson first time (awards lesson 30xp + daily quest 30xp + First Lesson Achievement 50xp = 110xp, and 3+3 = 6 stars)
+    StorageService.saveDailyQuests([
+      { id: 'quest_viet', title: 'Học 1 bài Tiếng Việt xinh', type: 'lesson_viet', targetCount: 1, rewardStars: 3, rewardXp: 30, currentCount: 0, completed: false },
+    ]);
     StorageService.completeLesson('vn-les-1', 'tieng-viet', 30, 3);
     const p1 = StorageService.getChildProfile();
     expect(p1.stars).toBe(6);

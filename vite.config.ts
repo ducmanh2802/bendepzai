@@ -60,6 +60,9 @@ export default defineConfig(() => {
             if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
               return 'react-vendor';
             }
+            if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase')) {
+              return 'firebase-vendor';
+            }
             if (id.includes('/src/data/math/') || id.includes('/src/data/mathCurriculum')) {
               return 'math-bank';
             }

@@ -783,6 +783,7 @@ export type KidBoxResponse =
 
 export interface KidBoxEvaluation {
   isCorrect: boolean;
+  outcome?: 'CORRECT' | 'INCORRECT';
   /** Item ids that were right, for per-item feedback. */
   correctItemIds: string[];
   wrongItemIds: string[];
@@ -802,6 +803,7 @@ export function evaluateActivityResponse(
 ): KidBoxEvaluation {
   const explain = (isCorrect: boolean): KidBoxEvaluation => ({
     isCorrect,
+    outcome: isCorrect ? 'CORRECT' : 'INCORRECT',
     correctItemIds: isCorrect ? activity.items.filter((i) => i.isCorrect).map((i) => i.id) : [],
     wrongItemIds: isCorrect ? [] : activity.items.filter((i) => i.isCorrect).map((i) => i.id),
     feedback: isCorrect

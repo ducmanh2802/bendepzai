@@ -5,6 +5,7 @@ import { sound } from '../../services/sound';
 import { Star, Sparkles, Flame, Volume2, VolumeX, Shield, ShoppingBag } from 'lucide-react';
 import { KidButton, Pill } from '../ui';
 import { NAVIGATION, getSubjectColor } from '../../config/navigation';
+import { AuthButton } from '../auth/AuthButton';
 
 interface HeaderProps {
   currentScreen: ActiveScreen;
@@ -282,6 +283,9 @@ export const Header: React.FC<HeaderProps> = ({
               <Volume2 className="w-4 h-4" aria-hidden="true" />
             )}
           />
+
+          {/* Google Sign-In & Cloud Sync Button */}
+          <AuthButton profile={profile} />
 
           {/* Parent Mode Gate button */}
           <KidButton

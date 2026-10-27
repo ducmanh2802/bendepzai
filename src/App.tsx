@@ -182,7 +182,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50/60 via-orange-50/30 to-amber-100/40 text-slate-800 flex flex-col font-sans">
+    <div className="min-h-screen min-h-[100dvh] w-full max-w-full overflow-x-clip bg-gradient-to-b from-amber-50/60 via-orange-50/30 to-amber-100/40 text-slate-800 flex flex-col font-sans">
       {/* Top Bar Header */}
       <Header
         currentScreen={currentScreen}
@@ -196,7 +196,7 @@ export default function App() {
       {/* Below lg the fixed bottom nav covers the end of the page: keep its
           height + the safe-area inset free (pb-16 was shorter than the nav plus
           inset, and md:pb-6 left 768–1023px with 24px under a ~60px nav). */}
-      <main className="flex-1 pb-[calc(var(--kb-bottom-nav-h)+env(safe-area-inset-bottom))] lg:pb-6">
+      <main className="flex-1 w-full max-w-full overflow-x-clip pb-[calc(var(--kb-bottom-nav-h)+env(safe-area-inset-bottom))] lg:pb-6">
         {currentScreen === 'home' && (
           <HomeScreen
             profile={profile}

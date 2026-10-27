@@ -237,6 +237,9 @@ export function writeJSON(key: string, value: unknown): void {
   try {
     if (typeof localStorage === 'undefined') return;
     localStorage.setItem(key, JSON.stringify(value));
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      window.dispatchEvent(new CustomEvent('kho_bau_storage_change', { detail: { key } }));
+    }
   } catch {
     // Storage full or unavailable: the app must keep running from defaults.
   }
@@ -1003,11 +1006,7 @@ export class StorageService {
   }
 
   public static saveChildProfile(profile: ChildProfile) {
-    try {
-      localStorage.setItem(STORAGE_KEYS.CHILD_PROFILE, JSON.stringify(profile));
-    } catch {
-      // Storage full or private mode handled safely
-    }
+    writeJSON(STORAGE_KEYS.CHILD_PROFILE, profile);
   }
 
 public static getParentSettings(): ParentSettings {
@@ -1120,11 +1119,7 @@ public static getParentSettings(): ParentSettings {
   }
 
   public static saveAnalytics(analytics: LearningAnalytics) {
-    try {
-      localStorage.setItem(STORAGE_KEYS.ANALYTICS, JSON.stringify(analytics));
-    } catch {
-      // Ignore
-    }
+    writeJSON(STORAGE_KEYS.ANALYTICS, analytics);
   }
 
   /**
@@ -1620,11 +1615,10 @@ public static getParentSettings(): ParentSettings {
       const motivation = StorageService.getMotivationState();
       motivation.starsEarnedTotal += Math.min(Math.max(Math.round(stars), 1), 3);
       StorageService.saveMotivationState(motivation);
+      // T18A — tiến trình quest qua engine chung (lesson_any/lesson_life/star_3...).
+      // recordQuestEvent tự trao thưởng quest + chấm thành tựu nên không cần thêm.
+      StorageService.recordQuestEvent({ kind: 'lesson', subject, stars });
     }
-
-    // T18A — tiến trình quest qua engine chung (lesson_any/lesson_life/star_3...).
-    // recordQuestEvent tự trao thưởng quest + chấm thành tựu nên không cần thêm.
-    StorageService.recordQuestEvent({ kind: 'lesson', subject, stars });
   }
 
   /**
