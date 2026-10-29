@@ -273,3 +273,36 @@ export function createCheckMarker(): THREE.Group {
   group.add(fill);
   return group;
 }
+
+/**
+ * Creates hint move indicator (glowing gold beam & ring pointing to suggested square)
+ */
+export function createHintMarker(): THREE.Group {
+  const group = new THREE.Group();
+
+  // Ground glowing disk
+  const diskGeom = new THREE.RingGeometry(0.2, 0.46, 32);
+  diskGeom.rotateX(-Math.PI / 2);
+  const diskMat = new THREE.MeshBasicMaterial({
+    color: 0x38bdf8,
+    transparent: true,
+    opacity: 0.85,
+    side: THREE.DoubleSide,
+  });
+  const disk = new THREE.Mesh(diskGeom, diskMat);
+  group.add(disk);
+
+  // Subtle transparent light beam pointing up
+  const beamGeom = new THREE.CylinderGeometry(0.15, 0.35, 1.2, 24, 1, true);
+  const beamMat = new THREE.MeshBasicMaterial({
+    color: 0x38bdf8,
+    transparent: true,
+    opacity: 0.25,
+    side: THREE.DoubleSide,
+  });
+  const beam = new THREE.Mesh(beamGeom, beamMat);
+  beam.position.y = 0.6;
+  group.add(beam);
+
+  return group;
+}

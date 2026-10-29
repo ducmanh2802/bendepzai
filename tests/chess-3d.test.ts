@@ -7,6 +7,7 @@ import {
   createSelectedMarker,
   createLastMoveMarker,
   createCheckMarker,
+  createHintMarker,
 } from '../src/components/learning/chess/chess3d/boardBuilder';
 import * as E from '../src/components/learning/chess/chessEngine';
 
@@ -70,6 +71,10 @@ describe('Chess 3D Component & Geometry Tests', () => {
 
     const checkMarker = createCheckMarker();
     expect(checkMarker).toBeInstanceOf(THREE.Group);
+
+    const hintMarker = createHintMarker();
+    expect(hintMarker).toBeInstanceOf(THREE.Group);
+    expect(hintMarker.children.length).toBeGreaterThan(0);
   });
 
   it('integrates with chess engine to validate opening moves', () => {

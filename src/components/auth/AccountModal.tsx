@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Cloud, RefreshCw, LogOut, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react';
 import { KidButton } from '../ui';
 import { signInWithGoogle, logOut } from '../../services/firebase';
@@ -24,15 +25,16 @@ export const AccountModal: React.FC<AccountModalProps> = ({
   const [successNotice, setSuccessNotice] = useState<string | null>(null);
 
   if (!isOpen) return null;
+  if (typeof document === 'undefined') return null;
 
   const handleGoogleSignIn = async () => {
-    sound.playClick();
+    sound.playClick?.();
     setIsLoading(true);
     setErrorMsg(null);
     try {
       await signInWithGoogle();
       sound.playLevelUp?.();
-      setSuccessNotice('Đăng nhập Google thành công! Tiến độ học tập đã được lưu.');
+      setSuccessNotice('Đăng nhập Google thành công! Tiến độ học tập đã được lưu an toàn.');
       setTimeout(() => setSuccessNotice(null), 3000);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Đăng nhập không thành công';
@@ -45,13 +47,13 @@ export const AccountModal: React.FC<AccountModalProps> = ({
   };
 
   const handleManualSync = async () => {
-    sound.playClick();
+    sound.playClick?.();
     setIsLoading(true);
     setErrorMsg(null);
     try {
       await CloudSyncService.syncNow();
       sound.playCorrect?.();
-      setSuccessNotice('Đã đồng bộ toàn bộ tiến độ lên đám mây thành công!');
+      setSuccessNotice('Đã đồng bộ toàn bộ tiến độ lên Google Cloud thành công!');
       setTimeout(() => setSuccessNotice(null), 3000);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Lỗi đồng bộ';
@@ -62,7 +64,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
   };
 
   const handleSignOut = async () => {
-    sound.playClick();
+    sound.playClick?.();
     setIsLoading(true);
     try {
       await logOut();
@@ -88,32 +90,36 @@ export const AccountModal: React.FC<AccountModalProps> = ({
     );
   };
 
-  return (
+  // Render via React Portal into document.body so it is NEVER trapped or submerged
+  // inside any parent stacking context, header, or overflow-clip container!
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="account-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/65 backdrop-blur-sm animate-fade-in overflow-y-auto"
+      onClick={onClose}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-md animate-fade-in overflow-y-auto"
+      style={{ isolation: 'isolate' }}
     >
       <div
-        className="w-full max-w-md my-auto bg-white rounded-3xl shadow-2xl border-4 border-amber-300 p-5 sm:p-6 relative flex flex-col gap-4 text-slate-800 max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-md my-auto bg-white rounded-3xl shadow-2xl border-4 border-amber-300 p-5 sm:p-6 relative flex flex-col gap-4 text-slate-800 max-h-[90vh] overflow-y-auto z-10"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
           onClick={() => {
-            sound.playClick();
+            sound.playClick?.();
             onClose();
           }}
           aria-label="Đóng bảng tài khoản"
-          className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 active:scale-95 flex items-center justify-center text-slate-600 transition-colors cursor-pointer"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 active:scale-95 flex items-center justify-center text-slate-600 transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Modal Header */}
         <div className="flex items-center gap-3 pr-8">
-          <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-2xl shrink-0 shadow-xs">
+          <div className="w-12 h-12 rounded-2xl bg-amber-100 border border-amber-200 flex items-center justify-center text-2xl shrink-0 shadow-xs">
             ☁️
           </div>
           <div>
@@ -122,7 +128,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 font-medium">
               {syncState.user
-                ? 'Dữ liệu được lưu trữ an toàn trên Google Cloud'
+                ? 'Dữ liệu được bảo vệ an toàn trên Google Cloud'
                 : 'Đăng nhập Google để lưu trữ kết quả học tập vĩnh viễn'}
             </p>
           </div>
@@ -130,13 +136,13 @@ export const AccountModal: React.FC<AccountModalProps> = ({
 
         {/* Alerts */}
         {errorMsg && (
-          <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm flex items-start gap-2">
+          <div className="p-3.5 rounded-2xl bg-rose-50 border-2 border-rose-200 text-rose-700 text-xs sm:text-sm flex items-start gap-2">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span className="font-semibold">{errorMsg}</span>
           </div>
         )}
         {successNotice && (
-          <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm flex items-start gap-2">
+          <div className="p-3.5 rounded-2xl bg-emerald-50 border-2 border-emerald-200 text-emerald-800 text-xs sm:text-sm flex items-start gap-2">
             <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
             <span className="font-semibold">{successNotice}</span>
           </div>
@@ -147,7 +153,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
           /* LOGGED IN VIEW */
           <div className="flex flex-col gap-4">
             {/* User Info Card */}
-            <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 flex items-center gap-3.5">
+            <div className="p-4 rounded-2xl bg-amber-50/90 border-2 border-amber-200 flex items-center gap-3.5 shadow-xs">
               {syncState.user.photoURL ? (
                 <img
                   src={syncState.user.photoURL}
@@ -157,15 +163,15 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                 />
               ) : (
                 <div className="w-13 h-13 rounded-full bg-amber-200 border-2 border-amber-400 flex items-center justify-center text-xl font-black text-amber-800 shrink-0">
-                  {syncState.user.displayName?.charAt(0) || 'B'}
+                  {syncState.user.displayName?.charAt(0) || 'G'}
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="font-black text-slate-900 truncate text-base">
                     {syncState.user.displayName || profile.name}
                   </span>
-                  <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                  <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold border border-emerald-300">
                     <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Google
                   </span>
                 </div>
@@ -176,7 +182,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
             </div>
 
             {/* Sync Status Box */}
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col gap-2">
+            <div className="p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-200 flex flex-col gap-2">
               <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="font-bold text-slate-700 flex items-center gap-1.5">
                   <Cloud className="w-4 h-4 text-sky-500" /> Trạng thái đám mây:
@@ -195,7 +201,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                   )}
                 </span>
               </div>
-              <div className="text-[11px] text-slate-500 flex items-center justify-between border-t border-slate-200/60 pt-2">
+              <div className="text-[11px] text-slate-500 flex items-center justify-between border-t border-slate-200/80 pt-2">
                 <span>Lần đồng bộ gần nhất:</span>
                 <span className="font-semibold text-slate-700 font-mono">
                   {formatLastSynced(syncState.lastSyncedAt)}
@@ -226,7 +232,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
             <div className="flex items-center gap-2 pt-2">
               <KidButton
                 variant="primary"
-                className="flex-1 min-h-[44px]"
+                className="flex-1 min-h-[46px]"
                 onClick={handleManualSync}
                 disabled={isLoading || syncState.status === 'syncing'}
                 leftIcon={<RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />}
@@ -238,7 +244,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                 onClick={handleSignOut}
                 disabled={isLoading}
                 aria-label="Đăng xuất Google"
-                className="min-h-[44px] px-3.5 rounded-2xl border-2 border-slate-200 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700 text-slate-600 font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="min-h-[46px] px-3.5 rounded-2xl border-2 border-slate-200 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700 text-slate-600 font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Đăng xuất</span>
@@ -249,7 +255,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
           /* NOT LOGGED IN VIEW */
           <div className="flex flex-col gap-4">
             {/* Value prop list */}
-            <div className="p-4 rounded-2xl bg-sky-50/70 border border-sky-100 flex flex-col gap-2.5 text-xs sm:text-sm text-sky-950">
+            <div className="p-4 rounded-2xl bg-sky-50/80 border-2 border-sky-200 flex flex-col gap-2.5 text-xs sm:text-sm text-sky-950">
               <div className="flex items-start gap-2.5">
                 <ShieldCheck className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
                 <span><strong>Bảo vệ tiến độ học:</strong> Toàn bộ điểm số, sao, huy hiệu và bài học được lưu vĩnh viễn trên Google Cloud.</span>
@@ -260,16 +266,16 @@ export const AccountModal: React.FC<AccountModalProps> = ({
               </div>
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong>Miễn phí & An toàn:</strong> Dành riêng cho học sinh tiểu học, bảo mật chính thức theo tài khoản Google.</span>
+                <span><strong>Miễn phí & An toàn:</strong> Dành riêng cho học sinh tiểu học, bảo mật chuẩn Firebase.</span>
               </div>
             </div>
 
-            {/* Google Sign In Action */}
+            {/* Google Sign In Action Button (Prominent & Clear) */}
             <div className="flex flex-col gap-2 pt-1">
               <button
                 onClick={handleGoogleSignIn}
                 disabled={isLoading}
-                className="w-full min-h-[48px] px-4 rounded-2xl bg-white border-2 border-slate-300 hover:border-amber-400 hover:bg-amber-50/40 active:scale-[0.98] flex items-center justify-center gap-3 font-extrabold text-sm sm:text-base text-slate-800 shadow-md transition-all cursor-pointer"
+                className="w-full min-h-[50px] px-4 rounded-2xl bg-white border-3 border-amber-400 hover:border-amber-500 hover:bg-amber-50/60 active:scale-[0.98] flex items-center justify-center gap-3 font-black text-sm sm:text-base text-slate-900 shadow-lg hover:shadow-xl transition-all cursor-pointer"
               >
                 {/* Official Google SVG Logo */}
                 <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
@@ -293,13 +299,14 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                 <span>{isLoading ? 'Đang kết nối Google...' : 'Đăng nhập bằng Google'}</span>
               </button>
 
-              <p className="text-[11px] text-center text-slate-400">
+              <p className="text-[11px] text-center text-slate-400 font-medium">
                 Nếu không đăng nhập, kết quả học vẫn được lưu tạm thời trên máy này.
               </p>
             </div>
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
