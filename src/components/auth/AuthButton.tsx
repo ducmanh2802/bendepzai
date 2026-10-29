@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Cloud, RefreshCw, UserCheck } from 'lucide-react';
+import { Cloud, RefreshCw } from 'lucide-react';
 import { CloudSyncService, type CloudSyncState } from '../../services/cloudSync';
 import { AccountModal } from './AccountModal';
 import { sound } from '../../services/sound';
@@ -34,18 +34,18 @@ export const AuthButton: React.FC<AuthButtonProps> = ({ profile }) => {
         onClick={handleClick}
         aria-label={
           isUserLoggedIn
-            ? `Tài khoản Google: ${syncState.user?.displayName || 'Đã đăng nhập'}, nhấn để xem trạng thái đồng bộ`
-            : 'Đăng nhập Google để lưu lại lịch sử học tập'
+            ? `Tài khoản Google: ${syncState.user?.displayName || 'Đã lưu'}, nhấn để đồng bộ`
+            : 'Đăng nhập Google để lưu trữ kết quả học tập'
         }
         title={
           isUserLoggedIn
-            ? `Đã đăng nhập: ${syncState.user?.email || ''} (Nhấn để đồng bộ)`
-            : 'Đăng nhập Google để lưu lịch sử học tập'
+            ? `Đã liên kết Google: ${syncState.user?.email || ''} (Nhấn để đồng bộ)`
+            : 'Đăng nhập Google để lưu điểm và bài học'
         }
-        className={`min-h-[44px] px-2.5 sm:px-3 rounded-2xl flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer text-xs sm:text-sm font-bold border-2 active:scale-95 ${
+        className={`min-h-[44px] px-2.5 sm:px-3 rounded-2xl flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer text-xs sm:text-sm font-black border-2 active:scale-95 shadow-xs ${
           isUserLoggedIn
-            ? 'bg-amber-50/90 hover:bg-amber-100 border-amber-300 text-amber-950 shadow-xs'
-            : 'bg-white hover:bg-amber-50 border-slate-300 hover:border-amber-400 text-slate-700 shadow-xs'
+            ? 'bg-emerald-50 hover:bg-emerald-100 border-emerald-400 text-emerald-950'
+            : 'bg-white hover:bg-amber-50 border-amber-400 hover:border-amber-500 text-amber-950 hover:shadow-md'
         }`}
       >
         {isUserLoggedIn ? (
@@ -56,11 +56,11 @@ export const AuthButton: React.FC<AuthButtonProps> = ({ profile }) => {
                 <img
                   src={syncState.user.photoURL}
                   alt={syncState.user.displayName || 'User'}
-                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-amber-400"
+                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-emerald-400"
                   referrerPolicy="no-referrer"
                 />
               ) : (
-                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center text-xs font-black">
+                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-200 text-emerald-900 flex items-center justify-center text-xs font-black">
                   {syncState.user?.displayName?.charAt(0) || 'G'}
                 </div>
               )}
@@ -76,7 +76,7 @@ export const AuthButton: React.FC<AuthButtonProps> = ({ profile }) => {
               />
             </div>
 
-            <span className="hidden min-[480px]:inline max-w-[85px] sm:max-w-[110px] truncate font-black text-amber-950">
+            <span className="hidden min-[420px]:inline max-w-[85px] sm:max-w-[120px] truncate font-black text-emerald-950">
               {syncState.user?.displayName || 'Đã lưu'}
             </span>
 
@@ -107,8 +107,8 @@ export const AuthButton: React.FC<AuthButtonProps> = ({ profile }) => {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
               />
             </svg>
-            <span className="hidden min-[480px]:inline text-slate-700 font-extrabold whitespace-nowrap">
-              Lưu điểm
+            <span className="text-amber-950 font-black whitespace-nowrap">
+              <span className="hidden min-[480px]:inline">Đăng nhập </span>Google
             </span>
           </>
         )}

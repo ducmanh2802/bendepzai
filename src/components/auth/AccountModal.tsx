@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Cloud, CloudCheck, RefreshCw, LogOut, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react';
+import { X, Cloud, RefreshCw, LogOut, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react';
 import { KidButton } from '../ui';
 import { signInWithGoogle, logOut } from '../../services/firebase';
 import { CloudSyncService, type CloudSyncState } from '../../services/cloudSync';
@@ -31,15 +31,12 @@ export const AccountModal: React.FC<AccountModalProps> = ({
     setErrorMsg(null);
     try {
       await signInWithGoogle();
+      sound.playLevelUp?.();
       setSuccessNotice('Đăng nhập Google thành công! Tiến độ học tập đã được lưu.');
       setTimeout(() => setSuccessNotice(null), 3000);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Đăng nhập không thành công';
-      // Show the real reason (e.g. "not configured in this build") instead of a
-      // generic network message, so the user understands why login is unavailable.
-      if (msg.includes('popup-closed-by-user')) {
-        // user dismissed the popup — no error toast
-      } else {
+      if (!msg.includes('hủy')) {
         setErrorMsg(msg);
       }
     } finally {
@@ -53,7 +50,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
     setErrorMsg(null);
     try {
       await CloudSyncService.syncNow();
-      sound.playCorrect();
+      sound.playCorrect?.();
       setSuccessNotice('Đã đồng bộ toàn bộ tiến độ lên đám mây thành công!');
       setTimeout(() => setSuccessNotice(null), 3000);
     } catch (err: unknown) {
@@ -83,10 +80,12 @@ export const AccountModal: React.FC<AccountModalProps> = ({
   };
 
   const formatLastSynced = (date: Date | null) => {
-    if (!date) return 'Chưa đồng bộ';
-    return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) +
+    if (!date) return 'Vừa mới đây';
+    return (
+      date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) +
       ' ngày ' +
-      date.toLocaleDateString('vi-VN');
+      date.toLocaleDateString('vi-VN')
+    );
   };
 
   return (
@@ -94,10 +93,10 @@ export const AccountModal: React.FC<AccountModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="account-modal-title"
-      className="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-4 sm:pt-8 bg-slate-900/60 backdrop-blur-xs animate-fade-in overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/65 backdrop-blur-sm animate-fade-in overflow-y-auto"
     >
       <div
-        className="w-full max-w-md bg-white rounded-3xl shadow-2xl border-4 border-amber-300 p-5 sm:p-6 relative flex flex-col gap-4 text-slate-800 max-h-[85vh] overflow-y-auto"
+        className="w-full max-w-md my-auto bg-white rounded-3xl shadow-2xl border-4 border-amber-300 p-5 sm:p-6 relative flex flex-col gap-4 text-slate-800 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -119,12 +118,12 @@ export const AccountModal: React.FC<AccountModalProps> = ({
           </div>
           <div>
             <h2 id="account-modal-title" className="text-xl font-black text-amber-950 font-display">
-              {syncState.user ? 'Tài Khoản & Đồng Bộ' : 'Lưu Lịch Sử Học Tập'}
+              {syncState.user ? 'Tài Khoản & Đồng Bộ' : 'Lưu Điểm Học Tập'}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 font-medium">
               {syncState.user
                 ? 'Dữ liệu được lưu trữ an toàn trên Google Cloud'
-                : 'Đăng nhập Google để không lo mất điểm số của bé'}
+                : 'Đăng nhập Google để lưu trữ kết quả học tập vĩnh viễn'}
             </p>
           </div>
         </div>
@@ -133,7 +132,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
         {errorMsg && (
           <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm flex items-start gap-2">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>{errorMsg}</span>
+            <span className="font-semibold">{errorMsg}</span>
           </div>
         )}
         {successNotice && (
@@ -253,15 +252,15 @@ export const AccountModal: React.FC<AccountModalProps> = ({
             <div className="p-4 rounded-2xl bg-sky-50/70 border border-sky-100 flex flex-col gap-2.5 text-xs sm:text-sm text-sky-950">
               <div className="flex items-start gap-2.5">
                 <ShieldCheck className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
-                <span><strong>Bảo vệ tiến độ học:</strong> Toàn bộ điểm số, sao, huy hiệu và bài học được lưu vĩnh viễn trên mây.</span>
+                <span><strong>Bảo vệ tiến độ học:</strong> Toàn bộ điểm số, sao, huy hiệu và bài học được lưu vĩnh viễn trên Google Cloud.</span>
               </div>
               <div className="flex items-start gap-2.5">
                 <Cloud className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
-                <span><strong>Học trên nhiều thiết bị:</strong> Đổi điện thoại hay máy tính bảng, bé vẫn giữ nguyên kết quả học tập.</span>
+                <span><strong>Học trên mọi thiết bị:</strong> Đổi điện thoại hay máy tính bảng, bé vẫn giữ nguyên kết quả học tập.</span>
               </div>
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong>Miễn phí & An toàn:</strong> Dành riêng cho học sinh tiểu học, không quảng cáo, bảo mật chuẩn Firebase.</span>
+                <span><strong>Miễn phí & An toàn:</strong> Dành riêng cho học sinh tiểu học, bảo mật chính thức theo tài khoản Google.</span>
               </div>
             </div>
 
