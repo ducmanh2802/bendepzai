@@ -172,10 +172,10 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
     // 1. Scene
     const scene = new THREE.Scene();
     sceneRef.current = scene;
-    scene.background = new THREE.Color(0x18202f); // deep slate room ambiance
+    scene.background = new THREE.Color(0xf5f7fb); // bright, clean luxury tournament studio
 
     // Subtle atmospheric ambient fog
-    scene.fog = new THREE.FogExp2(0x18202f, 0.02);
+    scene.fog = new THREE.FogExp2(0xf5f7fb, 0.015);
 
     // 2. Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
@@ -193,7 +193,7 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
     renderer.setPixelRatio(isSoftwareGl.current ? 1 : Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.25;
     if (!isSoftwareGl.current) {
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -211,12 +211,12 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
     controls.target.set(0, 0, 0);
     controls.update();
 
-    // 5. Lighting Setup (Rich Studio lighting)
-    const ambientLight = new THREE.AmbientLight(0xfff8ee, 0.85);
+    // 5. Lighting Setup (Bright Luxury Studio Lighting)
+    const ambientLight = new THREE.AmbientLight(0xfffdf5, 1.15);
     scene.add(ambientLight);
 
     // Main warm directional key light
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.6);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
     keyLight.position.set(6, 14, 7);
     keyLight.castShadow = !isSoftwareGl.current;
     if (keyLight.castShadow) {
@@ -232,13 +232,18 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
     }
     scene.add(keyLight);
 
+    // Warm fill light from opposite angle
+    const fillLight = new THREE.DirectionalLight(0xffedd5, 0.85);
+    fillLight.position.set(-5, 9, 6);
+    scene.add(fillLight);
+
     // Soft sky blue rim light
-    const rimLight = new THREE.DirectionalLight(0x93c5fd, 0.55);
-    rimLight.position.set(-7, 9, -7);
+    const rimLight = new THREE.DirectionalLight(0xa5d8ff, 0.6);
+    rimLight.position.set(-7, 10, -7);
     scene.add(rimLight);
 
     // Soft warm floor bounce
-    const bounceLight = new THREE.DirectionalLight(0xfef3c7, 0.3);
+    const bounceLight = new THREE.DirectionalLight(0xfef9c3, 0.4);
     bounceLight.position.set(0, -6, 0);
     scene.add(bounceLight);
 
@@ -247,13 +252,13 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
     boardRefs.current = boardData;
     scene.add(boardData.boardGroup);
 
-    // 7. Ambient Floor Plate
+    // 7. Ambient Tabletop Floor Plate (Bright Scandinavian Birch Table)
     const floorGeom = new THREE.PlaneGeometry(36, 36);
     floorGeom.rotateX(-Math.PI / 2);
     const floorMat = new THREE.MeshStandardMaterial({
-      color: 0x0b1120,
-      roughness: 0.85,
-      metalness: 0.05,
+      color: 0xebdcc7, // warm light birch table surface
+      roughness: 0.38,
+      metalness: 0.04,
     });
     const floor = new THREE.Mesh(floorGeom, floorMat);
     floor.position.y = -0.42;
@@ -517,7 +522,7 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
 
   return (
     <div
-      className={`relative rounded-3xl overflow-hidden border-4 border-amber-300 shadow-2xl bg-slate-900 select-none transition-all ${
+      className={`relative rounded-3xl overflow-hidden border-4 border-amber-300 shadow-2xl bg-gradient-to-b from-slate-50 via-amber-50/30 to-slate-100 select-none transition-all ${
         isFullscreen
           ? 'fixed inset-0 z-[100] w-screen h-screen rounded-none border-0'
           : 'w-full h-[60vh] min-h-[460px] md:h-[72vh] lg:h-[78vh] max-h-[820px]'
@@ -532,14 +537,14 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
       />
 
       {/* Floating 3D Controls Bar (Top Right) */}
-      <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-slate-900/85 backdrop-blur-md p-1.5 rounded-2xl border-2 border-slate-700/80 shadow-xl text-white">
+      <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-white/95 backdrop-blur-md p-1.5 rounded-2xl border-2 border-amber-200/90 shadow-xl text-slate-800">
         <button
           onClick={() => applyCameraPreset('iso')}
           title="Góc nhìn 3D bé (Mặc định)"
           className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
             cameraPreset === 'iso'
               ? 'bg-amber-500 text-white shadow-md'
-              : 'text-slate-300 hover:text-white hover:bg-slate-800'
+              : 'text-slate-700 hover:text-amber-900 hover:bg-amber-50'
           }`}
         >
           3D
@@ -550,7 +555,7 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
           className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
             cameraPreset === 'pov'
               ? 'bg-amber-500 text-white shadow-md'
-              : 'text-slate-300 hover:text-white hover:bg-slate-800'
+              : 'text-slate-700 hover:text-amber-900 hover:bg-amber-50'
           }`}
         >
           Người chơi
@@ -561,51 +566,51 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
           className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
             cameraPreset === 'top'
               ? 'bg-amber-500 text-white shadow-md'
-              : 'text-slate-300 hover:text-white hover:bg-slate-800'
+              : 'text-slate-700 hover:text-amber-900 hover:bg-amber-50'
           }`}
         >
           Từ trên
         </button>
 
-        <div className="w-[1px] h-5 bg-slate-700 mx-0.5" />
+        <div className="w-[1px] h-5 bg-amber-200 mx-0.5" />
 
         {/* Rotate 180° / Flip Side */}
         <button
           onClick={handleFlipPerspective}
           title="Đổi hướng xoay bàn cờ 180°"
-          className="p-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+          className="p-1.5 rounded-xl text-slate-700 hover:text-amber-900 hover:bg-amber-50 transition-colors cursor-pointer"
         >
-          <RotateCw className="w-4 h-4" />
+          <RotateCw className="w-4 h-4 text-amber-700" />
         </button>
 
         {/* Zoom In */}
         <button
           onClick={() => handleZoom('in')}
           title="Phóng to gần hơn"
-          className="p-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+          className="p-1.5 rounded-xl text-slate-700 hover:text-amber-900 hover:bg-amber-50 transition-colors cursor-pointer"
         >
-          <ZoomIn className="w-4 h-4" />
+          <ZoomIn className="w-4 h-4 text-amber-700" />
         </button>
 
         {/* Zoom Out */}
         <button
           onClick={() => handleZoom('out')}
           title="Thu nhỏ xa hơn"
-          className="p-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+          className="p-1.5 rounded-xl text-slate-700 hover:text-amber-900 hover:bg-amber-50 transition-colors cursor-pointer"
         >
-          <ZoomOut className="w-4 h-4" />
+          <ZoomOut className="w-4 h-4 text-amber-700" />
         </button>
 
         {/* Reset Camera to Center */}
         <button
           onClick={handleResetCamera}
           title="Căn giữa bàn cờ"
-          className="p-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+          className="p-1.5 rounded-xl text-slate-700 hover:text-amber-900 hover:bg-amber-50 transition-colors cursor-pointer"
         >
-          <Focus className="w-4 h-4" />
+          <Focus className="w-4 h-4 text-amber-700" />
         </button>
 
-        <div className="w-[1px] h-5 bg-slate-700 mx-0.5" />
+        <div className="w-[1px] h-5 bg-amber-200 mx-0.5" />
 
         {/* Fullscreen / Theater Toggle */}
         <button
@@ -617,17 +622,17 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
           className={`p-1.5 rounded-xl transition-all cursor-pointer ${
             isFullscreen
               ? 'bg-amber-500 text-white'
-              : 'text-slate-300 hover:text-white hover:bg-slate-800'
+              : 'text-slate-700 hover:text-amber-900 hover:bg-amber-50'
           }`}
         >
-          {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4 text-amber-700" />}
         </button>
       </div>
 
       {/* Interactive Helper Hint (Bottom Center) */}
       <div className="absolute bottom-3 inset-x-0 flex justify-center pointer-events-none">
-        <span className="px-3.5 py-1.5 bg-slate-900/85 backdrop-blur-md border border-slate-700/80 rounded-full text-xs font-bold text-amber-200 shadow-md flex items-center gap-2">
-          <Compass className="w-4 h-4 text-amber-400" />
+        <span className="px-3.5 py-1.5 bg-white/95 backdrop-blur-md border border-amber-200/90 rounded-full text-xs font-black text-amber-900 shadow-md flex items-center gap-2">
+          <Compass className="w-4 h-4 text-amber-500 animate-spin-slow" />
           <span>Chạm trực tiếp vào quân cờ để chọn · Vuốt để xoay 360°</span>
         </span>
       </div>

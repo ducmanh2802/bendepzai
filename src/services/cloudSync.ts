@@ -14,6 +14,17 @@ export interface CloudSyncState {
 
 type SyncListener = (state: CloudSyncState) => void;
 
+/**
+ * Strips all undefined fields recursively so Firestore never throws
+ * "Unsupported field value: undefined"
+ */
+function sanitizeForFirestore<T>(data: T): T {
+  if (data === undefined || data === null) {
+    return null as unknown as T;
+  }
+  return JSON.parse(JSON.stringify(data));
+}
+
 class CloudSyncManager {
   private state: CloudSyncState = {
     status: 'offline',
@@ -153,21 +164,24 @@ class CloudSyncManager {
       // Push merged back to cloud
       await setDoc(
         userDocRef,
-        {
+        sanitizeForFirestore({
           profile: mergedProfile,
           analytics: localAnalytics,
           updatedAt: new Date().toISOString(),
-        },
+        }),
         { merge: true }
       );
     } else {
       // First cloud save for this account
-      await setDoc(userDocRef, {
-        profile: localProfile,
-        analytics: localAnalytics,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
+      await setDoc(
+        userDocRef,
+        sanitizeForFirestore({
+          profile: localProfile,
+          analytics: localAnalytics,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        })
+      );
     }
   }
 
@@ -193,11 +207,11 @@ class CloudSyncManager {
 
       await setDoc(
         userDocRef,
-        {
+        sanitizeForFirestore({
           profile,
           analytics,
           updatedAt: new Date().toISOString(),
-        },
+        }),
         { merge: true }
       );
 

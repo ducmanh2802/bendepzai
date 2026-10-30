@@ -101,4 +101,22 @@ describe('Firebase Auth & Cloud Sync Integration Tests', () => {
     expect(typeof unsub).toBe('function');
     unsub();
   });
+
+  it('safely handles profiles containing undefined fields without Firestore errors', () => {
+    const rawProfile = {
+      name: 'Bé Minh',
+      stars: 10,
+      dailyChestClaimedDate: undefined,
+      nested: {
+        someKey: undefined,
+        validKey: 'abc',
+      },
+    };
+
+    const cleaned = JSON.parse(JSON.stringify(rawProfile));
+
+    expect(cleaned).not.toHaveProperty('dailyChestClaimedDate');
+    expect(cleaned.nested).not.toHaveProperty('someKey');
+    expect(cleaned.nested.validKey).toBe('abc');
+  });
 });
