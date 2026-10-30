@@ -150,4 +150,26 @@ describe('cotuong rules extra', () => {
     const ms2 = E.legalMoves(b2, [4, 0]);
     expect(ms2).toContainEqual({ from: [4, 0], to: [4, 1] });
   });
+
+  it('validates COTUONG_PUZZLES integrity and legal winning moves', async () => {
+    const { COTUONG_PUZZLES } = await import('../src/components/learning/cotuong/cotuongPuzzles');
+    expect(COTUONG_PUZZLES.length).toBeGreaterThanOrEqual(6);
+    for (const pz of COTUONG_PUZZLES) {
+      expect(pz.id).toBeTruthy();
+      expect(pz.title).toBeTruthy();
+      expect(pz.hint).toBeTruthy();
+      expect(pz.explanation).toBeTruthy();
+
+      const b = pz.createBoard();
+      // Verify both kings exist
+      const redKing = E.findKing(b, 'red');
+      const blackKing = E.findKing(b, 'black');
+      expect(redKing).not.toBeNull();
+      expect(blackKing).not.toBeNull();
+
+      // Verify expected move is in legal moves
+      const moves = E.legalMoves(b, pz.expectedMove.from);
+      expect(moves).toContainEqual(pz.expectedMove);
+    }
+  });
 });

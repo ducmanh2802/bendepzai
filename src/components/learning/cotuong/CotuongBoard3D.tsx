@@ -48,6 +48,26 @@ const PIECE_NAME: Record<E.PieceType, string> = {
   p: 'Tốt',
 };
 
+export type CotuongLabelMode = 'dual' | 'viet' | 'han';
+export type CotuongTheme = 'rosewood' | 'ebony' | 'bamboo';
+
+export const PIECE_VIET_NAME: Record<string, string> = {
+  'red-k': 'TƯỚNG',
+  'red-a': 'SĨ',
+  'red-e': 'TƯỢNG',
+  'red-h': 'MÃ',
+  'red-r': 'XE',
+  'red-c': 'PHÁO',
+  'red-p': 'BINH',
+  'black-k': 'TƯỚNG',
+  'black-a': 'SĨ',
+  'black-e': 'TƯỢNG',
+  'black-h': 'MÃ',
+  'black-r': 'XE',
+  'black-c': 'PHÁO',
+  'black-p': 'TỐT',
+};
+
 export interface CaptureFx {
   r: number;
   c: number;
@@ -64,6 +84,9 @@ interface Props {
   flat: boolean;
   disabled: boolean;
   gameKey: number;
+  labelMode?: CotuongLabelMode;
+  boardTheme?: CotuongTheme;
+  hintMove?: E.Move | null;
   onSquareClick: (r: number, c: number) => void;
 }
 
@@ -129,6 +152,9 @@ export const CotuongBoard3D: React.FC<Props> = ({
   flat,
   disabled,
   gameKey,
+  labelMode = 'dual',
+  boardTheme = 'rosewood',
+  hintMove,
   onSquareClick,
 }) => {
   const pieces: Array<{ piece: E.Piece; r: number; c: number; key: string }> = [];
@@ -141,6 +167,25 @@ export const CotuongBoard3D: React.FC<Props> = ({
   // Painter order: lower rows are nearer the viewer once the plate is tilted.
   pieces.sort((a, b) => a.r - b.r);
 
+  const checkingPiece = React.useMemo<[number, number] | null>(() => {
+    if (!checkAt) return null;
+    const targetKing = board[checkAt[0]][checkAt[1]];
+    if (!targetKing) return null;
+    const oppColor: E.Color = targetKing.color === 'red' ? 'black' : 'red';
+    for (let r = 0; r < E.BOARD_ROWS; r++) {
+      for (let c = 0; c < E.BOARD_COLS; c++) {
+        const p = board[r][c];
+        if (p && p.color === oppColor) {
+          const moves = E.legalMoves(board, [r, c]);
+          if (moves.some((m) => m.to[0] === checkAt[0] && m.to[1] === checkAt[1])) {
+            return [r, c];
+          }
+        }
+      }
+    }
+    return null;
+  }, [board, checkAt]);
+
   const isTarget = (r: number, c: number) => legal.some((m) => m.to[0] === r && m.to[1] === c);
   const isSelected = (r: number, c: number) => !!selected && selected[0] === r && selected[1] === c;
   const isLast = (r: number, c: number) =>
@@ -148,7 +193,7 @@ export const CotuongBoard3D: React.FC<Props> = ({
     ((lastMove.from[0] === r && lastMove.from[1] === c) || (lastMove.to[0] === r && lastMove.to[1] === c));
 
   return (
-    <div className={`ct-scene ${flat ? 'is-flat' : ''}`}>
+    <div className={`ct-scene ${flat ? 'is-flat' : ''} theme-${boardTheme}`}>
       <div className="ct-plate" style={{ aspectRatio: `${VW} / ${VH}` }}>
         <div className="ct-board" aria-hidden="true" />
         <div className="ct-surface">
@@ -167,6 +212,50 @@ export const CotuongBoard3D: React.FC<Props> = ({
             >
               漢 界
             </span>
+
+            {/* Hint Arrow overlay */}
+            {hintMove && (
+              <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" viewBox={`0 0 ${VW} ${VH}`}>
+                <defs>
+                  <marker id="hint-arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#0284c7" />
+                  </marker>
+                </defs>
+                <line
+                  x1={M + hintMove.from[1]}
+                  y1={M + hintMove.from[0]}
+                  x2={M + hintMove.to[1]}
+                  y2={M + hintMove.to[0]}
+                  stroke="#0284c7"
+                  strokeWidth="0.1"
+                  strokeDasharray="0.2, 0.1"
+                  markerEnd="url(#hint-arr)"
+                  className="animate-pulse"
+                />
+              </svg>
+            )}
+
+            {/* Checking attack laser ray */}
+            {checkingPiece && checkAt && (
+              <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" viewBox={`0 0 ${VW} ${VH}`}>
+                <defs>
+                  <marker id="check-arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626" />
+                  </marker>
+                </defs>
+                <line
+                  x1={M + checkingPiece[1]}
+                  y1={M + checkingPiece[0]}
+                  x2={M + checkAt[1]}
+                  y2={M + checkAt[0]}
+                  stroke="#dc2626"
+                  strokeWidth="0.1"
+                  strokeDasharray="0.15, 0.08"
+                  markerEnd="url(#check-arr)"
+                  className="animate-pulse"
+                />
+              </svg>
+            )}
 
             {lastMove && (
               <>
@@ -218,9 +307,24 @@ export const CotuongBoard3D: React.FC<Props> = ({
                 <span className="ct-piece__shadow" />
                 <span className="ct-piece__base" />
                 <span className="ct-piece__face">
-                  <span className="ct-piece__char">
-                    {PIECE_CHAR[`${piece.color}-${piece.type}`]}
-                  </span>
+                  {labelMode === 'viet' ? (
+                    <span className="ct-piece__viet-only">
+                      {PIECE_VIET_NAME[`${piece.color}-${piece.type}`]}
+                    </span>
+                  ) : labelMode === 'dual' ? (
+                    <div className="flex flex-col items-center justify-center leading-none select-none">
+                      <span className="ct-piece__char text-[3.8cqw] sm:text-[4.2cqw]">
+                        {PIECE_CHAR[`${piece.color}-${piece.type}`]}
+                      </span>
+                      <span className={`text-[1.8cqw] font-black tracking-tight uppercase opacity-90 mt-0.5 ${piece.color === 'red' ? 'text-rose-700' : 'text-slate-800'}`}>
+                        {PIECE_VIET_NAME[`${piece.color}-${piece.type}`]}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="ct-piece__char">
+                      {PIECE_CHAR[`${piece.color}-${piece.type}`]}
+                    </span>
+                  )}
                 </span>
               </div>
             ))}

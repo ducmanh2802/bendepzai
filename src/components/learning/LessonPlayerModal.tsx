@@ -92,9 +92,21 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
   const [lastSpoken, setLastSpoken] = useState<string | null>(null);
   const [praise, setPraise] = useState<PraiseResult | null>(null);
   const praiseAttemptRef = useRef(0);
+  const [difficultyMode, setDifficultyMode] = useState<'standard' | 'challenge'>('standard');
 
-  const question: Question = lesson.questions[currentIdx];
-  const progressPercent = Math.round(((currentIdx + 1) / lesson.questions.length) * 100);
+  const activeQuestions = React.useMemo(() => {
+    if (difficultyMode === 'challenge') {
+      const hardOnly = lesson.questions.filter((q) => q.difficulty >= 2);
+      if (hardOnly.length >= 3) {
+        return hardOnly;
+      }
+      return [...lesson.questions].sort((a, b) => b.difficulty - a.difficulty);
+    }
+    return lesson.questions;
+  }, [lesson.questions, difficultyMode]);
+
+  const question: Question = activeQuestions[currentIdx] || activeQuestions[0];
+  const progressPercent = Math.round(((currentIdx + 1) / activeQuestions.length) * 100);
   const correctAnswerStr = Array.isArray(question.correctAnswer)
     ? question.correctAnswer.join('|')
     : question.correctAnswer;
@@ -222,7 +234,7 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
 
   const handleNextQuestion = () => {
     sound.playClick();
-    if (currentIdx + 1 < lesson.questions.length) {
+    if (currentIdx + 1 < activeQuestions.length) {
       setCurrentIdx(currentIdx + 1);
     } else {
       // Rewards are saved right away; the result screen shows them.
@@ -230,7 +242,8 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
       finishedRef.current = true;
       sound.playLevelUp();
       fireCelebrationConfetti();
-      StorageService.completeLesson(lesson.id, lesson.subject, lesson.xpReward, lesson.starReward);
+      const earnedXp = difficultyMode === 'challenge' ? Math.round(lesson.xpReward * 1.5) : lesson.xpReward;
+      StorageService.completeLesson(lesson.id, lesson.subject, earnedXp, lesson.starReward);
     }
   };
 
@@ -494,12 +507,55 @@ return (
                 {lesson.title}
               </h3>
               <p className="text-[11px] text-amber-700 font-bold">
-                Câu hỏi {currentIdx + 1} / {lesson.questions.length}
+                Câu hỏi {currentIdx + 1} / {activeQuestions.length}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Difficulty Toggle Pill */}
+            <div className="flex items-center bg-amber-200/70 p-0.5 rounded-full border border-amber-300 text-[11px] font-black">
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  setDifficultyMode('standard');
+                  setCurrentIdx(0);
+                  setScore(0);
+                  setIsAnswerChecked(false);
+                  setIsCorrect(false);
+                }}
+                title="Chế độ học bình thường"
+                className={`px-2 py-0.5 rounded-full transition-all cursor-pointer ${
+                  difficultyMode === 'standard'
+                    ? 'bg-white text-amber-950 shadow-2xs font-extrabold'
+                    : 'text-amber-800 hover:text-amber-950'
+                }`}
+              >
+                Chuẩn
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  setDifficultyMode('challenge');
+                  setCurrentIdx(0);
+                  setScore(0);
+                  setIsAnswerChecked(false);
+                  setIsCorrect(false);
+                }}
+                title="Chế độ Thử thách Nâng cao: Đề khó hơn và tặng thêm +50% XP"
+                className={`px-2 py-0.5 rounded-full transition-all cursor-pointer flex items-center gap-0.5 ${
+                  difficultyMode === 'challenge'
+                    ? 'bg-rose-500 text-white shadow-2xs font-extrabold'
+                    : 'text-amber-800 hover:text-amber-950'
+                }`}
+              >
+                <span>Nâng cao</span>
+                <span className="text-[10px]">🔥</span>
+              </button>
+            </div>
+
             <div className="flex items-center gap-1 px-3 py-1 bg-amber-200/80 rounded-full text-xs font-black text-amber-900">
               <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-600" />
               <span>{score} đúng</span>
@@ -623,9 +679,14 @@ return (
             </h3>
             <p className="text-slate-600 text-sm md:text-base font-semibold mb-6">
               Bé đã làm đúng <span className="text-amber-600 font-black">{score}</span> /{' '}
-              {lesson.questions.length} câu hỏi của bài học:
+              {activeQuestions.length} câu hỏi của bài học:
               <br />
               <span className="text-slate-900 font-bold [overflow-wrap:anywhere]">{lesson.title}</span>
+              {difficultyMode === 'challenge' && (
+                <span className="block mt-1 text-xs font-black text-rose-600 bg-rose-50 border border-rose-200 py-1 px-3 rounded-full inline-block">
+                  🔥 Thử Thách Nâng Cao Đã Chinh Phục!
+                </span>
+              )}
             </p>
 
             {/* Earned Rewards — wraps on a 360px phone */}
@@ -637,6 +698,9 @@ return (
               <div className="flex items-center gap-2 text-purple-700 font-black text-base">
                 <Sparkles className="w-6 h-6 text-purple-500" aria-hidden="true" />
                 <span>+{lesson.xpReward} XP</span>
+                {difficultyMode === 'challenge' && (
+                  <span className="text-xs bg-rose-200 text-rose-800 px-1.5 py-0.5 rounded-md font-extrabold">+50% Thử thách</span>
+                )}
               </div>
               <div className="flex items-center gap-1.5 text-blue-700 font-black text-base">
                 <span aria-hidden="true">🎟️</span>

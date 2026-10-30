@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, RotateCcw, Box, Grid, Undo2, Lightbulb, Trophy, Shield } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Box, Grid, Undo2, Lightbulb, Trophy, Shield, Palette } from 'lucide-react';
 import { sound } from '../../../services/sound';
 import * as E from './chessEngine';
 import { Chess3DCanvas } from './chess3d/Chess3DCanvas';
+import { ChessPieceSvg } from './ChessPieceSvg';
 
-const PIECE_UNICODE: Record<string, string> = {
-  'w-p': '♟', 'w-n': '♞', 'w-b': '♝', 'w-r': '♜', 'w-q': '♛', 'w-k': '♚',
-  'b-p': '♟', 'b-n': '♞', 'b-b': '♝', 'b-r': '♜', 'b-q': '♛', 'b-k': '♚',
+const PIECE_NAMES: Record<string, string> = {
+  p: 'Tốt', n: 'Mã', b: 'Tượng', r: 'Xe', q: 'Hậu', k: 'Vua',
 };
 
 const DEPTH: Record<string, number> = { easy: 1, medium: 2, hard: 3, expert: 4 };
@@ -14,8 +14,16 @@ const DEPTH: Record<string, number> = { easy: 1, medium: 2, hard: 3, expert: 4 }
 interface MoveRec {
   from: [number, number];
   to: [number, number];
-  piece: string;
+  pieceType: E.PieceType;
+  pieceColor: E.Color;
   capture: boolean;
+  capturedType?: E.PieceType;
+}
+
+interface CapturedPiece {
+  id: string;
+  type: E.PieceType;
+  color: E.Color;
 }
 
 interface HistorySnap {
@@ -23,8 +31,8 @@ interface HistorySnap {
   turn: E.Color;
   moves: MoveRec[];
   lastMove: E.Move | null;
-  capturedW: string[];
-  capturedB: string[];
+  capturedW: CapturedPiece[];
+  capturedB: CapturedPiece[];
 }
 
 export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
@@ -37,10 +45,11 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [thinking, setThinking] = useState(false);
   const [moves, setMoves] = useState<MoveRec[]>([]);
   const [lastMove, setLastMove] = useState<E.Move | null>(null);
-  const [hintMove, setHintMove] = useState<E.Move | null>(null);
-  const [capturedW, setCapturedW] = useState<string[]>([]);
-  const [capturedB, setCapturedB] = useState<string[]>([]);
+  const [capturedW, setCapturedW] = useState<CapturedPiece[]>([]);
+  const [capturedB, setCapturedB] = useState<CapturedPiece[]>([]);
+  const [boardTheme, setBoardTheme] = useState<'emerald' | 'walnut' | 'midnight'>('emerald');
   const [viewMode, setViewMode] = useState<'3d' | '2d'>('3d');
+  const [hintMove, setHintMove] = useState<E.Move | null>(null);
   const [history, setHistory] = useState<HistorySnap[]>([]);
   const startedAt = useRef(Date.now());
 
@@ -91,9 +100,13 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const capPiece = board[m.to[0]][m.to[1]];
 
     if (capture && capPiece) {
-      const sym = PIECE_UNICODE[`${capPiece.color}-${capPiece.type}`];
-      if (capPiece.color === 'w') setCapturedW((a) => [...a, sym]);
-      else setCapturedB((a) => [...a, sym]);
+      const capObj: CapturedPiece = {
+        id: `${capPiece.color}_${capPiece.type}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        type: capPiece.type,
+        color: capPiece.color,
+      };
+      if (capPiece.color === 'w') setCapturedW((a) => [...a, capObj]);
+      else setCapturedB((a) => [...a, capObj]);
       sound.playStar?.();
     } else {
       sound.playPop?.();
@@ -105,7 +118,17 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     setLegal([]);
     setHintMove(null);
     setLastMove(m);
-    setMoves((arr) => [...arr, { from: m.from, to: m.to, piece: `${piece.color}-${piece.type}`, capture }]);
+    setMoves((arr) => [
+      ...arr,
+      {
+        from: m.from,
+        to: m.to,
+        pieceType: piece.type,
+        pieceColor: piece.color,
+        capture,
+        capturedType: capPiece ? capPiece.type : undefined,
+      },
+    ]);
     setTurn(turn === 'w' ? 'b' : 'w');
   };
 
@@ -347,31 +370,25 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     lastMove &&
                     ((lastMove.from[0] === r && lastMove.from[1] === c) ||
                       (lastMove.to[0] === r && lastMove.to[1] === c));
-                  return (
+                    return (
                     <button
                       key={`${r}-${c}`}
                       onClick={() => onSquareClick(r, c)}
-                      className={`aspect-square flex items-center justify-center text-3xl sm:text-4xl transition-all cursor-pointer relative ${
+                      className={`aspect-square flex items-center justify-center p-1 transition-all cursor-pointer relative ${
                         dark ? 'bg-[#b58863]' : 'bg-[#f0d9b5]'
                       } ${sel ? 'ring-4 ring-yellow-400 z-10' : ''} ${
                         isLast ? 'bg-[#f6f669]' : ''
                       }`}
                     >
                       {p ? (
-                        <span
-                          className={
-                            p.color === 'w'
-                              ? 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] font-bold'
-                              : 'text-slate-950 font-bold'
-                          }
-                        >
-                          {PIECE_UNICODE[`${p.color}-${p.type}`]}
-                        </span>
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ChessPieceSvg type={p.type} color={p.color} className="w-[88%] h-[88%] drop-shadow-sm select-none" />
+                        </div>
                       ) : target ? (
-                        <span className="w-4 h-4 rounded-full bg-emerald-600/80" />
+                        <span className="w-4 h-4 rounded-full bg-emerald-600/80 shadow-xs" />
                       ) : null}
                       {target && p && (
-                        <span className="absolute inset-0 border-4 border-rose-500/80 rounded-sm" />
+                        <span className="absolute inset-0 border-4 border-rose-500/80 rounded-sm pointer-events-none" />
                       )}
                     </button>
                   );
@@ -409,20 +426,36 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           </h3>
           <div className="grid grid-cols-2 gap-2">
             <div className="p-2.5 rounded-2xl bg-amber-50/70 border border-amber-200/80">
-              <span className="text-[11px] font-bold text-slate-500 block">Bạn bắt được:</span>
-              <div className="text-xl tracking-wider text-slate-900 min-h-[28px] flex items-center flex-wrap">
+              <span className="text-[11px] font-bold text-slate-500 block mb-1">Bạn bắt được:</span>
+              <div className="min-h-[32px] flex items-center flex-wrap gap-1">
                 {capturedB.length > 0 ? (
-                  capturedB.join(' ')
+                  capturedB.map((cp) => (
+                    <div
+                      key={cp.id}
+                      className="w-7 h-7 p-0.5 rounded-lg bg-white border border-amber-200 shadow-2xs flex items-center justify-center"
+                      title={`Quân Đen - ${PIECE_NAMES[cp.type]}`}
+                    >
+                      <ChessPieceSvg type={cp.type} color={cp.color} className="w-full h-full" />
+                    </div>
+                  ))
                 ) : (
                   <span className="text-xs text-slate-400 font-medium">Chưa bắt quân</span>
                 )}
               </div>
             </div>
             <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
-              <span className="text-[11px] font-bold text-slate-500 block">Máy bắt được:</span>
-              <div className="text-xl tracking-wider text-amber-900 min-h-[28px] flex items-center flex-wrap">
+              <span className="text-[11px] font-bold text-slate-500 block mb-1">Máy bắt được:</span>
+              <div className="min-h-[32px] flex items-center flex-wrap gap-1">
                 {capturedW.length > 0 ? (
-                  capturedW.join(' ')
+                  capturedW.map((cp) => (
+                    <div
+                      key={cp.id}
+                      className="w-7 h-7 p-0.5 rounded-lg bg-white border border-slate-200 shadow-2xs flex items-center justify-center"
+                      title={`Quân Trắng - ${PIECE_NAMES[cp.type]}`}
+                    >
+                      <ChessPieceSvg type={cp.type} color={cp.color} className="w-full h-full" />
+                    </div>
+                  ))
                 ) : (
                   <span className="text-xs text-slate-400 font-medium">Chưa bắt quân</span>
                 )}
@@ -454,15 +487,20 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   key={i}
                   className="p-1.5 rounded-xl bg-slate-50 hover:bg-amber-50 flex items-center justify-between border border-slate-100"
                 >
-                  <span className="font-bold text-slate-500">#{i + 1}</span>
-                  <span className="font-extrabold text-slate-800">
-                    {PIECE_UNICODE[m.piece] || '♟'} {String.fromCharCode(97 + m.from[1])}
-                    {8 - m.from[0]} → {String.fromCharCode(97 + m.to[1])}
-                    {8 - m.to[0]}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-slate-500 w-6">#{i + 1}</span>
+                    <div className="w-5 h-5 flex items-center justify-center">
+                      <ChessPieceSvg type={m.pieceType} color={m.pieceColor} className="w-full h-full" />
+                    </div>
+                    <span className="font-extrabold text-slate-800">
+                      {PIECE_NAMES[m.pieceType]} {String.fromCharCode(97 + m.from[1])}
+                      {8 - m.from[0]} → {String.fromCharCode(97 + m.to[1])}
+                      {8 - m.to[0]}
+                    </span>
+                  </div>
                   {m.capture && (
                     <span className="px-1.5 py-0.2 rounded-md bg-rose-100 text-rose-700 text-[10px] font-black">
-                      ăn
+                      ăn {m.capturedType ? PIECE_NAMES[m.capturedType] : ''}
                     </span>
                   )}
                 </div>
