@@ -6,6 +6,7 @@ import { StorageService } from '../../services/storage';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useModalHistory } from '../../hooks/useModalHistory';
 import { resolvePraise, speakPraise, PraiseSubject, PraiseOutcome, resetPraiseEngineForTests } from '../../services/praiseEngine';
+import { GAME_LEVEL_POLICY } from '../../config/policy';
 
 export interface GameTierMetaProp {
   id: number;
@@ -62,6 +63,7 @@ interface GameModalWrapperProps {
   prevBestStars?: number;
   nextTierMeta?: GameTierMetaProp;
   onNextTier?: () => void;
+  onSelectTier?: (tier: number) => void;
   /** Subject for praise engine (VIETNAMESE, MATH, ENGLISH) */
   praiseSubject?: PraiseSubject;
   isRealtime?: boolean;
@@ -114,15 +116,32 @@ export const GameModalWrapper: React.FC<GameModalWrapperProps> = ({
   prevBestStars = 0,
   nextTierMeta,
   onNextTier,
+  onSelectTier,
   praiseSubject: propsPraiseSubject,
   isRealtime = false,
 }) => {
   const [isMuted, setIsMuted] = React.useState(sound.getMuted());
   const [isPaused, setIsPaused] = React.useState(false);
+  const [showTierModal, setShowTierModal] = useState(false);
   const claimedKeys = React.useRef<Set<string>>(new Set());
   const [receipt, setReceipt] = React.useState<{ stars: number; xp: number } | null>(null);
   const dialogRef = useFocusTrap<HTMLDivElement>(true);
   const { requestClose } = useModalHistory(onExit);
+
+  const handleSelectTier = (t: number) => {
+    sound.playClick();
+    setShowTierModal(false);
+    if (onSelectTier) {
+      onSelectTier(t);
+    } else if (gameId) {
+      try {
+        StorageService.completeGameTier(gameId, Math.max(1, t - 1), 3, 0);
+      } catch {
+        // ignore
+      }
+      onRestart();
+    }
+  };
 
   // Praise/feedback state
   const [combo, setCombo] = useState(0);
@@ -306,14 +325,24 @@ export const GameModalWrapper: React.FC<GameModalWrapperProps> = ({
                   : `Được ${score} trên ${maxScore} sao`
               }>
                 {isLevelGame ? (
-                  <span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playClick();
+                      setShowTierModal(true);
+                    }}
+                    title="Bấm để chọn màn hoặc tăng độ khó"
+                    className="inline-flex items-center gap-1 hover:underline text-left cursor-pointer"
+                  >
                     <span aria-hidden="true">{tierMeta?.emoji} </span>
-                    Màn {tier}/{tierCount}
+                    <span className="font-extrabold text-amber-900 bg-amber-200/80 hover:bg-amber-300 px-1.5 py-0.2 rounded-md">
+                      Màn {tier}/{tierCount} ▾
+                    </span>
                     {roundTotal !== undefined && (
                       <span> · 🚀 Câu {roundNumber ?? 1}/{roundTotal}</span>
                     )}
                     <span className="hidden min-[420px]:inline"> · {tierMeta?.name}</span>
-                  </span>
+                  </button>
                 ) : (
                   <span>
                     <span aria-hidden="true">⭐ </span>
@@ -508,6 +537,68 @@ export const GameModalWrapper: React.FC<GameModalWrapperProps> = ({
               </div>
             )}
           </div>
+
+          {/* Difficulty / Tier Selector Modal */}
+          {showTierModal && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+              <div className="bg-white rounded-3xl p-5 max-w-sm w-full border-4 border-amber-400 shadow-2xl space-y-3.5">
+                <div className="flex items-center justify-between border-b pb-2">
+                  <h3 className="font-black text-base md:text-lg text-slate-800 font-display flex items-center gap-2">
+                    <span>🎯</span> Chọn Màn & Độ Khó
+                  </h3>
+                  <button
+                    onClick={() => setShowTierModal(false)}
+                    className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-sm"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <p className="text-xs text-slate-600 font-medium">
+                  Bé có thể chọn màn khó hơn (Màn 4, 5, 6) để thử tài chinh phục:
+                </p>
+                <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
+                  {GAME_LEVEL_POLICY.TIERS.slice(0, tierCount ?? 6).map((t) => {
+                    const isActive = tier === t.id;
+                    const isHard = t.id >= 4;
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => handleSelectTier(t.id)}
+                        className={`w-full p-2.5 rounded-2xl border-2 flex items-center justify-between text-left transition-all cursor-pointer active:scale-98 ${
+                          isActive
+                            ? 'border-amber-500 bg-amber-50 shadow-xs'
+                            : 'border-slate-200 hover:border-amber-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="text-2xl shrink-0">{t.emoji}</span>
+                          <div className="min-w-0">
+                            <div className="font-black text-xs md:text-sm text-slate-800 flex items-center gap-1.5 flex-wrap">
+                              <span>Màn {t.id}: {t.name}</span>
+                              {isHard && (
+                                <span className="text-[10px] font-black px-1.5 py-0.2 rounded-md bg-rose-100 text-rose-700">
+                                  {t.id === 6 ? 'Cực khó' : t.id === 5 ? 'Rất khó' : 'Khó'}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-medium truncate">{t.blurb}</div>
+                          </div>
+                        </div>
+                        {isActive ? (
+                          <span className="text-[11px] font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full shrink-0">
+                            Đang chơi
+                          </span>
+                        ) : (
+                          <span className="text-xs font-bold text-slate-400 shrink-0">Chọn →</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </GameFeedbackContext.Provider>

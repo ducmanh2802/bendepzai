@@ -20,8 +20,8 @@ function silent(label, fn) {
   }
 }
 
-if (!fs.existsSync(HOOKS_DIR)) {
-  console.warn(`[hooks] ${HOOKS_DIR} not found — nothing to install.`);
+if (!fs.existsSync(HOOKS_DIR) || !fs.existsSync('.git')) {
+  // Cloud deployment or non-git environment — silently skip
   process.exit(0);
 }
 

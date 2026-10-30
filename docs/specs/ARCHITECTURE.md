@@ -188,7 +188,7 @@ Hai đường, và cả hai đều do người lớn khởi động:
 | `firebase-vendor` | `firebase`/`@firebase` | 537.9 kB, chỉ dùng cho cloud-sync tuỳ chọn; tách để entry không phải mang SDK |
 | `math-bank` | `src/data/math/` + `mathCurriculum` | ngân sách sống sót sau khi kho Toán phình |
 | `english-bank` | `src/data/english/` + `englishCurriculum` | tương tự cho kho Anh |
-| entry `index-*.js` | App + services + phần còn lại | **≤ 600 kB (cứng), mục tiêu ≤ 450 kB** — hiện **512 kB** |
+| entry `index-*.js` | App + services + phần còn lại | **≤ 600 kB (cứng), mục tiêu ≤ 450 kB** — hiện **531.2 kB** |
 
 - Gate: `npm run check:budget` → `scripts/check-bundle-budget.mjs` đọc `dist/index.html`
   để tìm đúng file entry (bảo đảm không cộng nhầm chunk), exit 1 nếu vượt.
@@ -377,7 +377,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 ### ADR-08 — Ngân sách bundle là gate, không là lời khuyên
 - **Quyết định:** entry ≤ 600 kB chặn `verify`; 450 kB chỉ báo cáo. Script và test dùng
   chung `getBudgetReport()`.
-- **Hệ quả:** áp lực phình entry bị nhìn thấy ngay. **Nợ:** đang 512 kB, cách mục tiêu
+- **Hệ quả:** áp lực phình entry bị nhìn thấy ngay. **Nợ:** đang 531.2 kB, cách mục tiêu
   ~58 kB; mọi bổ sung lớn vào entry phải kèm lý do.
 
 ### ADR-09 — Bất biến đăng ký trò chơi 4 nơi, khoá bằng test
@@ -421,7 +421,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
   và `firebase-vendor` cho `firebase`/`@firebase`; màn dùng chúng luôn được `React.lazy`
   (`App.tsx:18` cho ChessScreen). Gate `check:budget` chỉ đo **entry**, nên nếu ai đó import
   thẳng three.js vào `App.tsx`, entry nhảy ~1.0 MB và gate đỏ ngay.
-- **Hệ quả:** entry giữ 512 kB (< 600 kB) dù tổng build có thêm ~1.08 MB vendor mới;
+- **Hệ quả:** entry giữ 531.2 kB (< 600 kB) dù tổng build có thêm ~1.08 MB vendor mới;
   người mở cờ vua/đăng nhập trả chi phí tải thêm, người không mở thì không. **Nợ:** ngân sách
   chỉ áp dụng cho entry — chưa có ngưỡng tổng cho từng vendor chunk, và `sw-precache` giờ
   precache cả `three-vendor` (tăng dung lượng cache trên thiết bị yếu).
@@ -470,11 +470,11 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 | Export policy | 17 (693 dòng) | `src/config/policy.ts` |
 | Key `localStorage` | 17 | `STORAGE_KEYS` (16) + key cục bộ IOE (1) |
 | Dependency runtime | 8 | `package.json` → `dependencies` |
-| Test file / test | 71 / 1034 | `npx vitest run` (69 `.ts` + 2 `.tsx`) |
+| Test file / test | 71 / 1035 | `npx vitest run` (69 `.ts` + 2 `.tsx`) |
 | Probe QA | 21 (20 `.mjs` + 1 `.cjs`) | `ls qa/*.mjs qa/*.cjs` (trừ `lib.mjs`, `run-one.mjs`) |
 | Workflow CI | 4 | `.github/workflows/` |
 | MCP server / tool | 5 / 27 | `mcp/` |
-| Main chunk | 512 kB | `npm run check:budget` |
+| Main chunk | 531.2 kB | `npm run check:budget` |
 | Vendor chunk lớn nhất | `three-vendor` 545.4 kB · `firebase-vendor` 537.9 kB · `react-vendor` 213.6 kB | `npm run check:budget` |
 | `App.tsx` / `storage.ts` / `learningOS.ts` / `competitionEngine.ts` / `readingEngine.ts` / `cloudSync.ts` / `firebase.ts` | 436 / 2393 / 842 / 747 / 647 / 224 / 85 dòng | `wc -l` |
 
@@ -485,7 +485,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 | # | Nợ | Ảnh hưởng | Hướng xử lý |
 |---|---|---|---|
 | 1 | `kho_bau_ioe_store` ngoài `STORAGE_KEYS`, đọc/ghi trực tiếp `localStorage` | thoát khỏi pipeline sanitize; dễ lệch kiểm kê | đưa về registry + `readJSONObject`, thêm test đếm đủ 17 key |
-| 2 | Entry chunk 512 kB so với mục tiêu 450 kB | thiết bị yếu tải chậm hơn mức mong muốn | đo lại sau mỗi mở rộng kho; cân nhắc tách bank Tiếng Việt |
+| 2 | Entry chunk 531.2 kB so với mục tiêu 450 kB | thiết bị yếu tải chậm hơn mức mong muốn | đo lại sau mỗi mở rộng kho; cân nhắc tách bank Tiếng Việt |
 | 3 | Kid's Box units = 0 | track Anh chưa dùng được như giáo trình | cần nguồn đã xác minh (FR-N04, ADR-15) |
 | 4 | Chưa audit riêng track Kid's Box với trẻ thật | rủi ro trải nghiệm | audit người dùng thật trước khi quảng bá track |
 | 5 | `bun.lock` còn trong repo trong khi npm là nguồn thật | gây nhầm package manager | giữ nguyên + ghi chú (quyết định đã chốt) |

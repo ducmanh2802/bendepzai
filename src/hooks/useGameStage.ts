@@ -38,6 +38,7 @@ export interface GameStage {
   submitWrong: () => void;
   startNextTier: () => void;
   restartGame: () => void;
+  jumpToTier: (targetTier: number) => void;
 }
 
 /** T02/B1 — stars from real performance (single source of truth). */
@@ -170,6 +171,26 @@ export function useGameStage(options: UseGameStageOptions): GameStage {
     }
   };
 
+  const jumpToTier = (targetTier: number) => {
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+    timerRef.current = null;
+    const safeTarget = clampTier(targetTier);
+    setTier(safeTarget);
+    setRoundIdx(0);
+    setScore(0);
+    setTierScore(0);
+    setMistakesInTier(0);
+    setLocked(false);
+    setPhase('playing');
+    setStarsEarned(0);
+    setPrevBestStars(0);
+    try {
+      setNonce(StorageService.bumpPlayNonce(gameId, safeTarget));
+    } catch {
+      setNonce((n) => n + 1);
+    }
+  };
+
   return {
     tier: tierSafe,
     tierMeta,
@@ -191,5 +212,6 @@ export function useGameStage(options: UseGameStageOptions): GameStage {
     submitWrong,
     startNextTier,
     restartGame,
+    jumpToTier,
   };
 }

@@ -3,7 +3,7 @@ import { ArrowLeft, RotateCcw, Undo2, Lightbulb, Box, Square } from 'lucide-reac
 import { sound } from '../../../services/sound';
 import { fireCelebrationConfetti } from '../../../services/confetti';
 import * as E from './cotuongEngine';
-import { CotuongBoard3D, PIECE_CHAR, type CaptureFx } from './CotuongBoard3D';
+import { CotuongBoard3D, PIECE_CHAR, type CaptureFx, type CotuongLabelMode, type CotuongTheme } from './CotuongBoard3D';
 
 const DEPTH: Record<string, number> = { easy: 2, medium: 3, hard: 4, expert: 4 };
 const BOT: Record<string, E.BotOptions> = {
@@ -84,19 +84,30 @@ export const CotuongGame: React.FC<{ onBack: () => void; embedded?: boolean }> =
   const [thinking, setThinking] = useState(false);
   const [moves, setMoves] = useState<MoveRec[]>([]);
   const [lastMove, setLastMove] = useState<E.Move | null>(null);
+  const [hintMove, setHintMove] = useState<E.Move | null>(null);
   const [history, setHistory] = useState<Snapshot[]>([]);
   const [result, setResult] = useState<{ winner: E.Color; text: string } | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [flat, setFlat] = useState(false);
+  const [labelMode, setLabelMode] = useState<CotuongLabelMode>('dual');
+  const [boardTheme, setBoardTheme] = useState<CotuongTheme>('rosewood');
   const [gameKey, setGameKey] = useState(0);
   const [captureFx, setCaptureFx] = useState<CaptureFx | null>(null);
   const fxTimer = useRef<number | null>(null);
+  const startedAt = useRef(Date.now());
 
   const checkAt = useMemo<[number, number] | null>(() => {
     if (result) return null;
     if (!E.inCheck(board, turn)) return null;
     return E.findKing(board, turn);
   }, [board, turn, result]);
+
+  // Voice check alert
+  useEffect(() => {
+    if (checkAt && !result) {
+      sound.speak('Chiếu tướng!');
+    }
+  }, [checkAt, result]);
 
   const captured = useMemo(() => missingPieces(board), [board]);
 
@@ -109,6 +120,7 @@ export const CotuongGame: React.FC<{ onBack: () => void; embedded?: boolean }> =
   const clearSelection = () => {
     setSelected(null);
     setLegal([]);
+    setHintMove(null);
   };
 
   const doMove = (m: E.Move) => {
@@ -174,12 +186,14 @@ export const CotuongGame: React.FC<{ onBack: () => void; embedded?: boolean }> =
     clearSelection();
     setMoves([]);
     setLastMove(null);
+    setHintMove(null);
     setHistory([]);
     setResult(null);
     setShowResult(false);
     setThinking(false);
     setCaptureFx(null);
     setGameKey((k) => k + 1);
+    startedAt.current = Date.now();
   };
 
   const changeDifficulty = (d: string) => {
@@ -209,9 +223,30 @@ export const CotuongGame: React.FC<{ onBack: () => void; embedded?: boolean }> =
     if (result || thinking || turn !== 'red') return;
     const mv = E.getBestMove(board, 'red', 2, { maxNodes: 40000 });
     if (!mv) return;
+    setHintMove(mv);
     setSelected(mv.from);
     setLegal([mv]);
     sound.playClick();
+  };
+
+  const analysis = () => {
+    const secs = Math.round((Date.now() - startedAt.current) / 1000);
+    const redLost = result?.winner === 'black';
+    const tips: string[] = [];
+
+    if (redLost) {
+      if (captured.red.length > captured.black.length) {
+        tips.push('Bé đã để mất nhiều quân hơn máy. Hãy bảo vệ các quân chủ lực (Xe, Pháo, Mã) thật kỹ.');
+      }
+      tips.push('Luôn để ý giữ 2 Sĩ và 2 Tượng liên hoàn để che chắn cho Tướng an toàn trong cung.');
+      tips.push('Đừng để Mã bị cản chân: quan sát kỹ các ô cản trước khi xuất kích.');
+      tips.push('Tận dụng Pháo: hãy mượn quân làm ngòi để Pháo phát huy tối đa tầm bắn uy lực.');
+    } else if (result?.winner === 'red') {
+      tips.push('Bé điều quân rất chuẩn xác! Các đường Xe, Pháo, Mã phối hợp công thủ toàn diện và giành chiến thắng vẻ vang.');
+    } else {
+      tips.push('Ván cờ hòa cân não! Cả hai bên đều có thế phòng ngự rất chặt chẽ.');
+    }
+    return { secs, tips };
   };
 
   const onSquareClick = (r: number, c: number) => {
@@ -263,45 +298,53 @@ export const CotuongGame: React.FC<{ onBack: () => void; embedded?: boolean }> =
         </div>
       )}
 
-      <div className="rounded-3xl bg-white/70 backdrop-blur-sm border-2 border-amber-200 shadow-sm p-2.5 sm:p-3 mb-3">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs sm:text-sm font-black text-slate-500 mr-1">Độ khó:</span>
-          {(['easy', 'medium', 'hard', 'expert'] as const).map((d) => (
-            <button
-              key={d}
-              onClick={() => changeDifficulty(d)}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm transition-colors ${
-                difficulty === d
-                  ? 'bg-amber-500 text-white shadow'
-                  : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200'
-              }`}
-            >
-              {DIFFICULTY_LABEL[d]}
-            </button>
-          ))}
-          <div className="ml-auto flex items-center gap-1.5">
+      <div className="rounded-3xl bg-white/70 backdrop-blur-sm border-2 border-amber-200 shadow-sm p-2.5 sm:p-3 mb-3 space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          {/* Difficulty Selector */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-xs sm:text-sm font-black text-slate-500 mr-0.5">Độ khó:</span>
+            {(['easy', 'medium', 'hard', 'expert'] as const).map((d) => (
+              <button
+                key={d}
+                onClick={() => changeDifficulty(d)}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-bold text-xs sm:text-sm transition-colors cursor-pointer ${
+                  difficulty === d
+                    ? 'bg-amber-500 text-white shadow'
+                    : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200'
+                }`}
+              >
+                {DIFFICULTY_LABEL[d]}
+              </button>
+            ))}
+          </div>
+
+          {/* Quick Actions: Hint, Undo, New Game, 3D View */}
+          <div className="flex items-center gap-1.5 flex-wrap ml-auto">
             <button
               onClick={hint}
               disabled={!!result || thinking || turn !== 'red'}
-              className="px-2.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100 disabled:opacity-40 flex items-center gap-1"
+              title="Xem gợi ý nước đi tối ưu"
+              className="px-2.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100 disabled:opacity-40 flex items-center gap-1 cursor-pointer"
             >
-              <Lightbulb className="w-3.5 h-3.5" /> Gợi ý
+              <Lightbulb className="w-3.5 h-3.5 text-violet-600" /> Gợi ý
             </button>
             <button
               onClick={undo}
               disabled={!!result || thinking || history.length === 0}
-              className="px-2.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 disabled:opacity-40 flex items-center gap-1"
+              title="Đi lại nước cờ trước"
+              className="px-2.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 disabled:opacity-40 flex items-center gap-1 cursor-pointer"
             >
-              <Undo2 className="w-3.5 h-3.5" /> Đi lại
+              <Undo2 className="w-3.5 h-3.5 text-slate-600" /> Đi lại
             </button>
             <button
               onClick={() => {
                 sound.playClick();
                 reset();
               }}
-              className="px-2.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1"
+              title="Bắt đầu ván cờ mới"
+              className="px-2.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1 cursor-pointer"
             >
-              <RotateCcw className="w-3.5 h-3.5" /> Ván mới
+              <RotateCcw className="w-3.5 h-3.5 text-emerald-600" /> Ván mới
             </button>
             <button
               onClick={() => {
@@ -309,11 +352,94 @@ export const CotuongGame: React.FC<{ onBack: () => void; embedded?: boolean }> =
                 setFlat((f) => !f);
               }}
               aria-pressed={flat}
-              className="px-2.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 flex items-center gap-1"
+              className="px-2.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 flex items-center gap-1 cursor-pointer"
             >
               {flat ? <Box className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
-              {flat ? 'Xem 3D' : 'Xem 2D'}
+              {flat ? 'Góc 3D' : 'Góc 2D'}
             </button>
+          </div>
+        </div>
+
+        {/* Board Customization Bar: Label Mode & Wood Theme */}
+        <div className="pt-2 border-t border-amber-200/60 flex items-center justify-between gap-2 flex-wrap text-xs">
+          {/* Label Mode Switcher */}
+          <div className="flex items-center gap-1.5">
+            <span className="font-bold text-slate-600">Mặt quân:</span>
+            <div className="flex bg-amber-100/80 p-0.5 rounded-xl border border-amber-200">
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setLabelMode('dual');
+                }}
+                className={`px-2 py-0.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  labelMode === 'dual' ? 'bg-amber-500 text-white shadow-2xs font-extrabold' : 'text-amber-900 hover:text-black'
+                }`}
+              >
+                Song ngữ 🀄
+              </button>
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setLabelMode('viet');
+                }}
+                className={`px-2 py-0.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  labelMode === 'viet' ? 'bg-amber-500 text-white shadow-2xs font-extrabold' : 'text-amber-900 hover:text-black'
+                }`}
+              >
+                Chữ Việt 🇻🇳
+              </button>
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setLabelMode('han');
+                }}
+                className={`px-2 py-0.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  labelMode === 'han' ? 'bg-amber-500 text-white shadow-2xs font-extrabold' : 'text-amber-900 hover:text-black'
+                }`}
+              >
+                Chữ Hán 🇨🇳
+              </button>
+            </div>
+          </div>
+
+          {/* Theme Switcher */}
+          <div className="flex items-center gap-1.5 ml-auto">
+            <span className="font-bold text-slate-600">Bàn cờ:</span>
+            <div className="flex bg-amber-100/80 p-0.5 rounded-xl border border-amber-200">
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setBoardTheme('rosewood');
+                }}
+                className={`px-2 py-0.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  boardTheme === 'rosewood' ? 'bg-amber-600 text-white shadow-2xs' : 'text-amber-900'
+                }`}
+              >
+                Gỗ Hương 🪵
+              </button>
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setBoardTheme('ebony');
+                }}
+                className={`px-2 py-0.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  boardTheme === 'ebony' ? 'bg-slate-800 text-white shadow-2xs' : 'text-amber-900'
+                }`}
+              >
+                Gỗ Mun 🖤
+              </button>
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  setBoardTheme('bamboo');
+                }}
+                className={`px-2 py-0.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  boardTheme === 'bamboo' ? 'bg-amber-500 text-white shadow-2xs' : 'text-amber-900'
+                }`}
+              >
+                Gỗ Tre 🌾
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -342,6 +468,11 @@ export const CotuongGame: React.FC<{ onBack: () => void; embedded?: boolean }> =
               {turn === 'red' ? '帥' : '將'}
             </span>
             <span className="truncate">{statusText}</span>
+            {hintMove && (
+              <span className="ml-2 px-2 py-0.5 rounded-md bg-sky-100 text-sky-800 text-xs font-black">
+                Đang hiện gợi ý
+              </span>
+            )}
             {thinking && (
               <span className="ml-auto flex gap-1" aria-hidden="true">
                 <span className="ct-dot-wave" />
@@ -361,21 +492,49 @@ export const CotuongGame: React.FC<{ onBack: () => void; embedded?: boolean }> =
             flat={flat}
             disabled={!!result || thinking || turn !== 'red'}
             gameKey={gameKey}
+            labelMode={labelMode}
+            boardTheme={boardTheme}
+            hintMove={hintMove}
             onSquareClick={onSquareClick}
           />
 
           {showResult && result && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-900/45 backdrop-blur-sm p-4 animate-pop">
-              <div className="w-full max-w-sm rounded-3xl bg-white border-4 border-amber-300 shadow-2xl p-6 text-center">
-                <div className="text-6xl mb-2 animate-bounce">{result.winner === 'red' ? '🏆' : '🤖'}</div>
+              <div className="w-full max-w-md rounded-3xl bg-white border-4 border-amber-300 shadow-2xl p-6 text-center space-y-3.5 max-h-[90vh] overflow-y-auto">
+                <div className="text-6xl animate-bounce">{result.winner === 'red' ? '🏆' : '🤖'}</div>
                 <h3 className="text-2xl font-black font-display text-slate-900 mb-1">
-                  {result.winner === 'red' ? 'Bé thắng rồi!' : 'Máy thắng ván này'}
+                  {result.winner === 'red' ? 'Bé Thắng Rồi!' : 'Máy Thắng Ván Này'}
                 </h3>
-                <p className="text-sm font-bold text-slate-500 mb-5">{result.text}</p>
-                <div className="flex gap-2">
+                <p className="text-sm font-bold text-slate-600">{result.text}</p>
+
+                {/* Coach Tactical Analysis */}
+                {(() => {
+                  const a = analysis();
+                  return (
+                    <div className="p-3.5 rounded-2xl bg-amber-50/90 border-2 border-amber-200 text-left space-y-2">
+                      <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                        <span>⏱️ Thời gian: <strong>{a.secs}s</strong></span>
+                        <span>♟️ Nước đi: <strong>{moves.length}</strong></span>
+                        <span>⭐ Đỏ bắt: <strong>{captured.black.length}</strong></span>
+                      </div>
+                      <div className="pt-1 text-xs text-slate-600 space-y-1">
+                        <span className="font-black text-amber-900 block text-[11px] uppercase tracking-wider">
+                          Lời khuyên của Huấn Luyện Viên:
+                        </span>
+                        <ul className="list-disc list-inside space-y-1">
+                          {a.tips.map((t, idx) => (
+                            <li key={idx} className="leading-relaxed">{t}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                <div className="flex gap-2 pt-1">
                   <button
                     onClick={() => setShowResult(false)}
-                    className="flex-1 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-700"
+                    className="flex-1 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-700 text-sm cursor-pointer"
                   >
                     Xem bàn cờ
                   </button>
@@ -384,7 +543,7 @@ export const CotuongGame: React.FC<{ onBack: () => void; embedded?: boolean }> =
                       sound.playClick();
                       reset();
                     }}
-                    className="flex-1 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black shadow-lg"
+                    className="flex-1 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black shadow-lg text-sm cursor-pointer"
                   >
                     Ván mới
                   </button>

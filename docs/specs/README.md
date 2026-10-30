@@ -14,8 +14,8 @@ của sản phẩm, từ nghiệp vụ tới từng test. Đọc theo thứ tự
 
 ## Quy ước chung của bộ tài liệu
 
-1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1034 test / 71 file,
-   512 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-10-30** — lần cuối ngay sau
+1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1035 test / 71 file,
+   531.2 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-10-30** — lần cuối ngay sau
    T25 nâng trần độ khó, trên nền hai merge `origin/main` (cloud-sync + cờ vua WebGL, rồi
    `3727f04` auth/chess) — bằng
    `npx vitest run`, `npm run check:budget` hoặc `ls`. Các số mô tả nội dung học (31/475/1570

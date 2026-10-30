@@ -177,7 +177,7 @@
 
 | ID | Nguồn | Test | Probe | Gate | Trạng thái |
 |---|---|---|---|---|---|
-| NFR-P01 | `scripts/check-bundle-budget.mjs` (`MAIN_CHUNK_BUDGET_BYTES`) | `tests/bundle-budget.test.ts` | — | V,2 | ĐẠT — 512 kB / 600 kB (mục tiêu 450 **chưa đạt**); `three-vendor` 545.4 + `firebase-vendor` 537.9 ở ngoài entry, có gate riêng bằng ADR-17 |
+| NFR-P01 | `scripts/check-bundle-budget.mjs` (`MAIN_CHUNK_BUDGET_BYTES`) | `tests/bundle-budget.test.ts` | — | V,2 | ĐẠT — 531.2 kB / 600 kB (mục tiêu 450 **chưa đạt**); `three-vendor` 545.4 + `firebase-vendor` 537.9 ở ngoài entry, có gate riêng bằng ADR-17 |
 | NFR-P02 | `src/components/games/registry.ts` | `tests/t02c-startup-split.test.ts` | `qa/t02-smoke.mjs` | V,2 | ĐẠT |
 | NFR-P03 | `src/components/learning/cotuong/cotuongEngine.ts` (node budget) | `tests/cotuong-engine.test.ts` | — | V,1 | ĐẠT |
 | NFR-P04 | `src/config/policy.ts:297` | `tests/game-content.test.ts` | — | V,1 | ĐẠT |
@@ -199,7 +199,7 @@
 | NFR-M01 | `package.json` (`verify`, `verify:quick`) | — | — | V,H,1,2 | ĐẠT |
 | NFR-M02 | `src/config/policy.ts` (17 export, có rationale) | test theo từng policy block | — | V,1 | ĐẠT |
 | NFR-M03 | ADR-03; `src/services/answerCheck.ts` | `tests/answerCheck.test.ts`, `tests/competition-engine.test.ts` | `qa/question-types.mjs` | V,1 | ĐẠT |
-| NFR-M04 | `tests/` naming | 71 file / 1034 test | — | V,H,1 | ĐẠT |
+| NFR-M04 | `tests/` naming | 71 file / 1035 test | — | V,H,1 | ĐẠT |
 | NFR-M05 | `package.json` (8 runtime deps; `@types/three` sai chỗ — nợ #8 ARCHITECTURE §13) | `tests/t23-mcp-servers.test.ts` | — | V,H,1 | ĐẠT |
 | NFR-M06 | `mcp/lib/server.mjs` | `tests/t23-mcp-servers.test.ts` | — | V,1 | ĐẠT |
 
@@ -309,5 +309,5 @@ chưa được ghi vào SRS (phải thêm FR hoặc xoá test).
 2. Xoá tính năng trong code ⇒ xoá dòng RTM và dòng SRS (giữ lại lịch sử ở `CHANGELOG.md`).
 3. Một dòng RTM chỉ chuyển sang ĐẠT khi output lệnh thật được dán vào PR/Issue —
    không dựa vào số liệu MCP (`AGENTS.md` §1.7, docs/SDLC.md §10).
-4. Số liệu kiểm kê (31 game / 475 câu / 70 test / 512 kB…) chỉ được sửa khi vừa đo lại
+4. Số liệu kiểm kê (31 game / 475 câu / 70 test / 531.2 kB…) chỉ được sửa khi vừa đo lại
    bằng `npx vitest run`, `npm run check:budget` hoặc `ls`.

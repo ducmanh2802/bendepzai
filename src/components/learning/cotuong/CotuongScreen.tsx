@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { ArrowLeft, BookOpen, Gamepad2, Lightbulb } from 'lucide-react';
+import { ArrowLeft, BookOpen, Gamepad2, Lightbulb, Target } from 'lucide-react';
 import { sound } from '../../../services/sound';
 import { CotuongGame } from './CotuongGame';
+import { CotuongPuzzlesView } from './CotuongPuzzlesView';
 
 const PIECES = [
   {
@@ -62,10 +63,11 @@ const TABS = [
   { id: 'pieces' as const, label: 'Quân cờ', icon: <BookOpen className="w-4 h-4" /> },
   { id: 'rules' as const, label: 'Luật chơi', icon: <Lightbulb className="w-4 h-4" /> },
   { id: 'play' as const, label: 'Chơi 3D', icon: <Gamepad2 className="w-4 h-4" /> },
+  { id: 'puzzles' as const, label: 'Luyện thế cờ', icon: <Target className="w-4 h-4" /> },
 ];
 
 export const CotuongScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  const [tab, setTab] = useState<'pieces' | 'rules' | 'play'>('pieces');
+  const [tab, setTab] = useState<'pieces' | 'rules' | 'play' | 'puzzles'>('pieces');
 
   return (
     <div className="max-w-6xl mx-auto px-3 sm:px-4 py-5 sm:py-6 space-y-5">
@@ -171,6 +173,7 @@ export const CotuongScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       )}
 
       {tab === 'play' && <CotuongGame embedded onBack={() => setTab('pieces')} />}
+      {tab === 'puzzles' && <CotuongPuzzlesView />}
     </div>
   );
 };

@@ -49,6 +49,12 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   `docs/plan/TASK_PLAN.md` (WBS WP-01…WP-12, lịch sử P25→P44, Definition of Ready, backlog
   EP-A…EP-G, milestone M1–M4), `docs/plan/TEST_PLAN.md` (5 tầng kiểm thử, ma trận
   "đổi gì → chạy gì", 20 probe, tiêu chí vào/ra) và `docs/specs/README.md` làm chỉ mục.
+- **Merge `fd3e7da`** (lane khác): chế độ **challenge** trong `LessonPlayerModal`, chọn bậc
+  (tier) ngay trong modal trò chơi — `GameModalWrapper` + `useGameStage.jumpToTier(targetTier)`
+  (additive, không đổi hành vi mặc định), quân cờ vua SVG độ phân giải cao
+  `src/components/learning/chess/ChessPieceSvg.tsx`, và **6 thế cờ tướng** có sẵn cho bé
+  (`CotuongPuzzlesView.tsx` + `cotuongPuzzles.ts`: Ngọa Tào Mã, Song Pháo, Thiết Môn Khảm,
+  Binh Nhập Cung, Mã Hậu Pháo, Song Xe Tảo Cung).
 
 ### Changed
 - Engine cờ tướng viết lại: negamax + alpha-beta kèm **node budget** để không bao giờ
@@ -91,6 +97,10 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
     `pixel_mosaic` 3×3 → 6×6 với 5 mẫu mới, `connect_dots` tới 18 chấm (thêm hoa 9 cánh,
     sao 8 cánh, bánh xe 14 tăm), `treasure_coding` bàn 4×4 → 8×8 với chương trình tới 18 lệnh
     (`MAX_TOKENS` 20) và đá chặn đường nhiều hơn.
+- **Số liệu kiểm kê đo lại sau merge `fd3e7da`**: `README.md`, `docs/SDLC.md`,
+  `docs/specs/{ARCHITECTURE,BRD,README,RTM,SRS}.md`, `docs/plan/{TASK_PLAN,TEST_PLAN}.md` cập
+  nhật **71 file / 1035 test** và main chunk **531.2 kB** (thay cho 1034 / 512 kB đo trước
+  merge); TEST_PLAN ghi 21 probe (20 `.mjs` + 1 `.cjs`).
 
 ### Removed
 - **68 prompt đã dùng xong trong `docs/` (358 kB)**, gỡ ngày 2026-10-30: 11 prompt phase ở gốc
@@ -130,6 +140,19 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   không đổi nên không cần `npm install` lại). Số liệu kiểm kê trong `docs/specs` +
   `docs/plan` đo lại sau merge: **70 file / 1013 test**, entry `index-_TMkcsWv.js` **512 kB**,
   `three-vendor` 545.4 / `firebase-vendor` 537.9 / `ChessScreen` 43.5.
+  **Tái diễn ở `fd3e7da`:** lane đó lại xoá `package-lock.json` (3331 dòng) trong merge nên
+  merge lần này chạy `git merge --no-commit` rồi khôi phục lockfile trước khi commit;
+  `package.json` vẫn không đổi giữa hai lane nên không cần `npm install` lại.
+- **`origin/main` đỏ vì dữ liệu thế cờ tướng, không phải vì code:** test
+  `tests/cotuong-engine.test.ts > validates COTUONG_PUZZLES integrity` fail ngay sau khi merge
+  `fd3e7da`, vì 3/6 thế cờ tác giả đặt sai luật nên engine trả `legalMoves = []` và bé không
+  chơi được: `ct-pz-1` hai Tướng cùng cột 4 thông (luật "tướng đối mặt" — `kingsFace()`
+  ở `src/components/learning/cotuong/cotuongEngine.ts:201` — vô hiệu hoá **mọi** nước Đỏ),
+  `ct-pz-2` Pháo sau có **hai** ngòi trên cột 4 (`b[1][4]` Sĩ + Pháo trước) nên không được
+  phép bắn, `ct-pz-3` Xe bị Sĩ của chính mình ở `b[1][3]` chắn ngay trước mặt. Sửa trong dữ
+  liệu: Tướng Đỏ `b[9][4]` → `b[9][3]`, Sĩ Đen `b[1][4]` → `b[1][3]`, Sĩ Đen `b[1][3]` →
+  `b[1][4]`; hint `ct-pz-2` cập nhật toạ độ `[2, 4]` → `[6, 4]` cho khớp bàn cờ. Test cũ
+  chạy lại **18/18 pass**.
 - **Bé lớp 1 không nghe được phép tính (FR-Y02):** đề thi viết ký hiệu — `Tính: 6 + 4 = ?`,
   `Điền số: ... + 27 = 60` — nhưng giọng tiếng Việt của nền tảng bỏ qua `+`, `−`, `=` nên bé
   chỉ nghe "sáu bốn" và mất ngữ cảnh. Đo 2026-10-30: **24/475** câu trong kho thi mang ký
@@ -182,6 +205,11 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   (pool xoay theo bậc, 12 con vật đều xuất hiện, pool vần ≥1.5× số câu).
 - **Đo lại sau T25**: `npm run verify` **EXIT=0** — typecheck sạch, **71 file / 1034 test**
   passed, build 1.92 s, main chunk `index-B2ct57KD.js` **512 kB PASS** (trần 600).
+- **Đo lại sau merge `fd3e7da` + sửa thế cờ tướng**: `npm run verify` **EXIT=0** — typecheck
+  sạch, **71 file / 1035 test** passed, main chunk `index-Gnw1Zwiz.js` **531.2 kB PASS**
+  (trần 600). Bằng chứng nhìn thấy được chạy trên bản merge: `node qa/run-one.mjs qa/games.mjs`
+  và `node qa/run-one.mjs qa/tier6-ladder-evidence.mjs` đều `QA PASS — 0 step(s), 0 errors`,
+  `npm run qa:smoke` `QA PASS — 28 step(s), 0 errors`.
 
 ## [1.0.0] - baseline
 
