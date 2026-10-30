@@ -1,0 +1,65 @@
+name: "Báo lỗi (bug)"
+description: "Một màn hình, trò chơi hoặc chức năng hoạt động sai"
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Cảm ơn bạn đã báo lỗi. Điền đủ 4 mục đầu để tái hiện được là tái hiện được ngay.
+  - type: textarea
+    id: steps
+    attributes:
+      label: Các bước tái hiện
+      description: "Ví dụ: 1) Mở trang chủ 2) Vào Trò chơi 3) Chọn 'Nối Số Tô Màu' 4) Bấm số 3 trước số 2"
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Kết quả mong đợi
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Kết quả thực tế
+      description: "Kèm ảnh chụp màn hình / log console nếu có"
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Khu vực
+      options:
+        - Trang chủ / Điều hướng
+        - Trò chơi Tiếng Việt
+        - Trò chơi Toán
+        - Trò chơi Tiếng Anh
+        - Trò chơi Fun / Cờ tướng
+        - Tiến độ, Sao, XP
+        - Âm thanh / PWA / Offline
+        - Build / CI
+    validations:
+      required: true
+  - type: dropdown
+    id: device
+    attributes:
+      label: Thiết bị
+      options:
+        - Desktop (Chrome/Edge)
+        - Android
+        - iPad / iOS Safari
+        - Khác
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Phiên bản
+      description: "Tag `vX.Y.Z`, hoặc commit SHA đang chạy"
+      placeholder: "v1.0.0"

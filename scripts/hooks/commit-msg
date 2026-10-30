@@ -1,0 +1,8 @@
+#!/bin/sh
+# commit-msg — enforce Conventional Commits (see docs/SDLC.md).
+set -eu
+if [ "$#" -lt 1 ]; then
+  echo "⚠ commit-msg: không nhận được đường dẫn file message — bỏ qua." >&2
+  exit 0
+fi
+exec node scripts/check-commit-message.mjs "$1"

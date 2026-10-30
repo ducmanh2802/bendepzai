@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Xem quy trình & tài liệu dự án
+    url: https://github.com/ducmanh2802/kho-bau-tri-thuc/blob/main/docs/SDLC.md
+    about: Quy trình phát triển, gates, nhánh, commit, release — đọc trước khi mở Issue/PR.

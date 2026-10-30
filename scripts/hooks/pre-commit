@@ -1,0 +1,35 @@
+#!/bin/sh
+# pre-commit — cheap local gate: no secrets, and TypeScript still compiles.
+# The full gate (tests + build + budget) lives in CI and in `npm run verify`.
+set -eu
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR || true)
+[ -z "$staged" ] && exit 0
+
+# 1) .env* never belongs in the repo, even when tracked by an old commit.
+secrets=$(printf '%s\n' "$staged" | grep -E '(^|/)\.env([.-].*)?$' | grep -vE '(^|/)\.env\.example$' || true)
+if [ -n "$secrets" ]; then
+  echo "✖ Pre-commit: không được commit file môi trường chứa secret:" >&2
+  printf '   %s\n' $secrets >&2
+  echo '  (chỉ .env.example được phép; hãy xóa nó khỏi staging bằng `git reset <file>`)' >&2
+  exit 1
+fi
+
+# 2) Typecheck only when source or config actually changed.
+changed=$(printf '%s\n' "$staged" | grep -E '\.(ts|tsx|json)$' || true)
+if [ -z "$changed" ]; then
+  exit 0
+fi
+
+if ! command -v npx >/dev/null 2>&1; then
+  echo "⚠ Pre-commit: không tìm thấy npx — bỏ qua typecheck." >&2
+  exit 0
+fi
+
+echo "… Pre-commit: typecheck"
+if ! npx tsc --noEmit; then
+  echo "✖ Pre-commit: typecheck lỗi — sửa trước khi commit." >&2
+  exit 1
+fi
+
+echo "✔ Pre-commit: typecheck sạch"

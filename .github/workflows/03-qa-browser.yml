@@ -1,0 +1,54 @@
+---
+name: "3. Browser QA"
+description: "Chạy probe Playwright thật trên bản build `dist/` vừa upload"
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      probe:
+        description: "Đường dẫn probe trong qa/"
+        required: false
+        default: "qa/golden-path.mjs"
+permissions:
+  contents: read
+concurrency:
+  group: ci-qa-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  CI: "true"
+jobs:
+  qa-smoke:
+    name: golden path trên Chromium
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    # Giai đoạn chuyển tiếp: probe QA từng chỉ chạy trên máy dev (đường dẫn Chromium
+    # hardcode), nên chưa chắc xanh ổn định trên runner. Job này BÁO LỖI nhưng chưa
+    # chặn merge. Xoá dòng `continue-on-error` khi nó xanh liên tiếp vài lần trên main.
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ github.event.pull_request.number || github.sha }}
+          path: dist
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: QA probe
+        run: node qa/run-one.mjs "${{ github.event.inputs.probe || 'qa/golden-path.mjs' }}"

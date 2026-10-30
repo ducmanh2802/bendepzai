@@ -13,6 +13,13 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "posttest": "node scripts/audit-snapshot.mjs",
+    "test:ci": "vitest run",
+    "verify:quick": "npm run typecheck && npm run test:ci",
+    "verify": "npm run verify:quick && npm run build && npm run check:budget",
+    "qa:smoke": "node qa/run-one.mjs qa/golden-path.mjs",
+    "qa:games": "node qa/run-one.mjs qa/games.mjs",
+    "hooks:install": "node scripts/install-hooks.mjs",
+    "prepare": "node scripts/install-hooks.mjs",
     "check:budget": "node scripts/check-bundle-budget.mjs"
   },
   "engines": {

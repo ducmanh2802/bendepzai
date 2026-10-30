@@ -1,0 +1,44 @@
+name: "Đề tính năng"
+description: "Thêm chức năng, màn hình hoặc cải tiến trải nghiệm"
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Nói rõ **ai dùng** (bé / phụ huynh) và **kết quả mong muốn**, không cần mô tả code.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Vấn đề hoặc nhu cầu
+      placeholder: "Bé chưa có chỗ luyện đọc thành tiếng theo đoạn văn ngắn."
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Đề xuất
+      description: "Mô tả hành vi mong muốn, kèm ảnh minh hoạ nếu có"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Khu vực ảnh hưởng
+      options:
+        - Tiếng Việt
+        - Toán
+        - Tiếng Anh
+        - Trò chơi / Fun
+        - Tiến độ & phần thưởng
+        - Phụ huynh / Cài đặt
+        - Hạ tầng (PWA, offline, build)
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: "Tiêu chí hoàn thành (Definition of Done)"
+      description: "Tiêu chí kiểm tra được, ví dụ: mở trò chơi < 2s, không console error, có QA probe"
+    validations:
+      required: true

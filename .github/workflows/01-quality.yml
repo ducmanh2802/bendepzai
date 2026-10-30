@@ -1,0 +1,38 @@
+---
+name: "1. Quality"
+description: "Typecheck + unit tests — chạy cho mọi PR và push vào main"
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: ci-quality-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  CI: "true"
+jobs:
+  quality:
+    name: typecheck + tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install (clean, from package-lock.json)
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck
+        run: npm run typecheck --silent
+
+      - name: Unit tests
+        run: npm run test:ci --silent

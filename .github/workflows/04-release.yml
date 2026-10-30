@@ -1,0 +1,95 @@
+---
+name: "4. Release"
+description: "Tag vX.Y.Z -> chạy full gate, đóng gói dist, tạo GitHub Release với ghi chú lấy từ CHANGELOG"
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag cần phát hành (vd v1.1.0)"
+        required: true
+permissions:
+  contents: write
+concurrency:
+  group: release
+  cancel-in-progress: false
+env:
+  CI: "true"
+jobs:
+  release:
+    name: build và phát hành
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout (toàn bộ lịch sử để đọc CHANGELOG)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Giá trị workflow_dispatch được đưa qua env, không nội suy thẳng vào shell.
+      - name: Resolve tag
+        id: tag
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          TAG="${INPUT_TAG:-${GITHUB_REF_NAME}}"
+          case "$TAG" in
+            v[0-9]*) : ;;
+            *) echo "✖ Tag phải có dạng vX.Y.Z (nhận: $TAG)"; exit 1 ;;
+          esac
+          VERSION="${TAG#v}"
+          PRERELEASE=""
+          case "$VERSION" in *-*) PRERELEASE="--prerelease" ;; esac
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$PRERELEASE" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Full gate (typecheck + tests + build + bundle budget)
+        run: npm run verify --silent
+
+      - name: Package dist
+        run: |
+          (cd dist && zip -qr "../kho-bau-tri-thuc-${{ steps.tag.outputs.version }}.zip" .)
+          ls -lh "kho-bau-tri-thuc-${{ steps.tag.outputs.version }}.zip"
+
+      - name: Release notes from CHANGELOG
+        run: node scripts/release-notes.mjs "${{ steps.tag.outputs.version }}" > RELEASE_NOTES.md
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+          VERSION: ${{ steps.tag.outputs.version }}
+          PRERELEASE: ${{ steps.tag.outputs.prerelease }}
+        run: |
+          {
+            echo ""
+            echo "---"
+            echo "Commit: \`$GITHUB_SHA\` · Tag: \`$TAG\`"
+          } >> RELEASE_NOTES.md
+
+          ZIP="kho-bau-tri-thuc-$VERSION.zip"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG đã tồn tại -> cập nhật asset và ghi chú."
+            gh release edit "$TAG" --notes-file RELEASE_NOTES.md $PRERELEASE
+            gh release upload "$TAG" "$ZIP" --clobber
+          else
+            gh release create "$TAG" \
+              --title "Kho Báu Tri Thức $TAG" \
+              --notes-file RELEASE_NOTES.md \
+              $PRERELEASE \
+              "$ZIP"
+          fi
+          echo "### Đã phát hành" >> "$GITHUB_STEP_SUMMARY"
+          echo "$TAG — $(gh release view "$TAG" --json url -q .url)" >> "$GITHUB_STEP_SUMMARY"

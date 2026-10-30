@@ -1,0 +1,53 @@
+name: "Đề nội dung / bài học"
+description: "Thêm câu hỏi, bài đọc, từ vựng hoặc chủ đề mới theo chương trình lớp 1"
+title: "[content] "
+labels: ["content"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Nội dung phải theo khung chương trình lớp 1 (xem `docs/CURRICULUM_MAP.md`, `docs/CONTENT_GUIDE.md`).
+  - type: dropdown
+    id: subject
+    attributes:
+      label: Môn
+      options:
+        - Tiếng Việt
+        - Toán
+        - Tiếng Anh
+        - Kiến thức tổng hợp / Fun
+    validations:
+      required: true
+  - type: textarea
+    id: skill
+    attributes:
+      label: Kỹ năng
+      description: "Mã skill nếu đã có trong skill taxonomy, ví dụ `math_number_sequence`, `visual_discrimination`"
+      placeholder: "vd: đọc vần / đếm trong phạm vi 10 / âm /e/..."
+    validations:
+      required: true
+  - type: textarea
+    id: items
+    attributes:
+      label: Nội dung cụ thể
+      description: "Dán danh sách câu hỏi / từ / cặp đáp án. Ghi rõ đáp án đúng và giải thích cho bé."
+      placeholder: |
+        1. Con thấy hình nào? A) con mèo  B) con chó  → đúng: B
+        2. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Độ khó mục tiêu (tier)
+      options: ["1", "2", "3", "4", "5", "6", "trải đều 1-6"]
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Kiểm tra an toàn
+      description: "Không hình ảnh/ từ ngữ bạo lực, không dữ liệu cá nhân, không bản quyền ngoài cho phép"
+      value: "- [ ] Không có nội dung bạo lực / đáng sợ\n- [ ] Đúng chính tả, dấu thanh tiếng Việt\n- [ ] Không vi phạm bản quyền"
+    validations:
+      required: true

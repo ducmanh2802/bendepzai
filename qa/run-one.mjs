@@ -2,16 +2,20 @@
  * Generic QA runner (P41).
  *
  * The qa/*.mjs probes export `default async run(page, ui)` and historically
- * relied on an external harness. This runner makes them executable locally:
- * it builds nothing (expects `dist/`), boots `vite preview`, launches the
- * Playwright Chromium already cached on this machine, invokes one probe and
- * prints its JSON result. Exit code is non-zero when the probe records errors.
+ * relied on an external harness. This runner makes them executable locally and
+ * on CI: it builds nothing (expects `dist/`), boots `vite preview`, launches
+ * Chromium (explicit PW_CHROME → this machine's cached build → the Playwright
+ * registry), invokes one probe and prints its JSON result.
+ *
+ * Exit code is non-zero only when the probe records errors or declares
+ * `ok: false` — many probes never set `ok`, so a missing `ok` is not a failure.
  *
  * Usage:
- *   node qa/run-one.mjs qa/p41-curriculum-quality.mjs
+ *   npm run build && node qa/run-one.mjs qa/golden-path.mjs
  * Env:
  *   PW_CHROME  override chromium executable path
  *   PORT       preview port (default 4173)
+ *   CI         adds --no-sandbox when set
  */
 
 import { spawn } from 'node:child_process';
@@ -30,7 +34,9 @@ if (!target) {
 
 const port = Number(process.env.PORT || 4173);
 const origin = `http://localhost:${port}`;
-const chromePath = process.env.PW_CHROME || DEFAULT_CHROME;
+// Prefer an explicit override, then the cached Windows build, then whatever
+// chromium `npx playwright install` placed in the Playwright registry.
+const chromePath = process.env.PW_CHROME || (fs.existsSync(DEFAULT_CHROME) ? DEFAULT_CHROME : undefined);
 
 function waitForServer(url, timeoutMs = 60000) {
   const start = Date.now();
@@ -67,7 +73,11 @@ async function main() {
     await waitForServer(origin);
 
     const { chromium } = await import('playwright');
-    browser = await chromium.launch({ executablePath: chromePath });
+    browser = await chromium.launch({
+      executablePath: chromePath,
+      // CI containers usually cannot start a sandboxed chromium.
+      args: process.env.CI ? ['--no-sandbox'] : [],
+    });
     const page = await browser.newPage();
     // Probes assume they start on the app origin (localStorage access).
     await page.goto(origin + '/');
@@ -77,7 +87,15 @@ async function main() {
     const state = await mod.default(page, ui);
 
     console.log(JSON.stringify(state, null, 2));
-    const failed = (state.errors && state.errors.length > 0) || !state.ok;
+    // A probe passes when it recorded no errors. Some probes (golden-path) never
+    // set `ok`, so only an explicit `ok: false` counts as a self-declared failure.
+    const errors = Array.isArray(state.errors) ? state.errors : [];
+    const failed = errors.length > 0 || state.ok === false;
+    if (failed) {
+      console.error(`QA FAIL — ${errors.length} error(s)` + (state.failedAt ? ` at ${state.failedAt}` : ''));
+    } else {
+      console.error(`QA PASS — ${(state.steps || []).length} step(s), 0 errors`);
+    }
     process.exitCode = failed ? 1 : 0;
   } finally {
     if (browser) await browser.close().catch(() => {});
