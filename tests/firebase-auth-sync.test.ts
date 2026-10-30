@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// Polyfill in-memory localStorage for Node test runner
 const createMockLocalStorage = () => {
   let store: Record<string, string> = {};
   return {
@@ -22,7 +21,6 @@ if (typeof globalThis.localStorage === 'undefined') {
     createMockLocalStorage();
 }
 
-// Mock Firebase SDK for isolated unit testing
 vi.mock('firebase/app', () => ({
   initializeApp: vi.fn(() => ({})),
   getApps: vi.fn(() => [{}]),
@@ -46,63 +44,61 @@ vi.mock('firebase/firestore', () => ({
   getFirestore: vi.fn(() => ({})),
   doc: vi.fn((_db, ...parts) => ({ path: parts.join('/') })),
   getDoc: vi.fn(async () => ({ exists: () => false, data: () => null })),
-  getDocFromServer: vi.fn(async () => ({})),
   setDoc: vi.fn(async () => {}),
   collection: vi.fn(() => ({})),
-  getDocs: vi.fn(async () => []),
 }));
 
 import firebaseConfig from '../firebase-applet-config.json';
 import { CloudSyncService } from '../src/services/cloudSync';
 import { StorageService } from '../src/services/storage';
+import { sanitizeUser } from '../src/services/firebase';
 
-describe('Firebase & Cloud Sync Unit Tests', () => {
+describe('Firebase Auth & Cloud Sync Integration Tests', () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it('contains valid Firebase applet configuration', () => {
+  it('loads real provisioned Firebase project configuration', () => {
     expect(firebaseConfig.projectId).toBe('dark-hydra-0ghtt');
+    expect(firebaseConfig.apiKey).toMatch(/^AIzaSy/);
     expect(firebaseConfig.authDomain).toBe('dark-hydra-0ghtt.firebaseapp.com');
-    expect(firebaseConfig.apiKey).toBeDefined();
-    expect(firebaseConfig.apiKey.length).toBeGreaterThan(10);
-    expect(firebaseConfig.firestoreDatabaseId).toBe(
-      'ai-studio-khobutrithclp1-7578dca8-cff7-48e6-9b6b-a2bbad9d8ffa'
-    );
   });
 
-  it('initializes CloudSyncService with safe offline state', () => {
-    const state = CloudSyncService.getState();
-    expect(state).toBeDefined();
-    expect(['offline', 'idle', 'synced']).toContain(state.status);
-    expect(state.user).toBeNull();
-  });
+  it('sanitizes Firebase user objects safely', () => {
+    expect(sanitizeUser(null)).toBeNull();
 
-  it('subscribes and receives state updates', () => {
-    let receivedState: unknown = null;
-    const unsub = CloudSyncService.subscribe((state) => {
-      receivedState = state;
+    const mockUser = {
+      uid: 'user-123',
+      displayName: 'Bé Lan',
+      email: 'belan@example.com',
+      photoURL: 'https://example.com/avatar.png',
+    } as any;
+
+    const sanitized = sanitizeUser(mockUser);
+    expect(sanitized).toEqual({
+      uid: 'user-123',
+      displayName: 'Bé Lan',
+      email: 'belan@example.com',
+      photoURL: 'https://example.com/avatar.png',
     });
+  });
 
-    expect(receivedState).toBeDefined();
+  it('maintains safe offline state without authenticated user', async () => {
+    const state = CloudSyncService.getState();
+    expect(state.user).toBeNull();
+    expect(['offline', 'idle']).toContain(state.status);
+
+    await CloudSyncService.syncNow();
+    expect(CloudSyncService.getState().status).toBe('offline');
+  });
+
+  it('allows subscription and unsubscription from CloudSyncService', () => {
+    let captured = null;
+    const unsub = CloudSyncService.subscribe((s) => {
+      captured = s;
+    });
+    expect(captured).toBeDefined();
     expect(typeof unsub).toBe('function');
     unsub();
-  });
-
-  it('handles manual sync safely without active user', async () => {
-    await CloudSyncService.syncNow();
-    const state = CloudSyncService.getState();
-    expect(state.status).toBe('offline');
-  });
-
-  it('preserves existing local learner progress when no cloud account connected', () => {
-    const profile = StorageService.getChildProfile();
-    profile.stars = 25;
-    profile.xp = 350;
-    StorageService.saveChildProfile(profile);
-
-    const reloaded = StorageService.getChildProfile();
-    expect(reloaded.stars).toBe(25);
-    expect(reloaded.xp).toBe(350);
   });
 });

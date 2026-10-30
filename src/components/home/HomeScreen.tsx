@@ -8,6 +8,7 @@ import { GAMES_CATALOG } from '../../data/gamesCatalog';
 import { NextBestActionCard } from '../learning/NextBestActionCard';
 import { Star, Sparkles, Gift, Check, ArrowRight, BookOpen, Target, Trophy, Gamepad2, Sparkle, RotateCcw } from 'lucide-react';
 import { KidButton, KidCard, Pill, SectionTitle } from '../ui';
+import { CloudSyncBanner } from '../auth/CloudSyncBanner';
 import type { DecisionRecommendation } from '../../types/decisionEngine';
 
 interface HomeScreenProps {
@@ -116,12 +117,20 @@ const SHORTCUT_CARDS: readonly ShortcutCard[] = [
     border: 'border-emerald-300',
   },
   {
+    screen: 'chess',
+    label: 'Cờ Vua 3D',
+    icon: '♟',
+    desc: 'Đấu trí 3D siêu đẹp',
+    gradient: 'from-amber-600 to-yellow-600',
+    border: 'border-amber-300',
+  },
+  {
     screen: 'cotuong',
     label: 'Cờ Tướng',
-    icon: '♟️',
+    icon: '🪖',
     desc: 'Vương quốc cờ tướng',
-    gradient: 'from-amber-500 to-orange-600',
-    border: 'border-amber-300',
+    gradient: 'from-red-500 to-orange-600',
+    border: 'border-red-300',
   },
 ];
 
@@ -319,6 +328,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </div>
 
+      {/* Cloud Sync & Google Account Banner (prominent on Home Screen) */}
+      <CloudSyncBanner profile={profile} />
+
       {/* 2. 4 SUBJECT CARDS with progress rings */}
       <div>
         <SectionTitle icon="🎯" size="lg">
@@ -499,7 +511,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <SectionTitle icon="⚡" size="md">
           Lối Tắt Nhanh
         </SectionTitle>
-        <div className="grid grid-cols-3 gap-3 mt-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 mt-3">
           {SHORTCUT_CARDS.map((shortcut) => (
             <KidButton
               key={shortcut.screen}

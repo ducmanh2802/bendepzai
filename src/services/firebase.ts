@@ -1,14 +1,31 @@
-// src/services/firebase.ts
-//
-// Google authentication helpers.
-//
-// The application is local-first (see .env.example / GOOGLE_AI_STUDIO_RUNBOOK.md):
-// cloud sync is an OPTIONAL enhancement. This module therefore exposes the
-// auth entry points consumed by the UI but degrades gracefully when no real
-// Firebase project is configured — the app keeps running entirely on
-// localStorage. To enable real Google sign-in, install the `firebase` package
-// and replace the placeholder values in `firebase-applet-config.json` with a
-// real Firebase web app config.
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  type User,
+} from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import firebaseConfig from '../../firebase-applet-config.json';
+
+// Initialize Firebase App singleton
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+
+// Initialize Firebase Auth
+export const auth = getAuth(app);
+
+// Google Auth Provider
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: 'select_account',
+});
+
+// Initialize Firestore with specific database ID if present
+export const db = firebaseConfig.firestoreDatabaseId
+  ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
+  : getFirestore(app);
 
 export interface CloudUser {
   uid: string;
@@ -17,21 +34,52 @@ export interface CloudUser {
   photoURL: string | null;
 }
 
-/**
- * Sign in with Google. Resolves when a real Firebase backend is wired up;
- * otherwise rejects so the caller can surface a friendly message instead of
- * silently pretending success.
- */
-export async function signInWithGoogle(): Promise<CloudUser> {
-  throw new Error(
-    'Đăng nhập Google chưa được cấu hình trong bản build này. Tiến độ vẫn được lưu cục bộ trên máy.'
-  );
+export function sanitizeUser(user: User | null): CloudUser | null {
+  if (!user) return null;
+  return {
+    uid: user.uid,
+    displayName: user.displayName || user.email?.split('@')[0] || 'Học viên',
+    email: user.email,
+    photoURL: user.photoURL,
+  };
 }
 
 /**
- * Sign out of the (optional) cloud account.
+ * Sign in with Google using popup
+ */
+export async function signInWithGoogle(): Promise<CloudUser> {
+  try {
+    const cred = await signInWithPopup(auth, googleProvider);
+    const user = sanitizeUser(cred.user);
+    if (!user) throw new Error('Không thể lấy thông tin tài khoản');
+    return user;
+  } catch (error: unknown) {
+    const err = error as { code?: string; message?: string };
+    if (err.code === 'auth/popup-closed-by-user') {
+      throw new Error('Đã hủy đăng nhập Google.');
+    }
+    if (err.code === 'auth/network-request-failed') {
+      throw new Error('Lỗi kết nối mạng, vui lòng kiểm tra Internet.');
+    }
+    if (err.code === 'auth/unauthorized-domain') {
+      throw new Error('Tên miền ứng dụng cần được ủy quyền trong Firebase Console.');
+    }
+    throw new Error(err.message || 'Đăng nhập Google không thành công.');
+  }
+}
+
+/**
+ * Log out from Firebase account
  */
 export async function logOut(): Promise<void> {
-  // No-op when cloud sync is disabled: there is nothing to sign out of.
-  return;
+  await signOut(auth);
+}
+
+/**
+ * Subscribe to Auth state changes
+ */
+export function onAuthChange(callback: (user: CloudUser | null) => void): () => void {
+  return onAuthStateChanged(auth, (user) => {
+    callback(sanitizeUser(user));
+  });
 }

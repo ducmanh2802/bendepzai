@@ -3,7 +3,6 @@ import { ActiveScreen, ChildProfile, SubjectType } from './types';
 import { StorageService } from './services/storage';
 import { Header } from './components/common/Header';
 import { HomeScreen } from './components/home/HomeScreen';
-import { ChessScreen } from './components/learning/chess/ChessScreen';
 import { CotuongScreen } from './components/learning/cotuong/CotuongScreen';
 import { EnglishIoeScreen } from './components/learning/englishIoe/EnglishIoeScreen';
 import { NAVIGATION } from './config/navigation';
@@ -16,6 +15,9 @@ import { NAVIGATION } from './config/navigation';
  * mini-games, the competition hub, reading fluency, parent mode, shops)
  * is loaded on demand so first render does not pay for the whole app.
  */
+const ChessScreen = lazy(() =>
+  import('./components/learning/chess/ChessScreen').then((m) => ({ default: m.ChessScreen }))
+);
 const WorldMapScreen = lazy(() =>
   import('./components/world/WorldMapScreen').then((m) => ({ default: m.WorldMapScreen }))
 );
@@ -330,7 +332,9 @@ export default function App() {
         )}
 
         {currentScreen === 'chess' && (
-          <ChessScreen onBack={() => setCurrentScreen('home')} />
+          <Suspense fallback={<ScreenFallback label="Học Cờ Vua 3D" />}>
+            <ChessScreen onBack={() => setCurrentScreen('home')} />
+          </Suspense>
         )}
 
         {currentScreen === 'cotuong' && (

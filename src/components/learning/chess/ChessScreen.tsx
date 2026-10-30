@@ -57,24 +57,41 @@ export const ChessScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <button
           onClick={() => { sound.playClick(); onBack(); }}
-          className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-slate-700 flex items-center gap-2"
+          className="px-4 py-2 bg-white hover:bg-slate-100 border-2 border-slate-200 rounded-xl font-bold text-slate-700 flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" /> Quay lại
         </button>
-        <h1 className="text-2xl font-black font-display text-slate-900">♟ Học Cờ Vua</h1>
+        <h1 className="text-xl sm:text-2xl font-black font-display text-slate-900 flex items-center gap-2">
+          <span>♟</span>
+          <span>Cờ Vua 3D & Bài Học</span>
+        </h1>
       </div>
 
-      <div className="flex gap-2">
-        {(['pieces', 'rules', 'illustrate', 'demo', 'quiz', 'play'] as const).map((t) => (
+      <div className="flex gap-2 flex-wrap">
+        {(['play', 'pieces', 'rules', 'illustrate', 'demo', 'quiz'] as const).map((t) => (
           <button
             key={t}
             onClick={() => { sound.playClick(); setTab(t); }}
-            className={`px-4 py-2 rounded-xl font-bold ${tab === t ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-700'}`}
+            className={`px-3 sm:px-4 py-2 rounded-xl font-black text-xs sm:text-sm transition-all cursor-pointer ${
+              tab === t
+                ? 'bg-amber-500 text-white shadow-md scale-105'
+                : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+            }`}
           >
-            {t === 'pieces' ? 'Quân cờ' : t === 'rules' ? 'Luật chơi' : t === 'illustrate' ? 'Minh họa' : t === 'demo' ? 'Demo' : t === 'quiz' ? 'Câu đố' : 'Chơi với máy'}
+            {t === 'play'
+              ? '🎮 Đấu Cờ 3D'
+              : t === 'pieces'
+              ? 'Quân cờ'
+              : t === 'rules'
+              ? 'Luật chơi'
+              : t === 'illustrate'
+              ? 'Minh họa'
+              : t === 'demo'
+              ? 'Nước đi mẫu'
+              : 'Câu đố'}
           </button>
         ))}
       </div>
