@@ -151,7 +151,7 @@
 | ID | Nguồn | Test | Probe | Gate | Trạng thái |
 |---|---|---|---|---|---|
 | FR-Y01 | `public/manifest.webmanifest`, `public/icon-*.png` | — | `qa/offline-pwa.mjs` | V,2,3 | ĐẠT (probe-only) |
-| FR-Y02 | `src/hooks/useSpeak.ts`, `src/services/britishSpeech.ts` | `tests/voice-persona.test.ts`, `tests/question-audio-routing.test.ts` | `qa/audio.mjs` | V,3 | ĐẠT |
+| FR-Y02 | `src/hooks/useSpeak.ts`, `src/services/britishSpeech.ts`, `src/services/speechText.ts` | `tests/voice-persona.test.ts`, `tests/question-audio-routing.test.ts`, `tests/t24-speech-math-operators.test.ts` | `qa/audio.mjs` | V,3 | ĐẠT |
 | FR-Y03 | `src/services/pwa.ts`, `public/sw.js`, `scripts/sw-precache.mjs` | `tests/pwa.test.ts`, `tests/sw-precache.test.ts` | `qa/offline-pwa.mjs` | V,1,2,3 | ĐẠT |
 | FR-Y04 | `public/sw.js` (cache không chứa dữ liệu bé) | `tests/sw-precache.test.ts` | `qa/offline-pwa.mjs` | V,3 | ĐẠT |
 | FR-Y05 | `src/components/system/UpdateBanner.tsx` | `tests/pwa.test.ts` | `qa/offline-pwa.mjs` | V,3 | ĐẠT |
@@ -177,7 +177,7 @@
 
 | ID | Nguồn | Test | Probe | Gate | Trạng thái |
 |---|---|---|---|---|---|
-| NFR-P01 | `scripts/check-bundle-budget.mjs` (`MAIN_CHUNK_BUDGET_BYTES`) | `tests/bundle-budget.test.ts` | — | V,2 | ĐẠT — 508.2 kB / 600 kB (mục tiêu 450 **chưa đạt**); `three-vendor` 544.1 + `firebase-vendor` 537.9 ở ngoài entry, có gate riêng bằng ADR-17 |
+| NFR-P01 | `scripts/check-bundle-budget.mjs` (`MAIN_CHUNK_BUDGET_BYTES`) | `tests/bundle-budget.test.ts` | — | V,2 | ĐẠT — 509 kB / 600 kB (mục tiêu 450 **chưa đạt**); `three-vendor` 544.1 + `firebase-vendor` 537.9 ở ngoài entry, có gate riêng bằng ADR-17 |
 | NFR-P02 | `src/components/games/registry.ts` | `tests/t02c-startup-split.test.ts` | `qa/t02-smoke.mjs` | V,2 | ĐẠT |
 | NFR-P03 | `src/components/learning/cotuong/cotuongEngine.ts` (node budget) | `tests/cotuong-engine.test.ts` | — | V,1 | ĐẠT |
 | NFR-P04 | `src/config/policy.ts:297` | `tests/game-content.test.ts` | — | V,1 | ĐẠT |
@@ -199,7 +199,7 @@
 | NFR-M01 | `package.json` (`verify`, `verify:quick`) | — | — | V,H,1,2 | ĐẠT |
 | NFR-M02 | `src/config/policy.ts` (17 export, có rationale) | test theo từng policy block | — | V,1 | ĐẠT |
 | NFR-M03 | ADR-03; `src/services/answerCheck.ts` | `tests/answerCheck.test.ts`, `tests/competition-engine.test.ts` | `qa/question-types.mjs` | V,1 | ĐẠT |
-| NFR-M04 | `tests/` naming | 69 file / 994 test | — | V,H,1 | ĐẠT |
+| NFR-M04 | `tests/` naming | 70 file / 1012 test | — | V,H,1 | ĐẠT |
 | NFR-M05 | `package.json` (8 runtime deps; `@types/three` sai chỗ — nợ #8 ARCHITECTURE §13) | `tests/t23-mcp-servers.test.ts` | — | V,H,1 | ĐẠT |
 | NFR-M06 | `mcp/lib/server.mjs` | `tests/t23-mcp-servers.test.ts` | — | V,1 | ĐẠT |
 
@@ -252,7 +252,7 @@
 | `qa/games.mjs` | FR-G01…G09, NFR-R04 | 31 game, thưởng đúng 1 lần/vòng, @195 px |
 | `qa/focus.mjs` | NFR-A01, FR-S02, FR-G08, FR-P02 | trap + restore |
 | `qa/offline-pwa.mjs` | BG-04/BG-05, NFR-R01, FR-Y01/Y03/Y04/Y05 | cache-wipe survival, icon decode |
-| `qa/audio.mjs` | NFR-A02, FR-M09, FR-N01/N02, FR-Y02 | chống stacked utterance, cổng autoplay |
+| `qa/audio.mjs` | NFR-A02, FR-M09, FR-N01/N02, FR-Y02 | chống stacked utterance, cổng autoplay, **phép tính `+ − =` đọc thành lời** (`mathOperatorsSpoken`: văn bản thật vào `SpeechSynthesisUtterance`) |
 | `qa/mobile.mjs` | BG-04, FR-S03/04 | 4 viewport + xoay + resume |
 | `qa/mobile-golden.mjs` | BG-01, BG-04, FR-G09 | 7 chặng @390 px và @195 px, XP giữ nguyên |
 | `qa/mobile-home.mjs` | FR-S03, FR-S06 | mànHome trên mobile |
@@ -276,7 +276,7 @@
 
 ## 7. Ma trận ngược: test không phục vụ yêu cầu nào?
 
-69 file test đều nằm trong ít nhất một dòng §2 hoặc §3 ở trên (mới: `tests/chess-3d.test.ts` → FR-C06; `tests/firebase-cloud-sync.test.ts` đổi tên thành `tests/firebase-auth-sync.test.ts` → FR-Y08/Y09/NFR-C01), **ngoại trừ** các file sau —
+70 file test đều nằm trong ít nhất một dòng §2 hoặc §3 ở trên (mới: `tests/chess-3d.test.ts` → FR-C06; `tests/firebase-cloud-sync.test.ts` đổi tên thành `tests/firebase-auth-sync.test.ts` → FR-Y08/Y09/NFR-C01; `tests/t24-speech-math-operators.test.ts` → FR-Y02), **ngoại trừ** các file sau —
 chúng bảo vệ *chất lượng nền* chứ không bảo vệ một FR riêng lẻ:
 
 | File | Vai trò thật |
@@ -309,5 +309,5 @@ chưa được ghi vào SRS (phải thêm FR hoặc xoá test).
 2. Xoá tính năng trong code ⇒ xoá dòng RTM và dòng SRS (giữ lại lịch sử ở `CHANGELOG.md`).
 3. Một dòng RTM chỉ chuyển sang ĐẠT khi output lệnh thật được dán vào PR/Issue —
    không dựa vào số liệu MCP (`AGENTS.md` §1.7, docs/SDLC.md §10).
-4. Số liệu kiểm kê (31 game / 475 câu / 69 test / 508.2 kB…) chỉ được sửa khi vừa đo lại
+4. Số liệu kiểm kê (31 game / 475 câu / 70 test / 509 kB…) chỉ được sửa khi vừa đo lại
    bằng `npx vitest run`, `npm run check:budget` hoặc `ls`.

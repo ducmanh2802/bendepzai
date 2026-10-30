@@ -5,8 +5,8 @@
 > coi là xanh**. Danh sách yêu cầu cần kiểm: [`SRS.md`](../specs/SRS.md); ánh xạ
 > yêu cầu ↔ test ↔ probe ↔ gate: [`RTM.md`](../specs/RTM.md); quy trình: [`../SDLC.md`](../SDLC.md).
 >
-> **Số liệu chốt 2026-10-30** (đo lại sau merge `origin/main`): 69 file test / 994 test ·
-> 20 probe (19 `.mjs` + 1 `.cjs`) · 4 workflow CI · 3 git hook · main chunk 508.2 kB / trần
+> **Số liệu chốt 2026-10-30** (đo lại sau merge `origin/main`): 70 file test / 1012 test ·
+> 20 probe (19 `.mjs` + 1 `.cjs`) · 4 workflow CI · 3 git hook · main chunk 509 kB / trần
 > 600 kB; vendor ngoài entry: `three-vendor` 544.1 kB, `firebase-vendor` 537.9 kB.
 
 ---
@@ -35,7 +35,7 @@ Lớp 5  Người lớn đọc to + beta trẻ thật          → §11   (2 phi
 Lớp 4  Thiết bị thật: Android/iOS, offline, audio → §7    (qa/mobile.mjs + tay người)
 Lớp 3  Probe trình duyệt trên dist/ (20 probe)    → §6    (npm run qa:smoke)
 Lớp 2  Build + ngân sách + precache               → §9    (npm run build && npm run check:budget)
-Lớp 1  Unit/integration Vitest (994 test)         → §5    (npm run test:ci)
+Lớp 1  Unit/integration Vitest (1012 test)        → §5    (npm run test:ci)
 ────────────────────────────────────────────────────────────────────────────────────────────
               npm run verify = typecheck + Lớp 1 + Lớp 2   ← cổng duy nhất
 ```
@@ -80,7 +80,7 @@ Lớp 1  Unit/integration Vitest (994 test)         → §5    (npm run test:ci)
 `posttest` gọi `scripts/audit-snapshot.mjs` ghi `docs/audit-state.json` và nối
 `docs/AUDIT_REPORT.md` (`AGENTS.md` §1.2).
 
-**Bố trí 69 file theo vai trò:**
+**Bố trí 70 file theo vai trò:**
 
 | Nhóm | File | Kiểm gì |
 |---|---|---|
@@ -92,6 +92,7 @@ Lớp 1  Unit/integration Vitest (994 test)         → §5    (npm run test:ci)
 | Tiếng Anh | `kidbox-curriculum`, `kidbox-activities`, `kidbox-learning-os`, `kidbox-bridge-practice`, `english-ioe`, `p32-english-mastery`, `voice-persona`, `english-curriculum` | **0 unit bịa** + 7 nhóm cần nguồn, en-GB fallback, mastery key riêng |
 | Động lực | `t18a-motivation`, `t01-achievements`, `praise-engine`, `t14c-logic`, `t14c-storage`, `t20a-levelup-hooks` | sticker/quest/streak/level, lời khen không từ cấm, hooks order |
 | Persistence | `t14c-storage`, `date-utils`, `parent-and-demo`, `firebase-auth-sync` | sanitize, `isRealDateKey`, export/import, **trạng thái offline khi chưa đăng nhập**, hợp nhất `Math.max`/`Set` union (mock Firestore) |
+| Âm thanh & giọng đọc | `question-audio-routing`, `voice-persona`, `t24-speech-math-operators` | nút "Đọc câu hỏi" luôn lấy canonical text (không rò rỉ đáp án/option/giải thích), persona + fallback en-GB, **phép tính `+ − =` đọc thành lời** mà không đổi chữ hiển thị |
 | Hệ thống | `bundle-budget`, `pwa`, `sw-precache`, `mobile-layout`, `t02c-startup-split`, `p41-font-encoding` | ngân sách chunk, precache, layout, tách chunk, font/dấu |
 | Cờ | `cotuong-engine`, `chess-3d` | luật (mã/tượng/pháo/tốt/tướng đối mặt/tự bỏ chiếu), node budget, `applyMove`; mesh 12 quân có shadow, bàn 64 ô + hitbox, marker nước đi/chiếu, nước mở đầu hợp lệ với engine |
 | Tooling | `t23-mcp-servers` | 5 server tồn tại, `node --check`, 0 import ngoài, `progress/` gitignored, 4 danh sách đăng ký khớp |
@@ -138,7 +139,7 @@ hoặc tự khai `ok: false` (nhiều probe không set `ok` ⇒ thiếu `ok` **k
 | `lesson-types.mjs` | 8 kiểu câu hỏi bài học, mỗi kiểu trả lời được | không kiểu nào treo/không chấm | đổi LessonPlayer/data |
 | `question-types.mjs` | 7 dạng bài thi thật: đủ dạng, mọi dạng trả lời + chấm được | `shortfall = 0`, đáp án vào `errorAnalysis` | đổi kho thi |
 | `offline-pwa.mjs` | SW install, precache, tắt mạng vẫn học, icon decode, xoá cache vẫn còn tiến độ | app chạy offline; dữ liệu còn nguyên | đổi SW/PWA |
-| `audio.mjs` | trạng thái TTS, chống stacked utterance, cổng autoplay, audio đoạn đọc | không 2 utterance đồng thời | đổi sound/speak |
+| `audio.mjs` | trạng thái TTS, chống stacked utterance, cổng autoplay, audio đoạn đọc, **phép tính `+ − =` đọc thành lời** (ghi âm văn bản thật đưa vào `SpeechSynthesisUtterance`, còn ký hiệu thô là FAIL) | không 2 utterance đồng thời | đổi sound/speak |
 | `p41-curriculum-quality.mjs` | quét chất lượng nội dung trên build | 0 lỗi nội dung | đổi `src/data/**` |
 | `p41-font-visual.mjs` | font/dấu hiển thị không vỡ | glyph đúng, không mojibake | đổi CSS/font |
 | `mobile-home.mjs` | màn home trên mobile | phần tử chính đủ lớn, không tràn | đổi Home |
@@ -194,7 +195,7 @@ Nợ đã biết: selector `qa/games.mjs` từng khiến probe `SKIPPED` ở m�
 | Precache | `tests/sw-precache.test.ts`, `qa/offline-pwa.mjs` | manifest đủ `/assets/*`; placeholder dev ⇒ danh sách rỗng nhưng SW vẫn sống | — |
 | Loại trừ | `node_modules`, `.git`, `dist` không vào manifest | — | — |
 
-**Số đo gần nhất (2026-10-30):** `index-DGxWhyYx.js = 508.2 kB` → PASS trần, **trên** mục tiêu 450 kB.
+**Số đo gần nhất (2026-10-30):** `index-DrGTeQFn.js = 509 kB` → PASS trần, **trên** mục tiêu 450 kB.
 
 ---
 

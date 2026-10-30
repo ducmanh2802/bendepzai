@@ -112,6 +112,7 @@ merge `main`. Trạng thái: `docs/opencode/TRANG_THAI.md`; báo cáo: `docs/ope
 | Đo lại | `npm install` + `npm run verify` **EXIT=0**: 69 file / 994 test, build 8.92 s, main chunk `index-DGxWhyYx.js` **508.2 kB PASS**; `three-vendor` 544.1 / `firebase-vendor` 537.9 | output `npm run verify`, `npm run check:budget` |
 | Viết lại specs | ARCHITECTURE (§1, §2, §3, §4.3, §6, §7, §8, §9, ADR-01/11/13, thêm ADR-16/17, §12, §13) · SRS (88 FR, 11 IF, FR-Y08/Y09, FR-C01/C06, NFR-P01/C01/M04/M05, §8, A-03) · BRD (BG-01/BG-05, §4.2, R-02/R-08, chi phí, phụ lục A) · RTM · TEST_PLAN | `docs/specs/*.md`, `docs/plan/TEST_PLAN.md` |
 | Sửa hồi quy offline | chunk lazy chết `net::ERR_FAILED` khi tắt mạng dù precache đủ 98/98 URL — `vite preview` trả `vary: Origin`, key precache (không có `Origin`) không khớp request script của trang (có `Origin`). `public/sw.js`: same-origin match `{ ignoreVary: true }`, navigation fallback `ignoreSearch + ignoreVary`, cross-origin giữ nguyên. Khoá bằng test mới trong `tests/pwa.test.ts` (⇒ tổng test **994**) | `node qa/run-one.mjs qa/offline-pwa.mjs` → `QA PASS — 10 step(s), 0 errors` (3/3 lần chạy, `assetCount: 86`, `offlineAnswering.showedFeedback: true`) |
+| Sửa T24: phép tính không đọc | đề thi viết ký hiệu (`Tính: 6 + 4 = ?`, `Điền số: ... + 27 = 60`) nhưng giọng tiếng Việt của nền tảng bỏ qua `+ − =` ⇒ bé chỉ nghe "sáu bốn". Đo 24/475 câu trong kho thi có ký hiệu trong văn bản đọc; 260 câu Toán curriculum đã có `audioPrompt` bằng lời nên không bị. Thêm lớp phát âm `src/services/speechText.ts` (`toSpeechText`) nối "cộng/trừ/bằng mấy/bằng bao nhiêu" NGAY TRƯỚC utterance ở cả hai đường (`sound.speak`, `useSpeak.speak`); không sửa chữ hiển thị, không đụng assert routing trong `questionAudio.ts`. `qa/audio.mjs` thêm bước ghi lại văn bản thật sự giao cho `SpeechSynthesisUtterance` và FAIL nếu còn ký hiệu thô | `node qa/run-one.mjs qa/audio.mjs` → `QA PASS — 9 step(s), 0 errors` (2/2 lần chạy; `symbolicSeen: 4`, `symbolicSpoken: 4`, `rawSpoken: []`); `tests/t24-speech-math-operators.test.ts` 18 test (⇒ tổng **70 file / 1012 test**) |
 
 **Hệ quả chưa đóng:** EP-G (G1…G6) — cloud sync chưa test với project thật, chưa có UI xoá
 dữ liệu cloud, WebGL chưa có fallback, `@types/three` sai chỗ, 4 lỗ hổng npm chưa đọc.
@@ -205,7 +206,7 @@ dữ liệu cloud, WebGL chưa có fallback, `@types/three` sai chỗ, 4 lỗ h�
 |---|---|---|
 | K-01 | **T03B — component Mascot Gấu Bút Chì (SVG) + avatar mặc đồ**: task P42 duy nhất còn nợ, prompt giữ lại ở `docs/opencode/queue/05_T03B_linh_vat_minh_hoa.md`; T03A/T04/T06 đang dùng emoji thay thế | `npm run verify` + screenshot 390 px | 
 | K-02 | `AGENTS.md` §0 slot "Công cụ MCP" đã có — thêm slot "Bộ tài liệu specs" | docs |
-| K-03 | Số liệu kiểm kê trong specs (31 game / 475 câu / 69 file test / 994 test / 508.2 kB / 8 deps — đo 2026-10-30) cần refresh mỗi lần `verify` | `kbt-docs → project_state` |
+| K-03 | Số liệu kiểm kê trong specs (31 game / 475 câu / 70 file test / 1012 test / 509 kB / 8 deps — đo 2026-10-30) cần refresh mỗi lần `verify` | `kbt-docs → project_state` |
 | K-04 | `qa/p38-browser-probe.cjs` (`.cjs` duy nhất) — chuyển `.mjs` cho đồng bộ | QA |
 
 ---

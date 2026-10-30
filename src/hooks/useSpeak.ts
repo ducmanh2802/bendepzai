@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { sound, VOICE_PERSONAS, type VoicePersonaId } from '../services/sound';
+import { toSpeechText } from '../services/speechText';
 
 /**
  * useSpeak — truthful text-to-speech button state (§20–22).
@@ -70,7 +71,9 @@ export function useSpeak() {
       }
       try {
         window.speechSynthesis.cancel(); // never stack utterances
-        const utterance = new SpeechSynthesisUtterance(text);
+        // `toSpeechText` chỉ đổi cách ĐỌC (6 + 4 → "6 cộng 4"); text hiển thị và
+        // canonical text mà questionAudio assert vẫn là nguyên văn đề bài.
+        const utterance = new SpeechSynthesisUtterance(toSpeechText(text, lang));
         utterance.lang = lang;
         const baseRate = lang === 'vi-VN' ? 0.9 : 0.85;
         utterance.rate = Math.min(2, Math.max(0.1, baseRate * (personaId ? VOICE_PERSONAS[personaId].rate : 1)));

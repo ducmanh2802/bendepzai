@@ -10,7 +10,7 @@
  *      usually has none — that path is the AUDIO_UNAVAILABLE evidence).
  */
 
-import { openFirstLesson } from './lib.mjs';
+import { openFirstLesson, openCompetitionHub } from './lib.mjs';
 const CLICK = { timeout: 12000 };
 
 export default async function run(page, ui) {
@@ -158,6 +158,105 @@ async function body(page, ui, out) {
     }
   } else {
     step('passageAudio', { skipped: 'reading nav not found' });
+  }
+
+  // ---- 3b) Phép tính `+ - =` phải ĐỌC THÀNH LỜI (T24) ----
+  // Kí hiệu toán học nằm trong văn bản đề thi ("Tính: 6 + 4 = ?"); giọng tiếng
+  // Việt của nền tảng bỏ qua `+ - =` nên bé chỉ nghe "sáu bốn". Lớp toSpeechText
+  // nối lời NGAY TRƯỚC utterance. Bằng chứng ở đây là văn bản thật sự được đưa
+  // vào SpeechSynthesisUtterance — không phải văn bản hiển thị.
+  await page.addInitScript(() => {
+    window.__spokenTexts = [];
+    const Real = window.SpeechSynthesisUtterance;
+    if (!Real) return;
+    function Recording(text, ...rest) {
+      const u = new Real(text, ...rest);
+      window.__spokenTexts.push(String(u.text));
+      return u;
+    }
+    Recording.prototype = Real.prototype;
+    Object.defineProperty(window, 'SpeechSynthesisUtterance', {
+      value: Recording,
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  const SYMBOLIC = /[0-9]\s*[+\-−=]\s*[0-9]/;
+  const WORDS = /(cộng|trừ|bằng|plus|minus|equals)/;
+  // Văn bản giao cho utterance KHÔNG còn được chứa ký hiệu thô. `+`/`=`/`−` không
+  // bao giờ là nội dung hợp lệ của một câu đọc; dấu `-` ASCII chỉ phạm lỗi khi làm
+  // phép trừ giữa hai chữ số NGOÀI dãy ngoặc vuông — trong "[1 - 3 - 5]" nó là phân
+  // cách dãy và app cố ý giữ nguyên (xem src/services/speechText.ts).
+  const RAW_HARD = /[+=−]/;
+  const RAW_MINUS = /\d\s*-\s*\d/;
+  const outsideBrackets = (s) => s.replace(/\[[^\]]*\]/g, ' ');
+  let symbolicSeen = 0;
+  let symbolicSpoken = 0;
+  const rawSpoken = [];
+  const spokenSamples = [];
+
+  // Hub Đấu Trường lọc theo môn, và các câu Toán ký hiệu chỉ hiện sau bộ lọc
+  // "Môn Toán"/"Tiếng Anh" — đi hết môn mới chắc là phần đọc này được chạy thật.
+  const SUBJECT_FILTERS = ['Môn Toán', 'Môn Tiếng Việt', 'Tiếng Anh'];
+  let examsWalked = 0;
+
+  outer: for (const subject of SUBJECT_FILTERS) {
+    for (let e = 0; e < 2; e += 1) {
+      await page.goto(APP_ORIGIN + '/');
+      await page.waitForSelector('[data-testid="nav-home"]:visible', { timeout: 20000 });
+      await openCompetitionHub(page);
+      const filter = page.getByRole('button', { name: subject }).first();
+      if (await filter.count()) {
+        await filter.click(CLICK).catch(() => {});
+        await page.waitForTimeout(250);
+      }
+      const starts = page.getByRole('button', { name: /Vào Thi Thử/ });
+      if (e >= (await starts.count())) break;
+      await starts.nth(e).click(CLICK);
+      await page.waitForSelector('role=dialog', { timeout: 20000 });
+      await page.waitForTimeout(700);
+      examsWalked += 1;
+
+      for (let q = 0; q < 12; q += 1) {
+        const btn = page.locator('[data-testid=question-audio]').first();
+        if (!(await btn.count())) break;
+        await btn.click(CLICK).catch(() => {});
+        await page.waitForTimeout(120);
+        // Đọc SAU khi bấm: data-last-spoken chỉ được ghi khi nút được bấm.
+        const canonical = (await btn.getAttribute('data-last-spoken')) || '';
+        if (SYMBOLIC.test(canonical)) {
+          symbolicSeen += 1;
+          const spoken = await page.evaluate(() => {
+            const list = window.__spokenTexts || [];
+            return list.length ? String(list[list.length - 1]) : '';
+          });
+          const bare = outsideBrackets(spoken);
+          if (RAW_HARD.test(spoken) || RAW_MINUS.test(bare) || !WORDS.test(spoken)) {
+            rawSpoken.push({ canonical, spoken });
+          } else {
+            symbolicSpoken += 1;
+            if (spokenSamples.length < 4) spokenSamples.push({ de: canonical, doc: spoken });
+          }
+        }
+        const next = page.getByRole('button', { name: /^Câu tiếp$/ });
+        if (await next.count()) {
+          await next.click(CLICK).catch(() => {});
+          await page.waitForTimeout(150);
+          continue;
+        }
+        break;
+      }
+      if (symbolicSeen >= 8) break outer;
+    }
+  }
+
+  step('mathOperatorsSpoken', { examsWalked, symbolicSeen, symbolicSpoken, rawSpoken, spokenSamples });
+  if (symbolicSeen === 0) {
+    out.errors.push('không gặp câu nào có ký hiệu + - = trong đề thi — probe không còn chạy được phần sửa lỗi T24');
+  }
+  for (const bad of rawSpoken) {
+    out.errors.push(`đề "${bad.canonical}" vẫn được đọc nguyên ký hiệu: "${bad.spoken}"`);
   }
 
   // ---- 4) Voiceless device: the UNAVAILABLE branch, observed live ----

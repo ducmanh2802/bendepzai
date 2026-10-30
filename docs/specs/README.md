@@ -14,8 +14,8 @@ của sản phẩm, từ nghiệp vụ tới từng test. Đọc theo thứ tự
 
 ## Quy ước chung của bộ tài liệu
 
-1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 994 test / 69 file,
-   508.2 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-10-30** — ngay sau merge
+1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1012 test / 70 file,
+   509 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-10-30** — ngay sau merge
    `origin/main` mang Firebase cloud-sync + bàn cờ vua WebGL vào — bằng `npx vitest run`,
    `npm run check:budget` hoặc `ls`. Các số mô tả nội dung học (31/475/1570 câu) giữ nguyên
    từ đợt đo 2026-10-29 vì merge không đụng `src/data/`. Dấu ✚ trong `BRD.md` nghĩa là

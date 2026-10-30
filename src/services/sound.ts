@@ -3,6 +3,8 @@
  * 100% self-contained, no external audio files needed!
  */
 
+import { toSpeechText } from './speechText';
+
 export type VoicePersonaId =
   | 'narrator'
   | 'teacher'
@@ -314,7 +316,7 @@ class SoundService {
         window.speechSynthesis.resume();
       }
       window.speechSynthesis.cancel(); // Stop any pending utterances
-      const utterance = new SpeechSynthesisUtterance(text);
+      const utterance = new SpeechSynthesisUtterance(toSpeechText(text, lang));
       utterance.lang = lang;
       const baseRate = lang === 'vi-VN' ? 0.9 : 0.85;
       utterance.rate = clampSpeechRange(baseRate * (options?.personaId ? VOICE_PERSONAS[options.personaId].rate : 1));
