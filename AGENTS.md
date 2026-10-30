@@ -52,8 +52,16 @@ Khác:
 - Data builder trong `src/data/games/*.ts` phải deterministic theo `(tier, seed)`:
   dùng `seededRng` / `shuffleSeeded` / `pickDistinct`, **không** `Math.random` / `Date.now`.
 - Framework trò chơi: `useGameStage` (6 bậc, sao, XP, `nonce` xáo đề) + `GameModalWrapper`.
-- Main chunk ≤ 600 kB (`npm run check:budget`). Không WebGL/three.js — 3D bằng CSS
+- Main chunk ≤ 600 kB (`npm run check:budget`). 3D mặc định bằng CSS
   (`perspective`, `preserve-3d`) như `src/components/learning/cotuong/CotuongBoard3D.tsx`.
+  **Ngoại lệ duy nhất** (từ merge 2026-10-30): bàn cờ vua WebGL `three.js` trong
+  `src/components/learning/chess/chess3d/` — được vì nó nằm sau `React.lazy`
+  (`src/App.tsx:18`) và trong chunk `three-vendor` riêng. Không import `three` hay `firebase`
+  thẳng vào `App.tsx`/entry: entry sẽ vọt quá trần và gate đỏ.
+- Dữ liệu trẻ **mặc định** chỉ nằm `localStorage`. `src/services/cloudSync.ts` là mirror
+  **tuỳ chọn**, chỉ chạy sau khi người lớn tự đăng nhập Google — không được bật mặc định,
+  không được buộc đăng nhập, và không bao giờ log/xuất nội dung bài làm của bé ra chat,
+  Issue hay tài liệu.
 - Test đặt tên `tests/t<NN>-<chủ đề>.test.ts`, mỗi hành vi mới kèm test.
 
 ## 3. Ngôn ngữ & trải nghiệm cho bé lớp 1

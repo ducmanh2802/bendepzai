@@ -36,12 +36,15 @@ Audit 1: [`P42_AUDIT.md`](P42_AUDIT.md) · Audit 2 (sau T01–T02): [`P42_AUDIT_
 | 5. Động lực | T18A dữ liệu · T18B giao diện · T18C Shop/thành tựu/phụ huynh · T19 âm thanh & ăn mừng | ⏳ |
 | 6. Nghiệm thu | T20A QA + danh sách lỗi · T20B sửa P0/P1 + chứng nhận | ⏳ |
 
-Thứ tự chính xác = thứ tự tên file trong `queue/`. Spec gốc `T03…T20_*.md` giữ làm tham chiếu.
+Thứ tự chính xác = thứ tự tên file trong `queue/`.
+Spec gốc `T03…T20_*.md` và các task `queue/` đã chạy xong đều **đã gỡ khỏi repo** ngày
+2026-10-30 (39 báo cáo trong `reports/` vẫn là chứng cứ); muốn đọc lại thì `git show "99edd29:<đường-dẫn>"`.
+Task còn nợ duy nhất: `queue/05_T03B_linh_vat_minh_hoa.md` (component Mascot).
 
 ## Chạy tay (nếu không dùng runner)
 
 ```powershell
-opencode run "Đọc docs/opencode/00_RULES.md rồi thực hiện ĐẦY ĐỦ task trong docs/opencode/queue/01_T02B_sua_loi_game_con_sot.md. Làm thật, chạy test, commit, viết báo cáo."
+opencode run "Đọc docs/opencode/00_RULES.md rồi thực hiện ĐẦY ĐỦ task trong docs/opencode/queue/05_T03B_linh_vat_minh_hoa.md. Làm thật, chạy test, commit, viết báo cáo."
 ```
 
 ## Kết quả mong đợi sau P42

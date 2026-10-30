@@ -14,7 +14,7 @@
 
 **Verify 2026-10-17 10:52:** `npm run typecheck` PASS · `npm test` 59 files / **881 PASS** · `npm run build` PASS (main chunk 446 kB ≤ 450 kB).
 
-## 3 tính năng = mục tiêu 1-2-3 trong docs/p41.md (đã chốt với người dùng)
+## 3 tính năng = mục tiêu 1-2-3 của phase P41 (đã chốt với người dùng; chứng nhận: `docs/P41_CERTIFICATION.md`)
 
 1. **Font & ký hiệu Toán học** — rà soát toàn bộ data/màn Toán: dấu trừ phải là `−`(U+2212) không phải ASCII `-`; không mojibake; nhất quán; grading chấp nhận cả 2 dạng; regression test.
 2. **Chính tả khớp hình/đáp án/âm-vần** — validator tái dùng được: câu hỏi vần/âm-đầu phải khớp đáp án; correctAnswer ∈ options; thiếu orderingItems/matchingPairs/mediaEmoji → báo; chạy trên toàn bộ ngân hàng rồi sửa mục sai thật.

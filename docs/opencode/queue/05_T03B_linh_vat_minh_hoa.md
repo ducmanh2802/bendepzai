@@ -1,6 +1,6 @@
 # T03B — Linh vật Gấu Bút Chì (SVG) + avatar mặc đồ + minh hoạ
 
-**Spec gốc:** `docs/opencode/T03_design_system_linh_vat.md` — **chỉ phần B**
+**Spec gốc:** prompt `docs/opencode/T03_design_system_linh_vat.md` phần B — brief đã gỡ khỏi `docs/`, đọc lại bằng `git show "99edd29:docs/opencode/T03_design_system_linh_vat.md"`
 
 > File này là bản chính thức. Chỗ nào khác spec gốc thì làm theo file này. Luật chung: `docs/opencode/00_RULES.md`.
 

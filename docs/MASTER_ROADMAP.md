@@ -1,6 +1,7 @@
 # MASTER ROADMAP — KHO BÁU TRI THỨC LỚP 1
 
-> Cập nhật sau chuỗi thực thi P27.5 → P33 (2026-10-05).
+> Cập nhật sau chuỗi thực thi P27.5 → P33 (2026-10-05); mục "Tài liệu" và cấu trúc `docs/`
+> được chốt lại ngày **2026-10-30** sau đợt gỡ prompt + merge Firebase/WebGL (P44).
 
 ## Trạng thái tổng quan
 
@@ -16,24 +17,64 @@
 | P31 | Performance / Responsive / A11y / Offline | **Hoàn tất** |
 | P32 | Google AI Studio | **Hoàn tất** |
 | P33 | Final Certification | **READY** |
+| P44 | Dọn `docs/` (gỡ 68 prompt) + merge `origin/main` (Firebase cloud-sync, cờ vua WebGL) + đo lại bộ specs | **XONG phần tài liệu**; nợ còn lại ở `plan/TASK_PLAN.md` §3.7 EP-G |
 
 ## Tài liệu
 
 | File | Nội dung |
 |---|---|
+| `specs/README.md` | **Bộ tài liệu chuẩn** — chỉ mục 6 file spec/plan + quy ước cập nhật |
+| `specs/BRD.md` | Mục tiêu nghiệp vụ, phạm vi, thước đo, phụ lục số liệu đo từ repo |
+| `specs/SRS.md` | 88 yêu cầu chức năng + 25 phi chức năng + 17 dữ liệu + 11 giao diện ngoài, mỗi dòng có nghiệm thu |
+| `specs/ARCHITECTURE.md` | Tầng, luồng dữ liệu, chunk, PWA, 17 ADR, nợ kỹ thuật |
+| `specs/RTM.md` | Ma trận truy vết yêu cầu → test → probe → gate |
+| `plan/TASK_PLAN.md` | WBS, lịch sử P25→P44, Definition of Ready, backlog EP-A…EP-G, milestones |
+| `plan/TEST_PLAN.md` | 5 tầng kiểm thử, ma trận "đổi gì → chạy gì", tiêu chí vào/ra |
 | `MASTER_BASELINE.md` | Baseline trước/sau, 3 lỗi P0 gốc rễ |
 | `P27_5_EXAM_FIDELITY.md` | 7 dạng bài, blueprint, seed, timer, scoring, review |
 | `P27_5_READING_FLUENCY.md` | Taxonomy, thang 5 bậc, công thức chỉ số, công bằng |
 | `P29_CONTENT_QUALITY.md` | Validator, coverage matrix, 5 lỗi nội dung đã sửa |
 | `P30_RELIABILITY.md` | Migration, sanitize, idempotency 5 tầng, parent mode |
 | `P31_PERFORMANCE_ACCESSIBILITY.md` | Bundle, 6 viewport, a11y, reduced motion |
-| `P32_GOOGLE_AI_STUDIO.md` | Dependency, metadata, fresh-env test |
+| `P32_GOOGLE_AI_STUDIO.md` | Dependency, metadata, fresh-env test — **nay đã lỗi thời một phần**: chính sách "không dependency" bị chính merge này phá; chuẩn hiện hành là `docs/specs/ARCHITECTURE.md` §2 + ADR-16/17 |
 | `P33_FINAL_CERTIFICATION.md` | Chứng nhận từng gate + golden path |
 | `FINAL_RELEASE_REPORT.md` | Báo cáo phát hành |
 | `GOOGLE_AI_STUDIO_RUNBOOK.md` | Runbook thực thi được |
+| `cotuong.md` · `covua.md` · `olypictienganh.md` | Master prompt 3 module (cờ tướng · cờ vua · English IOE) — vẫn là mô tả thiết kế gốc, code chỉ khoá được phần luật bằng test |
+| `opencode/README.md` · `opencode/00_RULES.md` | Cách chạy Kho Báu Auto Runner + luật chung mọi task phải theo |
 
 Tài liệu cũ (`P25`–`P28`, `LEARNING_ENGINE.md`, `PRODUCT_SPEC.md`…) được giữ lại làm lịch sử.
-Khi tài liệu cũ mô tả hành vi **không còn đúng** so với code, `docs/` ở trên là chuẩn.
+Khi tài liệu cũ mô tả hành vi **không còn đúng** so với code, `docs/specs/` là chuẩn
+hiện hành; `docs/plan/TASK_PLAN.md` §2 ghi lại những gì đã làm theo phase.
+
+### Cấu trúc `docs/` sau khi gỡ prompt (2026-10-30)
+
+| Nơi | Còn gì | Số file |
+|---|---|---|
+| `docs/` gốc | hướng dẫn (SDLC, GAME_DESIGN, CURRICULUM_MAP, CONTENT_GUIDE, PARENT_MODE, SAFETY_PRIVACY, `ENGLISH_KIDBOX_*`), chứng nhận P25→P43, 3 master prompt module (`cotuong.md`, `covua.md`, `olypictienganh.md`) | 48 `.md` |
+| `docs/opencode/` | `README.md` (cách chạy runner), `00_RULES.md`, `P42_AUDIT.md`, `P42_AUDIT_2.md`, `run-all.ps1`, 4 file `.bat`, `git-hook-post-commit.sh` | 10 file |
+| `docs/opencode/queue/` | `00_README.md` + **`05_T03B_linh_vat_minh_hoa.md` — task chưa làm** (component Mascot) | 2 |
+| `docs/opencode/reports/` | 39 báo cáo task (gồm `P43_SESSION_STATE.md`) + `_metrics.json` + `img/` (6 ảnh; `qa/t01-hotfix.mjs` và `qa/t02-smoke.mjs` ghi screenshot vào đây) | 41 mục |
+
+| `docs/specs/` · `docs/plan/` (mới) | BRD · SRS · ARCHITECTURE · RTM · README chỉ mục · TASK_PLAN · TEST_PLAN | 5 + 2 |
+
+**68 prompt đã dùng xong bị gỡ (358 kB; 67 `.md` + 1 `.txt`):** 11 prompt phase ở gốc (`KHO BÁU TRI THỨC — P34/P36/P38/P39/P40…`,
+`MASTER AUTONOMOUS PROMPT — P27.5…`, `Prompt OpenCode — Adaptive Learning Upgrade`), `p41.md`,
+`skill.md` (prompt của dự án khác — VN-STOCK-AI-PRO), `docs/opencode/UI.txt` (bản paste tài liệu
+Claude Code, không liên quan repo này), 20 brief `docs/opencode/T01…T20.md`, và 34 task `queue/`
+đã có báo cáo trong `reports/`. Báo cáo cũ vẫn **nhắc tên** các brief đó — không sửa lại báo cáo
+đã đóng dấu chứng nhận.
+
+**Ba master prompt module được giữ** vì chưa có tài liệu nào khác mô tả thiết kế: `docs/cotuong.md`
+(Vương Quốc Cờ Tướng), `docs/covua.md` (Chess Kingdom), `docs/olypictienganh.md` (English IOE
+Champion 12 tuần).
+
+Cả 68 file vẫn nguyên trong lịch sử — đọc/lấy lại từ commit `99edd29` (ngay trước đợt gỡ):
+
+```bash
+git show "99edd29:docs/KHO BÁU TRI THỨC — P40 AUTONOMOUS FULL PASS.md"   # đọc nội dung
+git checkout 99edd29 -- "docs/opencode/T10_tieng_viet_am_van.md"          # khôi phục một file
+```
 
 ## Bản đồ mã nguồn
 

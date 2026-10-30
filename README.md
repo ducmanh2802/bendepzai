@@ -5,6 +5,8 @@ kèm 31 trò chơi giáo dục, luyện đọc lưu loát, đề thi mô phỏng
 Chế độ Phụ huynh. Chạy trên trình duyệt, cài được như PWA, dùng được offline.
 
 - Công nghệ: React 19 · TypeScript · Vite 8 · Tailwind v4 · Vitest · Playwright
+- Dữ liệu: mặc định **chỉ nằm trên máy** (`localStorage`); đồng bộ Google Cloud là
+  **tuỳ chọn**, phải bấm đăng nhập mới bật (`docs/specs/ARCHITECTURE.md` ADR-16)
 - Quy trình làm việc: **[`docs/SDLC.md`](docs/SDLC.md)** — đọc trước khi sửa code
 - Bộ tài liệu chuẩn (BRD · SRS · Kiến trúc · RTM · Task/Test Plan): [`docs/specs/README.md`](docs/specs/README.md)
 - Lịch sử thay đổi: [`CHANGELOG.md`](CHANGELOG.md)
@@ -13,7 +15,7 @@ Chế độ Phụ huynh. Chạy trên trình duyệt, cài được như PWA, d�
 
 ```bash
 npm install          # (npm, không dùng bun — package-lock.json là nguồn thật)
-npm run hooks:install# bật cổng kiểm tra cục bộ: pre-commit / commit-msg / pre-push
+npm run hooks:install  # bật cổng kiểm tra cục bộ: pre-commit / commit-msg / pre-push
 npm run dev          # http://localhost:3000
 ```
 
@@ -25,7 +27,7 @@ npm run dev          # http://localhost:3000
 | `npm run build` | build sản phẩm vào `dist/` |
 | `npm run preview` | xem thử `dist/` (port do Vite chọn) |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm test` | 68 file / 989 unit test, **sau đó tự chạy audit tăng dần** (`posttest`) |
+| `npm test` | 69 file / 994 unit test, **sau đó tự chạy audit tăng dần** (`posttest`) |
 | `npm run test:ci` | chỉ chạy test (dùng trong CI, không ghi file audit) |
 | `npm run verify:quick` | typecheck + test — cổng trước khi push |
 | `npm run verify` | **cổng đầy đủ**: typecheck + test + build + bundle budget |
@@ -47,7 +49,9 @@ src/
   App.tsx             điều hợp màn hình chính
   components/
     games/            31 component trò chơi + registry.ts (lazy) + GameModalWrapper
-    learning/         màn học theo môn; learning/cotuong/ là module cờ tướng 3D
+    learning/         màn học theo môn; learning/cotuong/ là bàn cờ tướng 3D bằng CSS,
+                      learning/chess/chess3d/ là bàn cờ vua 3D WebGL (three.js, chunk lazy)
+    auth/             đăng nhập Google + banner đồng bộ (tuỳ chọn, mặc định tắt)
     competition/, reading/, parent/, shop/, home/, world/, ui/…  theo tính năng
   config/policy.ts    LAUNCHABLE_GAME_IDS, chính sách decision engine
   data/
@@ -55,7 +59,8 @@ src/
     games/*.ts        data pack deterministic cho từng trò chơi
     *.ts              curriculum, competition bank, achievement, skill taxonomy…
   hooks/useGameStage.ts  6 bậc độ khó, sao, XP, nonce xáo đề
-  services/           storage, sound, TTS, decision engine…
+  services/           storage (nguồn thật), sound, TTS, decision engine…,
+                      cloudSync + firebase (mirror tuỳ chọn sau khi đăng nhập)
   types/              kiểu dùng chung
 tests/                Vitest, đặt tên t<NN>-<chủ đề>.test.ts
 qa/                   probe Playwright chạy trên bản build thật
@@ -95,14 +100,14 @@ output `npm run verify` trước khi nói “xong” (`docs/SDLC.md` §10).
 | File | Trả lời câu hỏi |
 |---|---|
 | [`docs/specs/BRD.md`](docs/specs/BRD.md) | Vì sao làm sản phẩm này, đo bằng gì, phạm vi tới đâu |
-| [`docs/specs/SRS.md`](docs/specs/SRS.md) | 87 yêu cầu chức năng + 25 phi chức năng, mỗi yêu cầu có nghiệm thu |
-| [`docs/specs/ARCHITECTURE.md`](docs/specs/ARCHITECTURE.md) | Tầng, luồng dữ liệu, chunk, 15 quyết định (ADR), nợ kỹ thuật |
+| [`docs/specs/SRS.md`](docs/specs/SRS.md) | 88 yêu cầu chức năng + 25 phi chức năng + 11 giao diện ngoài, mỗi yêu cầu có nghiệm thu |
+| [`docs/specs/ARCHITECTURE.md`](docs/specs/ARCHITECTURE.md) | Tầng, luồng dữ liệu, chunk, 17 quyết định (ADR), nợ kỹ thuật |
 | [`docs/specs/RTM.md`](docs/specs/RTM.md) | Yêu cầu nào được test/probe nào chứng minh — và chỗ nào còn trống |
 | [`docs/plan/TASK_PLAN.md`](docs/plan/TASK_PLAN.md) | WBS, việc đã làm theo phase, backlog còn lại, milestones |
 | [`docs/plan/TEST_PLAN.md`](docs/plan/TEST_PLAN.md) | 5 tầng kiểm thử, đổi gì thì phải chạy gì, tiêu chí vào/ra |
 
-Chỉ số trong bộ tài liệu này đo từ repo ngày 2026-10-29; quy ước cập nhật xem
-[`docs/specs/README.md`](docs/specs/README.md).
+Chỉ số trong bộ tài liệu này đo từ repo ngày **2026-10-30** (sau khi merge Firebase cloud-sync
+và bàn cờ vua WebGL); quy ước cập nhật xem [`docs/specs/README.md`](docs/specs/README.md).
 
 ## Đóng góp
 
