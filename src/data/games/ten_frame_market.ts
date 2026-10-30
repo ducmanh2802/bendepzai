@@ -6,13 +6,13 @@
  * - T1–T2: khung 10 đơn (have 0–9, target 10, cộng không nhớ).
  * - T3: 2 khung đến 20 (have 10–18, target 20).
  * - T4: chục–đơn vị với bó que tính (target 11–99, hỏi chục hoặc đơn vị còn thiếu).
- * - T5: tiền mệnh giá nhỏ (bé có tròn chục đồng, giá hàng hơn vài đồng → cần thêm mấy).
+ * - T5: tiền hàng chênh 14–38 đồng (bé có tròn chục đồng, trừ ra vẫn không mượn).
  * - T6: trộn 20 + chục–đơn vị + tiền hàng.
  *
  * Lớp 1 (GDPT 2018): mọi phép tính đều không nhớ/không mượn, số ≤ 100.
  */
 
-import { numericOptions, pickDistinct, roundsForTier, seededRng, shuffleSeeded } from '../gameLevels';
+import { numericOptions, pickDistinct, roundsForTier, seededRng, shuffleSeeded, tierOptionCount } from '../gameLevels';
 
 export type MarketKind = 'ten' | 'twenty' | 'tensUnits' | 'money';
 
@@ -33,7 +33,7 @@ export interface MarketRound {
   need: number;
   /** Câu đề cho bé (NFC). */
   prompt: string;
-  /** 4 phương án số (đã xáo trộn, gồm need). */
+  /** Phương án số (đã xáo trộn, gồm need); số lượng tăng theo bậc. */
   options: number[];
   /** T4: số chục / số đơn vị của target (để vẽ bó que tính). */
   chuc?: number;
@@ -128,7 +128,7 @@ function money(customer: keyof typeof CUST, haveTens: number, extra: number, ite
 
 /**
  * POOL_BY_TIER — mỗi pool 8 mục (số vòng tối đa mỗi cấp là 8).
- * Đáp án luôn 0–9 (vòng hỏi "mấy chục" đáp bằng số chục).
+ * Đáp án 2–90 tuỳ bậc; bậc 5–6 chênh cả chục que tính/chục đồng.
  */
 export const POOL_BY_TIER: MarketTarget[][] = [
   // T1 — khung 10, have 4–8 (need 2–6, dễ nhẩm)
@@ -175,27 +175,27 @@ export const POOL_BY_TIER: MarketTarget[][] = [
     sticks('khi', 6, 5, 'donVi'),
     sticks('gau', 3, 0, 'chuc'),
   ],
-  // T5 — tiền hàng mệnh giá nhỏ (có tròn chục, giá hơn 1–9 đồng)
+  // T5 — tiền hàng: giá chênh 14–38 đồng (tròn chục trừ đi vẫn không mượn)
   [
-    money('tho', 2, 5, 'gói bánh', '🍪'),
-    money('meo', 3, 7, 'quyển vở', '📒'),
-    money('ga', 1, 4, 'cái kẹo', '🍬'),
-    money('vit', 4, 2, 'quả bóng', '⚽'),
-    money('soc', 2, 8, 'hộp bút', '✏️'),
-    money('ech', 5, 3, 'cuốn truyện', '📖'),
-    money('khi', 3, 6, 'cái mũ', '🧢'),
-    money('gau', 4, 9, 'hộp sữa', '🥛'),
+    money('tho', 2, 15, 'gói bánh', '🍪'),
+    money('meo', 3, 27, 'quyển vở', '📒'),
+    money('ga', 1, 14, 'cái cặp', '🎒'),
+    money('vit', 4, 22, 'quả bóng', '⚽'),
+    money('soc', 2, 38, 'hộp bút', '✏️'),
+    money('ech', 5, 33, 'cuốn truyện', '📖'),
+    money('khi', 3, 26, 'cái mũ', '🧢'),
+    money('gau', 4, 19, 'hộp sữa', '🥛'),
   ],
   // T6 — trộn 20 + chục–đơn vị + tiền hàng
   [
     twenty('tho', 'nho', 16),
     sticks('meo', 4, 6, 'donVi'),
-    money('ga', 2, 3, 'cái bánh', '🥖'),
+    sticks('ga', 5, 3, 'donVi'),
     twenty('vit', 'tao', 12),
     sticks('soc', 7, 2, 'chuc'),
-    money('ech', 5, 5, 'tô phở', '🍜'),
+    money('ech', 5, 25, 'tô phở', '🍜'),
     sticks('khi', 8, 4, 'donVi'),
-    money('gau', 1, 2, 'cây kem', '🍦'),
+    sticks('gau', 9, 7, 'donVi'),
   ],
 ];
 
@@ -219,7 +219,7 @@ function promptFor(t: MarketTarget, need: number): string {
 
 /**
  * Dựng các vòng chơi cho 1 cấp: đủ vòng, đáp án = target - have,
- * 4 phương án số duy nhất đã xáo trộn theo seed.
+ * phương án số duy nhất đã xáo trộn theo seed (4 → 6 tuỳ bậc).
  */
 export function buildMarketRounds(tier: number, seedOrNonce = 0): MarketRound[] {
   const safeTier = Math.min(Math.max(Math.round(tier), 1), 6);
@@ -230,7 +230,7 @@ export function buildMarketRounds(tier: number, seedOrNonce = 0): MarketRound[] 
   return picks.map((t, i) => {
     const r = seededRng(1600 + safeTier * 307 + seedOrNonce * 1009 + i * 61 + 7);
     const need = t.need ?? t.target - t.have;
-    const options = numericOptions(need, 4, r, 0, Math.max(t.target, 10));
+    const options = numericOptions(need, tierOptionCount(safeTier), r, 0, Math.max(t.target, 10));
     const shuffled = shuffleSeeded(options, r);
     return {
       id: `tm-t${safeTier}-${i}-${t.have}-${t.target}`,

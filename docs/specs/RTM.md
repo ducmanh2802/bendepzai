@@ -71,8 +71,8 @@
 | FR-G01 | `src/data/gamesCatalog.ts:24` | `tests/games-all.test.ts`, `tests/games-content.test.ts` | `qa/games.mjs` | V,1,3 | ĐẠT |
 | FR-G02 | `docs/SDLC.md` §3.1 | `tests/t23-mcp-servers.test.ts` (so 4 danh sách) | `qa/games.mjs` (`GAME_TITLES`) | V,1,3 | ĐẠT |
 | FR-G03 | `src/components/games/registry.ts` (31 × `lazy`) | `tests/t02c-startup-split.test.ts`, `tests/bundle-budget.test.ts` | `qa/t02-smoke.mjs` | V,2 | ĐẠT |
-| FR-G04 | `src/data/gameLevels.ts`, `src/hooks/useGameStage.ts` | `tests/t08-games-hub.test.ts`, `tests/game-content.test.ts` | `qa/games.mjs` | V,3 | ĐẠT |
-| FR-G05 | `src/config/policy.ts:297`, `src/data/games/*.ts` | `tests/game-content.test.ts`, `tests/t15-viet-games.test.ts`, `tests/t16-math-games.test.ts`, `tests/t17a-english-games.test.ts`, `tests/t17b-coding.test.ts`, `tests/t17b-scientist.test.ts`, `tests/t21-fun-games.test.ts` | `qa/games.mjs` | V,1,3 | ĐẠT |
+| FR-G04 | `src/data/gameLevels.ts`, `src/hooks/useGameStage.ts` | `tests/t08-games-hub.test.ts`, `tests/game-content.test.ts`, `tests/t25-difficulty-ladder.test.ts` | `qa/games.mjs`, `qa/tier6-ladder-evidence.mjs` | V,3 | ĐẠT |
+| FR-G05 | `src/config/policy.ts:297`, `src/data/games/*.ts` | `tests/game-content.test.ts`, `tests/t15-viet-games.test.ts`, `tests/t16-math-games.test.ts`, `tests/t17a-english-games.test.ts`, `tests/t17b-coding.test.ts`, `tests/t17b-scientist.test.ts`, `tests/t21-fun-games.test.ts`, `tests/t25-difficulty-ladder.test.ts` | `qa/games.mjs` | V,1,3 | ĐẠT |
 | FR-G06 | `src/hooks/useGameStage.ts`, DC-08 | `tests/t08-games-hub.test.ts` | `qa/games.mjs` | V,3 | ĐẠT |
 | FR-G07 | DC-09 (`kho_bau_game_first_seen`) | `tests/game-rewards.test.ts` | `qa/games.mjs` | V,1,3 | ĐẠT |
 | FR-G08 | `src/components/games/GameModalWrapper.tsx`, `src/hooks/useFocusTrap.ts` | `tests/t01b-ui-fixes.test.ts` | `qa/focus.mjs`, `qa/kidbox-focus.mjs` | V,3 | ĐẠT |
@@ -199,7 +199,7 @@
 | NFR-M01 | `package.json` (`verify`, `verify:quick`) | — | — | V,H,1,2 | ĐẠT |
 | NFR-M02 | `src/config/policy.ts` (17 export, có rationale) | test theo từng policy block | — | V,1 | ĐẠT |
 | NFR-M03 | ADR-03; `src/services/answerCheck.ts` | `tests/answerCheck.test.ts`, `tests/competition-engine.test.ts` | `qa/question-types.mjs` | V,1 | ĐẠT |
-| NFR-M04 | `tests/` naming | 70 file / 1013 test | — | V,H,1 | ĐẠT |
+| NFR-M04 | `tests/` naming | 71 file / 1034 test | — | V,H,1 | ĐẠT |
 | NFR-M05 | `package.json` (8 runtime deps; `@types/three` sai chỗ — nợ #8 ARCHITECTURE §13) | `tests/t23-mcp-servers.test.ts` | — | V,H,1 | ĐẠT |
 | NFR-M06 | `mcp/lib/server.mjs` | `tests/t23-mcp-servers.test.ts` | — | V,1 | ĐẠT |
 
@@ -276,7 +276,7 @@
 
 ## 7. Ma trận ngược: test không phục vụ yêu cầu nào?
 
-70 file test đều nằm trong ít nhất một dòng §2 hoặc §3 ở trên (mới: `tests/chess-3d.test.ts` → FR-C06; `tests/firebase-cloud-sync.test.ts` đổi tên thành `tests/firebase-auth-sync.test.ts` → FR-Y08/Y09/NFR-C01; `tests/t24-speech-math-operators.test.ts` → FR-Y02), **ngoại trừ** các file sau —
+71 file test đều nằm trong ít nhất một dòng §2 hoặc §3 ở trên (mới: `tests/chess-3d.test.ts` → FR-C06; `tests/firebase-cloud-sync.test.ts` đổi tên thành `tests/firebase-auth-sync.test.ts` → FR-Y08/Y09/NFR-C01; `tests/t24-speech-math-operators.test.ts` → FR-Y02; `tests/t25-difficulty-ladder.test.ts` → FR-G04/G05), **ngoại trừ** các file sau —
 chúng bảo vệ *chất lượng nền* chứ không bảo vệ một FR riêng lẻ:
 
 | File | Vai trò thật |

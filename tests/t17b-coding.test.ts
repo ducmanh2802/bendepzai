@@ -130,7 +130,11 @@ describe('T17B treasure_coding: man choi', () => {
     }
   });
 
-  it('do kho tang that: luoi 4->6, loi giai vua suc (<=12 buoc), dai dan', () => {
+  it('do kho tang that: luoi 4->7, loi giai theo tran cua tung bac (T25), dai dan', () => {
+    // T25: luoi 4/4/5/6/7/8 va tran buoc 8/9/11/13/16/18 (truoc day khoa 12 buoc
+    // cho moi bac nen bac 5-6 khong dài hơn bac 4).
+    const TIERS = [4, 4, 5, 6, 7, 8];
+    const MAX_STEPS = [8, 9, 11, 13, 16, 18];
     const sizes: number[] = [];
     const lens: number[][] = [[], [], [], [], [], []];
     for (let t = 1; t <= 6; t++) {
@@ -138,8 +142,8 @@ describe('T17B treasure_coding: man choi', () => {
         for (const r of buildCodingRounds(t, seed)) {
           sizes.push(r.level.size);
           lens[t - 1].push(r.level.minSteps);
-          expect(r.level.size).toBe([4, 4, 5, 5, 6, 6][t - 1]);
-          expect(r.level.minSteps, `${r.id} qua dai`).toBeLessThanOrEqual(12);
+          expect(r.level.size).toBe(TIERS[t - 1]);
+          expect(r.level.minSteps, `${r.id} qua dai`).toBeLessThanOrEqual(MAX_STEPS[t - 1]);
           expect(r.level.minSteps, `${r.id} qua ngan`).toBeGreaterThanOrEqual(2);
           // Da nam trong luoi, khong de len o dac biet.
           for (const rock of r.level.rocks) {
@@ -157,6 +161,7 @@ describe('T17B treasure_coding: man choi', () => {
     expect(new Set(sizes).size).toBeGreaterThan(1);
     const avg = (a: number[]): number => a.reduce((x, y) => x + y, 0) / a.length;
     expect(avg(lens[5]), 'T6 phai kho hon T1').toBeGreaterThan(avg(lens[0]));
+    expect(avg(lens[5]), 'T6 phai dài hơn T4').toBeGreaterThan(avg(lens[3]));
   });
 
   it('nonce xao tron man; generateLevel xac dinh theo seed', () => {

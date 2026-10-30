@@ -2,7 +2,7 @@
  * T02B/B3+A — Safari Tiếng Anh (AnimalSafari) data. Pure TypeScript.
  */
 
-import { defaultRoundsPerTier, pickDistinct, seededRng, shuffleSeeded } from '../gameLevels';
+import { defaultRoundsPerTier, pickDistinct, seededRng, shuffleSeeded, tierOptionCount } from '../gameLevels';
 
 export interface AnimalSafariItem {
   englishName: string;
@@ -35,17 +35,25 @@ export const SAFARI_ANIMALS: AnimalSafariItem[] = [
  * T02B/B3+A — the target is picked FIRST, then options are shuffled, so the
  * answer position is uniformly distributed (never pinned to index 0).
  * `seed` mixes the play nonce (component passes stage.nonce).
+ *
+ * T25 — đàn thú được xáo theo nonce rồi mới cắt, nên mỗi lượt chơi gặp con vật
+ * khác nhau (trước đây luôn là 4 con đầu tiên của danh sách), và số phương án
+ * theo bậc tăng dần 4 → 6 để bé không đoán mò ăn 25%.
  */
 export function buildAnimalRounds(tier: number, seed = 0): AnimalRound[] {
   const safeTier = Math.min(Math.max(Math.round(tier), 1), 6);
   const roundsPerTier = defaultRoundsPerTier();
   const count = roundsPerTier[safeTier - 1];
-  const poolSize = safeTier <= 1 ? 4 : safeTier === 2 ? 5 : safeTier === 3 ? 6 : safeTier === 4 ? 8 : safeTier === 5 ? 10 : SAFARI_ANIMALS.length;
-  const pool = SAFARI_ANIMALS.slice(0, poolSize);
+  const optionCount = tierOptionCount(safeTier);
+  const zooSize = Math.max(
+    optionCount,
+    safeTier <= 1 ? 4 : safeTier === 2 ? 5 : safeTier === 3 ? 6 : safeTier === 4 ? 8 : safeTier === 5 ? 10 : SAFARI_ANIMALS.length
+  );
+  const zoo = shuffleSeeded(SAFARI_ANIMALS, seededRng(9100 + safeTier * 59 + seed * 1009)).slice(0, zooSize);
   const rounds: AnimalRound[] = [];
   for (let i = 0; i < count; i++) {
     const rngI = seededRng(9100 + safeTier * 59 + seed * 1009 + i * 271);
-    const picked = pickDistinct(pool, 4, rngI);
+    const picked = pickDistinct(zoo, optionCount, rngI);
     // Pick the target before shuffling so its final slot is random.
     const target = picked[Math.floor(rngI() * picked.length)];
     const shuffled = shuffleSeeded(picked, seededRng(9100 + safeTier * 59 + seed * 1009 + i * 853));

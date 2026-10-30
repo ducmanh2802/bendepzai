@@ -1,10 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { GameModalWrapper } from './GameModalWrapper';
 import { sound } from '../../services/sound';
 import { Zap } from 'lucide-react';
 import { useGameStage } from '../../hooks/useGameStage';
 import { defaultRoundsPerTier, getTierMeta } from '../../data/gameLevels';
-import { buildRaceQuestions } from '../../data/games/speed_racing';
+import { buildRaceQuestions, tierBudgetMs } from '../../data/games/speed_racing';
 import type { MathQuestion } from '../../data/games/speed_racing';
 
 export { buildRaceQuestions };
@@ -17,6 +17,30 @@ export const MathSpeedRacingGame: React.FC<{ onExit: () => void }> = ({ onExit }
   const questions = useMemo(() => buildRaceQuestions(stage.tier, stage.nonce), [stage.tier, stage.nonce]);
   const current = questions[stage.roundIdx];
   const carProgress = 10 + (Math.min(stage.roundNumber, stage.roundTotal) / stage.roundTotal) * 80;
+
+  // Giấy giờ theo bậc (bạc 4–6). Hết giờ chỉ tính MỘT lỗi rồi chạy lại đồng hồ
+  // cho cùng câu — bé không bị mất câu, vẫn phải nghĩ ra đáp án.
+  const budgetMs = tierBudgetMs(stage.tier);
+  const [remainingMs, setRemainingMs] = useState<number | null>(budgetMs);
+  useEffect(() => {
+    setRemainingMs(budgetMs);
+  }, [budgetMs, stage.roundIdx, stage.nonce]);
+  useEffect(() => {
+    if (!budgetMs || stage.locked || stage.phase !== 'playing') return;
+    const tick = window.setInterval(() => {
+      setRemainingMs((r) => (r === null ? null : Math.max(0, r - 100)));
+    }, 100);
+    return () => window.clearInterval(tick);
+  }, [budgetMs, stage.roundIdx, stage.locked, stage.phase]);
+  useEffect(() => {
+    if (remainingMs !== 0) return;
+    sound.playWrong();
+    sound.speak('Hết giờ rồi! Bé tính lại nhanh nhé!');
+    stage.submitWrong();
+    setRemainingMs(budgetMs);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [remainingMs]);
+
 
   const handleSelectOption = (num: number) => {
     if (stage.locked) return;
@@ -104,15 +128,34 @@ export const MathSpeedRacingGame: React.FC<{ onExit: () => void }> = ({ onExit }
         </div>
 
         {/* Answer Options */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 w-full max-w-xl">
+        {budgetMs !== null && remainingMs !== null && (
+          <div className="w-full max-w-xl mb-1" data-testid="race-timer" role="timer">
+            <div className="h-2 rounded-full bg-white/15 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-[width] duration-100 ease-linear ${
+                  remainingMs / budgetMs > 0.5 ? 'bg-emerald-400' : remainingMs / budgetMs > 0.2 ? 'bg-amber-400' : 'bg-rose-500'
+                }`}
+                style={{ width: `${(remainingMs / budgetMs) * 100}%` }}
+              />
+            </div>
+            <p className="mt-1 text-center text-[11px] font-bold text-white/70">
+              {Math.ceil(remainingMs / 1000)} giây cho câu này
+            </p>
+          </div>
+        )}
+        <div
+          className={`w-full max-w-xl grid gap-3 md:gap-4 grid-cols-2 ${
+            current.options.length > 4 ? 'md:grid-cols-3' : 'md:grid-cols-4'
+          }`}
+        >
           {current.options.map((opt) => (
             <button
               key={opt}
               onClick={() => handleSelectOption(opt)}
               disabled={stage.locked}
-              className={`py-4 px-6 bg-gradient-to-b from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-3xl rounded-2xl shadow-xl border-2 border-white/50 active:scale-95 transition-all cursor-pointer font-display ${
-                stage.locked ? 'opacity-60' : ''
-              }`}
+              className={`bg-gradient-to-b from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black rounded-2xl shadow-xl border-2 border-white/50 active:scale-95 transition-all cursor-pointer font-display ${
+                current.options.length > 4 ? 'py-3 px-4 text-2xl md:text-3xl' : 'py-4 px-6 text-3xl'
+              } ${stage.locked ? 'opacity-60' : ''}`}
             >
               {opt}
             </button>

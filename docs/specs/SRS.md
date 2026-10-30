@@ -120,7 +120,7 @@ Cột **Gate** chỉ cổng nào chặn nếu vi phạm: `V` = `npm run verify` 
 | FR-G01 | Catalog có đúng 31 trò chơi (9 Việt · 10 Toán · 5 Anh · 2 Logic · 5 Fun) | `GAMES_CATALOG.length = 31` | [src/data/gamesCatalog.ts](file:///D:/trithuc/kho-bau-tri-thuc/src/data/gamesCatalog.ts), `tests/games-all.test.ts` | V |
 | FR-G02 | Bất biến đăng ký 4 nơi, tên tiếng Việt khớp nhau | `ids(GAMES_CATALOG) == ids(GAME_REGISTRY) == LAUNCHABLE_GAME_IDS == keys(GAME_TITLES)` | [docs/SDLC.md §3.1](file:///D:/trithuc/kho-bau-tri-thuc/docs/SDLC.md), `tests/t23-mcp-servers.test.ts` (`readRegistration`), `qa/games.mjs` | V, Q |
 | FR-G03 | Component trò chơi nạp lười | Mở game không tăng main chunk quá ngân sách | [src/components/games/registry.ts](file:///D:/trithuc/kho-bau-tri-thuc/src/components/games/registry.ts), `npm run check:budget`, `tests/t02c-startup-split.test.ts` | V |
-| FR-G04 | Mỗi trò có 6 bậc; số câu mỗi bậc `[5,6,6,7,8,8]` | `defaultRoundsPerTier()` trả đúng mảng | [src/data/gameLevels.ts](file:///D:/trithuc/kho-bau-tri-thuc/src/data/gameLevels.ts), [src/hooks/useGameStage.ts](file:///D:/trithuc/kho-bau-tri-thuc/src/hooks/useGameStage.ts) | V |
+| FR-G04 | Mỗi trò có 6 bậc; số câu mỗi bậc `[5,6,6,7,8,8]`; **một bậc thang độ khó dùng chung** — số phương án `[4,4,5,5,6,6]`, trần số Toán `[10,20,30,50,70,100]`, giấy giờ chỉ bật từ bậc 4 và giảm dần, trần nhóm Puzzle (24 thẻ lật · mosaic 6×6 · 18 chấm · bàn coding 8×8) | `defaultRoundsPerTier()`/`TIER_OPTION_COUNT`/`TIER_MAX_VALUE` trả đúng mảng; probe đếm phương án render thật ở Màn 6 | [src/data/gameLevels.ts](file:///D:/trithuc/kho-bau-tri-thuc/src/data/gameLevels.ts), [src/hooks/useGameStage.ts](file:///D:/trithuc/kho-bau-tri-thuc/src/hooks/useGameStage.ts), `tests/t25-difficulty-ladder.test.ts`, `qa/tier6-ladder-evidence.mjs` | V, Q |
 | FR-G05 | Dữ liệu trò chơi deterministic theo `(tier, seed)`; cấm `Math.random`/`Date.now` trong builder | Cùng seed → cùng đề; grep không thấy random/Date.now trong `src/data/games/*.ts` | `seededRng`/`shuffleSeeded`/`pickDistinct`, [src/config/policy.ts:297](file:///D:/trithuc/kho-bau-tri-thuc/src/config/policy.ts#L297) `SEED_POLICY`, `tests/game-content.test.ts` | V |
 | FR-G06 | Nút "xáo đề" đổi `nonce` và sinh đề mới, vẫn deterministic theo nonce | `kho_bau_game_nonce` đổi → câu đổi | [src/hooks/useGameStage.ts](file:///D:/trithuc/kho-bau-tri-thuc/src/hooks/useGameStage.ts), DC-08 | V |
 | FR-G07 | Thưởng (XP/sao) trả **một lần mỗi vòng chơi**, không farming | Chơi lại vòng cũ không tăng `starsByTier`/`bestScoreByTier` đã đạt | `tests/game-rewards.test.ts`, `qa/games.mjs` | V, Q |
@@ -248,7 +248,7 @@ Cột **Gate** chỉ cổng nào chặn nếu vi phạm: `V` = `npm run verify` 
 | NFR-M01 | Bảo trì | Một cổng duy nhất: `npm run verify` = typecheck + test + build + budget | exit 0 | [package.json](file:///D:/trithuc/kho-bau-tri-thuc/package.json) scripts | V, C |
 | NFR-M02 | Bảo trì | Mọi ngưỡng nghiệp vụ nằm trong `src/config/policy.ts`, có rationale + test | 17 export policy, 693 dòng | `src/config/policy.ts` | V |
 | NFR-M03 | Bảo trì | UI không quyết định correctness/score/mastery/readiness | engine là chỗ chấm duy nhất | FR-L03, FR-E05, `AGENTS.md` §0 principle 1 | V |
-| NFR-M04 | Bảo trì | Tên test `tests/t<NN>-<chủ đề>.test.ts`; hành vi mới ⇒ test mới | 70 file / 1013 test | `AGENTS.md` §2 | V, H |
+| NFR-M04 | Bảo trì | Tên test `tests/t<NN>-<chủ đề>.test.ts`; hành vi mới ⇒ test mới | 71 file / 1034 test | `AGENTS.md` §2 | V, H |
 | NFR-M05 | Bảo trì | Không thêm dependency nếu chưa hỏi; runtime deps = 8 | `package.json` không đổi ngoài kế hoạch (`firebase`, `three`, `@types/three` vào repo cùng merge từ lane khác — đã ghi nợ vì `@types/three` lẽ ra thuộc `devDependencies`) | `AGENTS.md` §1.4 | H, C |
 | NFR-M06 | Bảo trì | MCP layer zero-dependency, stdio tự viết | 0 import ngoài `node:*` trong `mcp/**` | `tests/t23-mcp-servers.test.ts` | V |
 
@@ -365,7 +365,7 @@ Chi tiết từng dòng: xem [`RTM.md`](RTM.md).
 
 | Hạng | Kết quả 2026-10-30 (sau merge) |
 |---|---|
-| `npm run verify` | **EXIT=0** — typecheck sạch · 70 file / 1013 test pass · build OK · main chunk 512 kB → PASS |
+| `npm run verify` | **EXIT=0** — typecheck sạch · 71 file / 1034 test pass · build OK · main chunk 512 kB → PASS |
 | Probe QA | cần chạy lại trên `dist/` sau mỗi thay đổi UI (xem `docs/SDLC.md` §5) |
 | FR chưa đạt / cần nguồn | FR-N04 (Kid's Box units = 0), BG-01 (vẫn chưa đo được: sync là tuỳ chọn nên không có số liệu server), FR-Y09 mới chỉ đạt một phần (chưa test với project Firebase thật) |
 | Nợ ghi nhận | mục tiêu chunk 450 kB chưa đạt (đang 512 kB); audit riêng cho track Kid's Box trước khi dùng với trẻ; WebGL chưa có fallback thiết bị yếu; `@types/three` sai chỗ; `npm install` báo 4 lỗ hổng severity cao |

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { GameModalWrapper, useGameFeedback } from './GameModalWrapper';
 import { sound } from '../../services/sound';
 import { useGameStage } from '../../hooks/useGameStage';
-import { defaultRoundsPerTier, getTierMeta, roundsForTier } from '../../data/gameLevels';
+import { defaultRoundsPerTier, getTierMeta } from '../../data/gameLevels';
 import {
   DISTRACTOR_POOL,
   RHYME_FAMILIES,
@@ -10,80 +10,22 @@ import {
   containsRhyme,
   stripTones,
 } from '../../data/games/rhyme_hunter';
-import { getGameItems, GameItem } from '../../services/gameContent';
-import type { RhymeFruit, RhymeRound } from '../../data/games/rhyme_hunter';
+import type { RhymeRound } from '../../data/games/rhyme_hunter';
 
 export { DISTRACTOR_POOL, RHYME_FAMILIES, buildRhymeRounds, containsRhyme, stripTones };
 
 const ROUNDS_PER_TIER = defaultRoundsPerTier();
 
-interface RhymeGameItem extends GameItem {
-  targetRhyme: string;
-  targetDescription: string;
-  fruits: RhymeFruit[];
-}
-
-function buildRoundsFromGameItems(items: GameItem[], tier: number, seed: number): RhymeGameItem[] {
-  const rounds: RhymeGameItem[] = [];
-  for (const item of items) {
-    const targetRhyme = item.prompt.match(/vần\s+"([^"]+)"/i)?.[1] || 'an';
-    const targetDescription = `vần "${targetRhyme.toUpperCase()}"`;
-    const options = item.options.slice(0, 6);
-    const targetWords = options.filter(opt => {
-      if (item.answer.includes(opt)) return true;
-      return containsRhyme(opt, targetRhyme);
-    });
-    const distractorWords = options.filter(opt => !targetWords.includes(opt));
-
-    const fruits: RhymeFruit[] = [
-      ...targetWords.map((w, idx) => ({
-        id: `r-${item.id}-${idx}`,
-        word: w,
-        hasRhyme: true,
-        emoji: '🍎',
-        picked: false,
-      })),
-      ...distractorWords.map((w, idx) => ({
-        id: `r-${item.id}-d-${idx}`,
-        word: w,
-        hasRhyme: false,
-        emoji: '🍐',
-        picked: false,
-      })),
-    ];
-
-    rounds.push({
-      ...item,
-      targetRhyme,
-      targetDescription,
-      fruits: fruits.slice(0, 8),
-    });
-  }
-  return rounds;
-}
-
 export const RhymeHunterGame: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   const stage = useGameStage({ gameId: 'rhyme_hunter', roundsPerTier: ROUNDS_PER_TIER, advanceDelayMs: 1200 });
-  const [gameItems, setGameItems] = useState<GameItem[]>([]);
-  const [roundsState, setRoundsState] = useState<RhymeGameItem[]>([]);
+  // T25: builder riêng theo (bậc, nonce) thay vì cạo đề từ ngân hàng câu hỏi —
+  // options của bank có chuỗi dài không phải một từ, hiển thị lên quả là khó đọc.
+  const rounds = useMemo(() => buildRhymeRounds(stage.tier, stage.nonce), [stage.tier, stage.nonce]);
+  const [roundsState, setRoundsState] = useState<RhymeRound[]>([]);
 
   useEffect(() => {
-    const items = getGameItems({
-      subject: 'tieng-viet',
-      kinds: ['rhyme'],
-      count: ROUNDS_PER_TIER[stage.tier - 1] || 5,
-      tier: stage.tier,
-      seed: stage.nonce,
-    });
-    setGameItems(items);
-  }, [stage.tier, stage.nonce]);
-
-  useEffect(() => {
-    if (gameItems.length > 0) {
-      const rounds = buildRoundsFromGameItems(gameItems, stage.tier, stage.nonce);
-      setRoundsState(rounds.map((r) => ({ ...r, fruits: r.fruits.map((f) => ({ ...f, picked: false })) })));
-    }
-  }, [gameItems, stage.tier, stage.nonce]);
+    setRoundsState(rounds.map((r) => ({ ...r, fruits: r.fruits.map((f) => ({ ...f, picked: false })) })));
+  }, [rounds]);
 
   const currentRound = roundsState[stage.roundIdx];
 
@@ -126,8 +68,8 @@ export const RhymeHunterGame: React.FC<{ onExit: () => void }> = ({ onExit }) =>
  */
 const RhymeHunterStage: React.FC<{
   stage: ReturnType<typeof useGameStage>;
-  currentRound: RhymeGameItem;
-  setRoundsState: React.Dispatch<React.SetStateAction<RhymeGameItem[]>>;
+  currentRound: RhymeRound;
+  setRoundsState: React.Dispatch<React.SetStateAction<RhymeRound[]>>;
 }> = ({ stage, currentRound, setRoundsState }) => {
   const { reportCorrect, reportWrong, showCorrectAnswer } = useGameFeedback();
 
@@ -176,8 +118,13 @@ const RhymeHunterStage: React.FC<{
           <span className="text-xs text-slate-500 font-semibold">(Còn {remainingInRound} quả)</span>
         </div>
 
-        {/* Tree and Fruits Grid */}
-        <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-6 items-center justify-items-center max-w-xl mx-auto my-auto w-full">
+        {/* Tree and Fruits Grid — bậc 6 thả tới 12 quả nên phải đổi số cột, nếu
+            không lưới 2 cột sẽ tràn dọc và quả cuối nằm ngoài tầm với của bé. */}
+        <div
+          className={`flex-1 grid gap-3 md:gap-6 items-center justify-items-center max-w-xl mx-auto my-auto w-full ${
+            currentRound.fruits.length > 8 ? 'grid-cols-3 sm:grid-cols-4' : 'grid-cols-2 sm:grid-cols-3'
+          }`}
+        >
           {currentRound.fruits.map((f) => (
             <button
               key={f.id}

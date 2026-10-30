@@ -470,8 +470,8 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 | Export policy | 17 (693 dòng) | `src/config/policy.ts` |
 | Key `localStorage` | 17 | `STORAGE_KEYS` (16) + key cục bộ IOE (1) |
 | Dependency runtime | 8 | `package.json` → `dependencies` |
-| Test file / test | 70 / 1013 | `npx vitest run` (68 `.ts` + 2 `.tsx`) |
-| Probe QA | 20 (19 `.mjs` + 1 `.cjs`) | `ls qa/*.mjs qa/*.cjs` (trừ `lib.mjs`, `run-one.mjs`) |
+| Test file / test | 71 / 1034 | `npx vitest run` (69 `.ts` + 2 `.tsx`) |
+| Probe QA | 21 (20 `.mjs` + 1 `.cjs`) | `ls qa/*.mjs qa/*.cjs` (trừ `lib.mjs`, `run-one.mjs`) |
 | Workflow CI | 4 | `.github/workflows/` |
 | MCP server / tool | 5 / 27 | `mcp/` |
 | Main chunk | 512 kB | `npm run check:budget` |

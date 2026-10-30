@@ -96,7 +96,11 @@ export const OceanFishingGame: React.FC<{ onExit: () => void }> = ({ onExit }) =
               key={idx}
               onClick={() => handleCatchFish(fish.val)}
               disabled={stage.locked}
-              className={`p-4 bg-white/90 hover:bg-white rounded-3xl shadow-xl border-3 border-blue-300 hover:border-amber-400 flex flex-col items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer min-w-[110px] md:min-w-[130px] ${
+              className={`bg-white/90 hover:bg-white rounded-3xl shadow-xl border-3 border-blue-300 hover:border-amber-400 flex flex-col items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer ${
+                current.fishPool.length > 4
+                  ? 'p-3 min-w-[86px] md:min-w-[110px]'
+                  : 'p-4 min-w-[110px] md:min-w-[130px]'
+              } ${
                 hookedFish === fish.val ? 'scale-125 -translate-y-8 bg-amber-100 border-amber-500' : 'hover:scale-105'
               } ${stage.locked ? 'opacity-80' : ''}`}
             >

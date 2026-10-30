@@ -3,8 +3,8 @@
  * Lớp 1: trừ KHÔNG mượn, kết quả 0–100.
  */
 
-import { defaultRoundsPerTier, numericOptions, seededRng, shuffleSeeded } from '../gameLevels';
-import { isNoBorrowSub } from './mathUtils';
+import { defaultRoundsPerTier, numericOptions, seededRng, shuffleSeeded, tierOptionCount } from '../gameLevels';
+import { isNoBorrowSub, tierMaxValue } from './mathUtils';
 
 export interface FishItem {
   val: number;
@@ -30,7 +30,8 @@ export function buildFishRounds(tier: number, seedOrNonce = 0, seedOverride?: nu
   const safeTier = Math.min(Math.max(Math.round(tier), 1), 6);
   const roundsPerTier = defaultRoundsPerTier();
   const count = roundsPerTier[safeTier - 1];
-  const maxA = safeTier <= 1 ? 5 : safeTier <= 3 ? 10 : 20;
+  const maxA = tierMaxValue(safeTier);
+  const optionCount = tierOptionCount(safeTier);
   const base = seedOverride ?? 2300 + safeTier * 53 + seedOrNonce * 1009;
   const rounds: FishQuestion[] = [];
   for (let i = 0; i < count; i++) {
@@ -53,7 +54,7 @@ export function buildFishRounds(tier: number, seedOrNonce = 0, seedOverride?: nu
       }
     }
     const ans = a - b;
-    const vals = numericOptions(ans, 4, rngI, 0, maxA);
+    const vals = numericOptions(ans, optionCount, rngI, 0, maxA);
     const fishPool = vals.map((val, idx) => ({
       val,
       emoji: FISH_EMOJI[idx % FISH_EMOJI.length],

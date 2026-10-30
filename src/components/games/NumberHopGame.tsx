@@ -190,7 +190,11 @@ const NumberHopStage: React.FC<{ stage: GameStage; current: HopRound }> = ({ sta
         <p className="text-center text-sm md:text-base font-black text-blue-900 mb-2">
           Ếch tới số mấy? Bé chạm số đúng:
         </p>
-        <div className="grid grid-cols-4 gap-2 md:gap-3" role="group" aria-label="Chọn số đích">
+        <div
+          className={`grid gap-2 md:gap-3 ${current.options.length > 4 ? 'grid-cols-3' : 'grid-cols-4'}`}
+          role="group"
+          aria-label="Chọn số đích"
+        >
           {current.options.map((opt, i) => (
             <button
               key={`${opt}-${i}`}

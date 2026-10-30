@@ -23,6 +23,30 @@ export interface DotShape {
   points: readonly ShapePoint[];
 }
 
+/**
+ * Điểm trên đường tròn tâm (50,50), bán kính `radius`, chia đều `total` phần
+ * tử, bắt đầu ở hướng 12 giờ. `Math.cos/sin` là hàm thuần → cùng đầu vào luôn
+ * cùng đầu ra, nên vẫn giữ bất biến deterministic của data builder.
+ */
+function ringPoint(index: number, total: number, radius: number): ShapePoint {
+  const angle = -Math.PI / 2 + (index * 2 * Math.PI) / total;
+  return {
+    x: Math.round((50 + radius * Math.cos(angle)) * 10) / 10,
+    y: Math.round((50 + radius * Math.sin(angle)) * 10) / 10,
+  };
+}
+
+/** Hình có `petals` mũi: xen kẽ bán kính ngoài và trong → 2×petals chấm. */
+function starPoints(petals: number, outer: number, inner: number): ShapePoint[] {
+  const total = petals * 2;
+  return Array.from({ length: total }, (_, i) => ringPoint(i, total, i % 2 === 0 ? outer : inner));
+}
+
+/** Đa giác đều `sides` cạnh. */
+function polygonPoints(sides: number, radius: number): ShapePoint[] {
+  return Array.from({ length: sides }, (_, i) => ringPoint(i, sides, radius));
+}
+
 export const CONNECT_SHAPES: DotShape[] = [
   {
     id: 'kite',
@@ -177,6 +201,29 @@ export const CONNECT_SHAPES: DotShape[] = [
       { x: 37, y: 27.5 },
     ],
   },
+  // T25 — ba hình nhiều chấm cho bậc 5–6 (16/18/14 chấm), bé nối lâu hơn và
+  // phải đếm số chính xác đến hàng chục.
+  {
+    id: 'star8',
+    name: 'Ngôi sao tám cánh',
+    emoji: '🌟',
+    color: '#facc15',
+    points: starPoints(8, 45, 20),
+  },
+  {
+    id: 'flower9',
+    name: 'Bông hoa chín cánh',
+    emoji: '🌼',
+    color: '#ec4899',
+    points: starPoints(9, 45, 26),
+  },
+  {
+    id: 'wheel14',
+    name: 'Bánh xe mười bốn cạnh',
+    emoji: '🎡',
+    color: '#38bdf8',
+    points: polygonPoints(14, 43),
+  },
 ];
 
 export interface ConnectDot {
@@ -192,8 +239,11 @@ export interface ConnectRound {
   dots: ConnectDot[];
 }
 
-/** Số điểm tối đa theo màn — màn thấp hình đơn giản, màn cao nhiều điểm. */
-const MAX_DOTS_BY_TIER = [6, 6, 8, 8, 12, 12];
+/**
+ * Số điểm tối đa theo màn — màn thấp hình đơn giản, màn cao nhiều điểm.
+ * T25: 6/6/8/8/12/12 → 6/8/10/12/16/18 (thêm ba hình 14–18 chấm).
+ */
+const MAX_DOTS_BY_TIER = [6, 8, 10, 12, 16, 18];
 
 export function shapesForTier(tier: number): DotShape[] {
   const safeTier = Math.min(Math.max(Math.round(tier), 1), MAX_DOTS_BY_TIER.length);

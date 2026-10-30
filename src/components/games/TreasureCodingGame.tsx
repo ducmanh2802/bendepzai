@@ -19,7 +19,7 @@ import { CodingControls, CodingGrid, ProgramBar } from './TreasureCodingParts';
 export { buildCodingRounds };
 
 const ROUNDS_PER_TIER = defaultRoundsPerTier();
-const MAX_TOKENS = 14;
+const MAX_TOKENS = 20;
 const STEP_MS = 380;
 
 function isQaMode(): boolean {

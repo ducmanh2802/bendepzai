@@ -48,7 +48,9 @@ function readCount() {
 }
 
 async function playMemoryGameToEnd(page) {
-  const cards = page.locator('div.grid.grid-cols-3 button, div.grid.grid-cols-4 button');
+  // Chỉ lấy thẻ của trò chơi. Locator theo class grid từng bắt cả 6 nút của
+  // GamesHub nằm sau modal → total sai, click bị overlay chặn và probe kẹt.
+  const cards = page.locator('[data-testid="memory-card"]');
   const total = await cards.count();
   if (total === 0) return { matched: false, reason: 'no cards rendered' };
 
@@ -102,7 +104,15 @@ async function playMemoryGameToEnd(page) {
       for (let j = 0; j < total; j += 1) {
         if (j === i || settled.has(j)) continue;
         if (await safeClick(j)) {
-          known.set(j, await faceOf(j));
+          const faceJ = await faceOf(j);
+          known.set(j, faceJ);
+          // T25 — khi thăm dò, hai thẻ có thể tình cờ khớp nhau và game khoá
+          // chúng lại. Probe phải ghi nhận là đã khớp, nếu không nó sẽ bấm lại
+          // hai thẻ đã disabled và kẹt (settled không bao giờ đủ total).
+          if (faceJ === known.get(i)) {
+            settled.add(i);
+            settled.add(j);
+          }
           break;
         }
       }
@@ -112,7 +122,7 @@ async function playMemoryGameToEnd(page) {
     if (!probed) break;
   }
 
-  return { matched: settled.size >= total, settled: settled.size, guard };
+  return { matched: settled.size >= total, total, settled: settled.size, guard };
 }
 
 export default async function run(page, ui) {
@@ -203,13 +213,20 @@ export default async function run(page, ui) {
   await page.waitForTimeout(700);
   const play1 = await playMemoryGameToEnd(page);
   await page.waitForTimeout(900);
-  const gameOverShown = (await page.getByText('HOAN HÔ BÉ YÊU!').count()) > 0;
+  // Trò chơi theo bậc: màn chưa phải màn cuối thì biên lai là "VƯỢT QUA MÀN n",
+  // hết bậc mới là "HOÀN THÀNH TẤT CẢ MÀN!"; game không theo bậc dùng "HOAN HÔ".
+  const bodyText = await page.evaluate(() => document.body.innerText);
+  const gameOverShown = ['HOAN HÔ BÉ YÊU!', 'HOÀN THÀNH TẤT CẢ MÀN!', 'VƯỢT QUA MÀN'].some((t) =>
+    bodyText.includes(t),
+  );
   const countAfterRound1 = await page.evaluate(readCount);
 
-  // C) replay -> one more reward for the second completed round
-  const replay = page.getByRole('button', { name: /Chơi lại/ });
-  if (await replay.count()) {
-    await replay.click(CLICK);
+  // C) chơi tiếp một vòng nữa (lên màn kế hoặc chơi lại) -> đúng 1 phần thưởng
+  const nextRound = page
+    .getByRole('button', { name: /Chơi lại|Màn tiếp theo|Chơi lại từ đầu/ })
+    .first();
+  if (await nextRound.count()) {
+    await nextRound.click(CLICK);
     await page.waitForTimeout(700);
     await playMemoryGameToEnd(page);
     await page.waitForTimeout(900);

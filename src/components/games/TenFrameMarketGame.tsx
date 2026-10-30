@@ -99,10 +99,10 @@ const TenFrameMarketStage: React.FC<{ stage: GameStage; current: MarketRound }> 
   const showChuc = Math.floor(filled / 10);
   const showDonVi = filled % 10;
 
-  const handleAdd = () => {
+  const handleAdd = (step = 1) => {
     if (stage.locked) return;
     if (added < current.need) {
-      setAdded((a) => a + 1);
+      setAdded((a) => Math.min(a + step, current.need));
       sound.playClick();
     }
   };
@@ -175,21 +175,39 @@ const TenFrameMarketStage: React.FC<{ stage: GameStage; current: MarketRound }> 
         ) : (
           <TenFrame count={filled} />
         )}
-        <button
-          onClick={handleAdd}
-          disabled={stage.locked || added >= current.need}
-          aria-label={`Thêm một ${current.fruit} vào khay`}
-          className="min-h-[44px] px-5 py-2 bg-amber-100 hover:bg-amber-200 disabled:opacity-40 text-amber-900 font-black rounded-2xl border-2 border-amber-300 text-base active:scale-95"
-        >
-          {current.fruitEmoji} Thêm 1 {added >= current.need ? '— đủ rồi!' : ''}
-        </button>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <button
+            onClick={() => handleAdd(1)}
+            disabled={stage.locked || added >= current.need}
+            aria-label={`Thêm một ${current.fruit} vào khay`}
+            className="min-h-[44px] px-5 py-2 bg-amber-100 hover:bg-amber-200 disabled:opacity-40 text-amber-900 font-black rounded-2xl border-2 border-amber-300 text-base active:scale-95"
+          >
+            {current.fruitEmoji} Thêm 1 {added >= current.need ? '— đủ rồi!' : ''}
+          </button>
+          {/*need ≥ 10 — thêm theo chục để bé không phải bấm 38 lần, đồng thời
+            đúng thao tác "thêm chục rồi thêm đơn vị" của lớp 1. */}
+          {current.need >= 10 && (
+            <button
+              onClick={() => handleAdd(10)}
+              disabled={stage.locked || added >= current.need}
+              aria-label={`Thêm 10 ${current.fruit} vào khay`}
+              className="min-h-[44px] px-5 py-2 bg-blue-100 hover:bg-blue-200 disabled:opacity-40 text-blue-900 font-black rounded-2xl border-2 border-blue-300 text-base active:scale-95"
+            >
+              {current.fruitEmoji} Thêm 10
+            </button>
+          )}
+        </div>
       </div>
 
       <div key={shakeKey} className={shakeKey > 0 ? 'animate-shake' : ''}>
         <p className="text-center text-sm md:text-base font-black text-blue-900 mb-2">
           Khách cần thêm mấy? Bé chạm số đúng:
         </p>
-        <div className="grid grid-cols-4 gap-2 md:gap-3" role="group" aria-label="Chọn số còn thiếu">
+        <div
+          className={`grid gap-2 md:gap-3 ${current.options.length > 4 ? 'grid-cols-3' : 'grid-cols-4'}`}
+          role="group"
+          aria-label="Chọn số còn thiếu"
+        >
           {current.options.map((opt, i) => (
             <button
               key={`${opt}-${i}`}

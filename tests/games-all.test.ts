@@ -30,10 +30,10 @@ if (typeof (globalThis as Record<string, unknown>).localStorage === 'undefined')
 }
 
 import { GAME_LEVEL_POLICY } from '../src/config/policy';
-import { defaultRoundsPerTier } from '../src/data/gameLevels';
+import { defaultRoundsPerTier, tierOptionCount } from '../src/data/gameLevels';
 import { containsBannedWord, ALLOWED_PHRASES } from '../src/data/contentSafety';
 import { StorageService } from '../src/services/storage';
-import { isNoBorrowSub, isNoCarryAdd } from '../src/data/games/mathUtils';
+import { isNoBorrowSub, isNoCarryAdd, tierMaxValue } from '../src/data/games/mathUtils';
 import {
   POOL_BY_TIER as SYL_POOLS,
   SYLLABLE_ROUNDS_PER_TIER,
@@ -48,7 +48,7 @@ import { THEMES, buildPhonicsRounds } from '../src/data/games/listen_pick';
 import { buildFishRounds } from '../src/data/games/ocean_fishing';
 import { POOLS as STORY_POOLS, buildWordStoryRounds } from '../src/data/games/word_story';
 import { POOLS as CLOCK_POOLS, buildClockMoneyRounds } from '../src/data/games/clock_money';
-import { buildRaceQuestions } from '../src/data/games/speed_racing';
+import { buildRaceQuestions, tierBudgetMs } from '../src/data/games/speed_racing';
 import { buildTowerRounds } from '../src/data/games/number_tower';
 import {
   RHYME_FAMILIES,
@@ -171,20 +171,25 @@ describe('T02B/C animal safari answers spread + nonce', () => {
   it('target ∈ options, options unique, slots spread, nonce reshuffles', () => {
     const slots: number[] = [];
     const seenOrders = new Set<string>();
+    const seenAnimals = new Set<string>();
     for (let t = 1; t <= 6; t++) {
+      const optionCount = tierOptionCount(t);
       for (const seed of SEEDS) {
         const rounds = buildAnimalRounds(t, seed);
         expect(rounds.length).toBe(ROUNDS[t - 1]);
         for (const r of rounds) {
           expect(r.options.map((o) => o.englishName)).toContain(r.target.englishName);
-          expect(new Set(r.options.map((o) => o.englishName)).size).toBe(4);
+          expect(new Set(r.options.map((o) => o.englishName)).size).toBe(optionCount);
           slots.push(r.options.findIndex((o) => o.englishName === r.target.englishName));
         }
         seenOrders.add(rounds.map((r) => r.target.englishName).join('|'));
+        rounds.forEach((r) => seenAnimals.add(r.target.englishName));
       }
     }
-    expectSpread(slots, 4, 'safari');
+    expectSpread(slots, tierOptionCount(6), 'safari');
     expect(seenOrders.size, 'nonce never reshuffles safari').toBeGreaterThan(6);
+    // T25: đàn thú được xáo theo nonce nên cả 12 con đều có lượt lên tiếng.
+    expect(seenAnimals.size).toBe(SAFARI_ANIMALS.length);
     expect(SAFARI_ANIMALS.length).toBeGreaterThanOrEqual(4);
   });
 });
@@ -194,18 +199,19 @@ describe('T02B/C listen-pick answers spread + nonce', () => {
     const slots: number[] = [];
     const seenOrders = new Set<string>();
     for (let t = 1; t <= 6; t++) {
+      const cardCount = tierOptionCount(t);
       for (const seed of SEEDS) {
         const rounds = buildPhonicsRounds(t, seed);
         expect(rounds.length).toBe(ROUNDS[t - 1]);
         for (const r of rounds) {
           expect(r.cards.map((c) => c.word)).toContain(r.targetWord);
-          expect(new Set(r.cards.map((c) => c.word)).size).toBe(4);
+          expect(new Set(r.cards.map((c) => c.word)).size).toBe(cardCount);
           slots.push(r.cards.findIndex((c) => c.word === r.targetWord));
         }
         seenOrders.add(rounds.map((r) => r.targetWord).join('|'));
       }
     }
-    expectSpread(slots, 4, 'listen-pick');
+    expectSpread(slots, tierOptionCount(6), 'listen-pick');
     expect(seenOrders.size, 'nonce never reshuffles listen-pick').toBeGreaterThan(6);
     expect(THEMES.length).toBeGreaterThanOrEqual(1);
   });
@@ -215,10 +221,11 @@ describe('T02B/C listen-pick answers spread + nonce', () => {
 // 5. Ocean fishing: recompute + no-borrow + range
 // ---------------------------------------------------------------------------
 describe('T02B/C ocean fishing arithmetic', () => {
-  it('a - b recomputed, 0–20, no-borrow, options valid + spread', () => {
-    const slots: number[] = [];
+  it('a - b recomputed, trần theo bậc, no-borrow, options valid + spread', () => {
     for (let t = 1; t <= 6; t++) {
-      const maxA = t <= 1 ? 5 : t <= 3 ? 10 : 20;
+      const maxA = tierMaxValue(t);
+      const optionCount = tierOptionCount(t);
+      const slots: number[] = [];
       for (const seed of SEEDS) {
         const rounds = buildFishRounds(t, seed);
         expect(rounds.length).toBe(ROUNDS[t - 1]);
@@ -231,13 +238,24 @@ describe('T02B/C ocean fishing arithmetic', () => {
           expect(r.ans).toBeGreaterThanOrEqual(0);
           expect(a).toBeLessThanOrEqual(maxA);
           expect(isNoBorrowSub(a, b), r.expr).toBe(true);
+          expect(r.fishPool).toHaveLength(optionCount);
           expect(r.fishPool.map((f) => f.val)).toContain(r.ans);
           expect(new Set(r.fishPool.map((f) => f.val)).size).toBe(r.fishPool.length);
           slots.push(r.fishPool.findIndex((f) => f.val === r.ans));
         }
       }
+      expectSpread(slots, optionCount, `ocean T${t}`);
     }
-    expectSpread(slots, 4, 'ocean');
+  });
+
+  it('T25 — trần số tăng theo bậc và phương án nhiều hơn ở bậc cao', () => {
+    expect(tierMaxValue(1)).toBe(10);
+    expect(tierMaxValue(6)).toBe(100);
+    expect(tierOptionCount(1)).toBe(4);
+    expect(tierOptionCount(6)).toBe(6);
+    const a = buildFishRounds(6, 3);
+    expect(a[0].fishPool.length).toBe(6);
+    expect(Math.max(...a.flatMap((r) => r.fishPool.map((f) => f.val)))).toBeGreaterThan(20);
   });
 });
 
@@ -336,33 +354,64 @@ describe('T02B/C clock & money pools + rounds', () => {
 // 8+9. Speed racing + Number tower: generated arithmetic
 // ---------------------------------------------------------------------------
 describe('T02B/C speed racing arithmetic + nonce', () => {
-  it('recomputed, 0–100, no-carry/no-borrow, ans ≤ max, nonce varies', () => {
+  /** `a + b` | `a - b` | `a + b - c` → { ans, các bước kiểm tra lớp 1 }. */
+  function parseExpr(expr: string): { ans: number; steps: [number, number, '+' | '-'][] } | null {
+    const tok = expr.trim().split(/\s+/);
+    if (tok.length !== 3 && tok.length !== 5) return null;
+    if (!tok.every((t, i) => (i % 2 === 0 ? /^\d+$/.test(t) : t === '+' || t === '-'))) return null;
+    const steps: [number, number, '+' | '-'][] = [];
+    let acc = Number(tok[0]);
+    for (let i = 1; i < tok.length; i += 2) {
+      const rhs = Number(tok[i + 1]);
+      steps.push([acc, rhs, tok[i] as '+' | '-']);
+      acc = tok[i] === '+' ? acc + rhs : acc - rhs;
+    }
+    return { ans: acc, steps };
+  }
+
+  it('recomputed, 0–100, no-carry/no-borrow, ans ≤ trần bậc, hai bước từ T5, nonce varies', () => {
     const seen = new Set<string>();
     for (let t = 1; t <= 6; t++) {
-      const max = t <= 1 ? 5 : t <= 3 ? 10 : t === 4 ? 15 : 20;
+      const max = tierMaxValue(t);
+      const optionCount = tierOptionCount(t);
+      let twoStepCount = 0;
       for (const seed of SEEDS) {
         const qs = buildRaceQuestions(t, seed);
         expect(qs.length).toBe(ROUNDS[t - 1]);
         seen.add(qs.map((q) => q.expr).join('|'));
         for (const q of qs) {
-          const m = /^(\d+) ([+-]) (\d+)$/.exec(q.expr);
-          expect(m, q.expr).not.toBeNull();
-          const a = Number(m![1]);
-          const b = Number(m![3]);
-          const op = m![2];
-          const ans = op === '+' ? a + b : a - b;
-          expect(q.ans).toBe(ans);
+          const parsed = parseExpr(q.expr);
+          expect(parsed, q.expr).not.toBeNull();
+          const steps = parsed!.steps;
+          if (steps.length === 2) {
+            twoStepCount++;
+            expect(t, `phép hai bước xuất hiện ở bậc ${t}: ${q.expr}`).toBeGreaterThanOrEqual(5);
+          }
+          for (const [lhs, rhs, op] of steps) {
+            if (op === '+') expect(isNoCarryAdd(lhs, rhs), q.expr).toBe(true);
+            else expect(isNoBorrowSub(lhs, rhs), q.expr).toBe(true);
+            expect(lhs).toBeLessThanOrEqual(max);
+          }
+          expect(q.ans).toBe(parsed!.ans);
           expect(q.ans).toBeGreaterThanOrEqual(0);
-          expect(q.ans).toBeLessThanOrEqual(100);
           expect(q.ans).toBeLessThanOrEqual(max);
-          if (op === '+') expect(isNoCarryAdd(a, b), q.expr).toBe(true);
-          else expect(isNoBorrowSub(a, b), q.expr).toBe(true);
+          expect(q.options).toHaveLength(optionCount);
           expect(q.options).toContain(q.ans);
           expect(new Set(q.options).size).toBe(q.options.length);
         }
       }
+      if (t >= 5) expect(twoStepCount, `bậc ${t} phải có phép tính hai bước`).toBeGreaterThan(0);
+      else expect(twoStepCount).toBe(0);
     }
     expect(seen.size, 'nonce never varies racing').toBeGreaterThan(6);
+  });
+
+  it('T25 — bậc 4–6 có giấy giờ, ba bậc đầu không đếm giờ', () => {
+    expect(tierBudgetMs(1)).toBeNull();
+    expect(tierBudgetMs(3)).toBeNull();
+    expect(tierBudgetMs(4)).toBe(15000);
+    expect(tierBudgetMs(6)).toBe(10000);
+    for (const t of [4, 5, 6]) expect(tierBudgetMs(t)!).toBeGreaterThan(0);
   });
 });
 
@@ -370,7 +419,8 @@ describe('T02B/C number tower arithmetic + nonce', () => {
   it('part1 + missing = total, no-carry, options valid, nonce varies', () => {
     const seen = new Set<string>();
     for (let t = 1; t <= 6; t++) {
-      const maxTotal = t <= 1 ? 5 : t <= 3 ? 10 : 20;
+      const maxTotal = tierMaxValue(t);
+      const optionCount = tierOptionCount(t);
       for (const seed of SEEDS) {
         const rounds = buildTowerRounds(t, seed);
         expect(rounds.length).toBe(ROUNDS[t - 1]);
@@ -380,6 +430,7 @@ describe('T02B/C number tower arithmetic + nonce', () => {
           expect(r.total).toBeLessThanOrEqual(maxTotal);
           expect(r.missing).toBeGreaterThanOrEqual(0);
           expect(isNoCarryAdd(r.part1, r.missing), `${r.part1}+${r.missing}=${r.total}`).toBe(true);
+          expect(r.options).toHaveLength(optionCount);
           expect(r.options).toContain(r.missing);
           expect(new Set(r.options).size).toBe(r.options.length);
         }

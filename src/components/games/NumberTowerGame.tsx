@@ -4,6 +4,7 @@ import { sound } from '../../services/sound';
 import { useGameStage } from '../../hooks/useGameStage';
 import { defaultRoundsPerTier, getTierMeta } from '../../data/gameLevels';
 import { buildTowerRounds } from '../../data/games/number_tower';
+import { tierMaxValue } from '../../data/games/mathUtils';
 import type { TowerRound } from '../../data/games/number_tower';
 
 export { buildTowerRounds };
@@ -15,7 +16,7 @@ export const NumberTowerGame: React.FC<{ onExit: () => void }> = ({ onExit }) =>
 
   const rounds = useMemo(() => buildTowerRounds(stage.tier, stage.nonce), [stage.tier, stage.nonce]);
   const current = rounds[stage.roundIdx];
-  const maxTotal = stage.tier <= 1 ? 5 : stage.tier <= 3 ? 10 : 20;
+  const maxTotal = tierMaxValue(stage.tier);
 
   useEffect(() => {
     setTowerBlocks([]);
@@ -99,7 +100,7 @@ export const NumberTowerGame: React.FC<{ onExit: () => void }> = ({ onExit }) =>
           <span className="text-xs font-bold text-slate-700 block text-center mb-2">
             Số trong khoảng 0–{maxTotal}. Chọn viên gạch số đúng để xếp lên tháp:
           </span>
-          <div className="grid grid-cols-4 gap-3">
+          <div className={`grid gap-3 ${current.options.length > 4 ? 'grid-cols-3' : 'grid-cols-4'}`}>
             {current.options.map((opt) => (
               <button
                 key={opt}

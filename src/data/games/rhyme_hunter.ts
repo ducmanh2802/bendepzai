@@ -42,6 +42,16 @@ export const DISTRACTOR_POOL = [
 const FRUIT_EMOJI = ['🍎', '🍐', '🍊', '🍑', '🍓', '🍇', '🍉', '🍒', '🥭', '🍌'] as const;
 
 /**
+ * T25 — một thang duy nhất cho cả builder lẫn màn chơi: bậc cao treo nhiều quả
+ * hơn (4 → 12) và giữ trọn 4 từ vần trong cây để bé phải đọc hết.
+ */
+export const RHYME_TARGET_COUNT_BY_TIER = [2, 3, 3, 4, 4, 4] as const;
+export const RHYME_DECOY_COUNT_BY_TIER = [2, 3, 5, 6, 8, 8] as const;
+export const RHYME_FRUIT_CAP_BY_TIER = RHYME_TARGET_COUNT_BY_TIER.map(
+  (t, i) => t + RHYME_DECOY_COUNT_BY_TIER[i],
+);
+
+/**
  * T02B/B5 — lowercase + strip ONLY the 5 tone marks. Circumflex / breve /
  * horn (â ă ê ô ơ ư) and đ are preserved, so ă≠a, ô≠o, ơ≠o.
  */
@@ -65,6 +75,9 @@ const ROUNDS_PER_TIER = defaultRoundsPerTier();
 /**
  * Decoys are filtered by RHYME (never contain the target rhyme); every tier
  * builds ≥ 5 rounds. `seed` mixes the play nonce.
+ *
+ * T25 — bậc cao thả nhiều trái hơn (6 → 12) và giữ trọn 4 từ vần trong cây,
+ * nên bé phải đọc hết chứ không quét nhanh vài quả là xong.
  */
 export function buildRhymeRounds(tier: number, seedOrNonce = 0, seedOverride?: number): RhymeRound[] {
   const safeTier = Math.min(Math.max(Math.round(tier), 1), 6);
@@ -72,20 +85,21 @@ export function buildRhymeRounds(tier: number, seedOrNonce = 0, seedOverride?: n
   const count = Math.max(5, roundsForTier(safeTier));
   const rng = seededRng(base);
   const fams = shuffleSeeded(RHYME_FAMILIES, rng);
-  const targetCount = safeTier <= 2 ? 2 : safeTier <= 4 ? 3 : 4;
+  const targetCount = RHYME_TARGET_COUNT_BY_TIER[safeTier - 1];
+  const decoyCountByTier = RHYME_DECOY_COUNT_BY_TIER;
   const rounds: RhymeRound[] = [];
   let fruitId = 0;
   for (let i = 0; i < count; i++) {
     const fam = fams[i % fams.length];
     const roundRng = seededRng(base + i * 101);
-    const targets = pickDistinct(fam.words, 4, roundRng).slice(0, targetCount);
-    const distractorCount = Math.max(2, 6 - targetCount);
+    const targets = pickDistinct(fam.words, Math.min(targetCount, fam.words.length), roundRng);
+    const distractorCount = decoyCountByTier[safeTier - 1];
     const safeDecoys = DISTRACTOR_POOL.filter(
       (w) => !fam.words.includes(w) && !containsRhyme(w, fam.rhyme)
     );
     const distractors = pickDistinct(
       safeDecoys,
-      distractorCount,
+      Math.min(distractorCount, safeDecoys.length),
       seededRng(base + i * 101 + 7)
     );
     const fruits: RhymeFruit[] = [

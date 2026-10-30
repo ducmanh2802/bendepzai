@@ -2,7 +2,7 @@
  * T02B/B3+A — Đôi Tai Thính (ListenPickPhonics) data. Pure TypeScript.
  */
 
-import { defaultRoundsPerTier, pickDistinct, seededRng, shuffleSeeded } from '../gameLevels';
+import { defaultRoundsPerTier, pickDistinct, seededRng, shuffleSeeded, tierOptionCount } from '../gameLevels';
 
 export interface PhonicsCard {
   word: string;
@@ -93,18 +93,22 @@ export const THEMES: PhonicsTheme[] = [
 /**
  * T02B/B3+A — target picked first, cards shuffled after, so the answer slot
  * is uniformly distributed. `seed` mixes the play nonce.
+ *
+ * T25 — số thẻ theo bậc tăng 4 → 6 và bậc càng cao càng trộn nhiều chủ đề
+ * (T1 một chủ đề, T6 sáu chủ đề), nên bé không còn loại trừ theo nhóm hình.
  */
 export function buildPhonicsRounds(tier: number, seed = 0): PhonicsRound[] {
   const safeTier = Math.min(Math.max(Math.round(tier), 1), 6);
   const roundsPerTier = defaultRoundsPerTier();
   const count = roundsPerTier[safeTier - 1];
-  const themeCount = safeTier <= 1 ? 1 : safeTier <= 3 ? 2 : safeTier <= 5 ? 3 : THEMES.length;
+  const optionCount = tierOptionCount(safeTier);
+  const themeCount = Math.min(safeTier, THEMES.length);
   const themes = pickDistinct(THEMES, themeCount, seededRng(7800 + safeTier * 61 + seed * 1009));
+  const allWords = themes.flatMap((t) => t.words);
   const rounds: PhonicsRound[] = [];
   for (let i = 0; i < count; i++) {
-    const theme = themes[i % themes.length];
     const rngI = seededRng(7800 + safeTier * 47 + seed * 1009 + i * 331);
-    const picked = pickDistinct(theme.words, 4, rngI);
+    const picked = pickDistinct(allWords, optionCount, rngI);
     const target = picked[Math.floor(rngI() * picked.length)];
     const cards = shuffleSeeded(
       picked.map((w) => ({ word: w.word, emoji: w.emoji, spokenText: w.word })),

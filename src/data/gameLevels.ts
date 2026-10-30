@@ -73,6 +73,20 @@ export function numericOptions(
   return shuffleSeeded([...set], rng);
 }
 
+/**
+ * Số phương án chọn theo bậc — dùng chung cho MỌI trò chơi, không chỉ trò Toán.
+ *
+ * Vì sao có: phụ huynh báo "trò chơi quá dễ so với con" (2026-10-30). Với 4
+ * phương án, bé đoán mò vẫn trúng 25%; ở bậc cao nâng lên 5–6 phương án giảm
+ * còn ~17% và buộc bé phải đọc/tính thật.
+ */
+export const TIER_OPTION_COUNT = [4, 4, 5, 5, 6, 6] as const;
+
+/** Số phương án nên sinh ra ở một bậc (clamped 1..MAX_TIER). */
+export function tierOptionCount(tier: number): number {
+  return TIER_OPTION_COUNT[clampTier(tier) - 1];
+}
+
 /** Number of rounds/objectives for a tier, clamped to the policy array. */
 export function roundsForTier(tier: number): number {
   const idx = clampTier(tier) - 1;

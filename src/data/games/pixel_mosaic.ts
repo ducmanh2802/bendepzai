@@ -68,10 +68,20 @@ export const MOSAIC_PATTERNS: MosaicPattern[] = [
   makePattern('big_heart', 'Trái tim lớn', '💖', ['.R.R.', 'RRWRR', 'RRRRR', '.RRR.', '..R..']),
   makePattern('big_fish', 'Chú cá lớn', '🐟', ['..BB.', '.BBBB', 'BBBBO', '..BB.', '.BB..']),
   makePattern('bird', 'Chú chim', '🐦', ['..B..', '.BBB.', 'BBBBB', '..Y..', '.YYY.']),
+  // T25 — thêm các tranh 6×6 cho bậc 5–6 (trước đây trần là 5×5 nên bé cuối
+  // lớp 1 hết đất thử thách từ bậc 4).
+  makePattern('big_butterfly', 'Con bướm lớn', '🦋', ['P.TT.P', 'PPTTPP', 'PBTTBP', 'PPTTPP', '.PTTP.', '..TT..']),
+  makePattern('big_flower6', 'Bông hoa sáu cánh', '🌸', ['.PPPP.', 'PYYYYP', 'PYYYYP', '.PPPP.', '..GG..', '..GG..']),
+  makePattern('big_house6', 'Ngôi nhà có mái', '🏡', ['..RR..', '.RRRR.', 'RRRRRR', '.YYYY.', '.YTTY.', '.YYYY.']),
+  makePattern('big_cat', 'Mặt mèo con', '🐱', ['O....O', 'OO..OO', 'OOOOOO', 'OWOOWO', 'OOPPOO', '.OOOO.']),
+  makePattern('big_boat', 'Thuyền buồm', '⛵', ['..W...', '..WW..', '..WWW.', '..WWWW', '.TTTT.', 'BBBBBB']),
 ];
 
-/** Số màn mỗi cấp: tranh mosaic tốn thời gian nên ít vòng hơn game khác. */
-export const MOSAIC_ROUNDS_PER_TIER = [2, 2, 3, 3, 3, 4];
+/**
+ * Số màn mỗi cấp: tranh mosaic tốn thời gian nên ít vòng hơn game khác.
+ * T25 — cỡ lưới 3→6 (trần cũ 5) là đòn bẩy độ khó chính, số vòng giữ nhẹ.
+ */
+export const MOSAIC_ROUNDS_PER_TIER = [2, 2, 3, 3, 4, 4];
 
 export type MosaicGoal = (string | null)[][];
 
@@ -87,7 +97,8 @@ export interface MosaicRound {
   showGhost: boolean;
 }
 
-const SIZE_BY_TIER = [3, 3, 4, 4, 5, 5];
+/** Cỡ lưới theo bậc: 3×3 (T1–2) → 4×4 (T3) → 5×5 (T4) → 6×6 (T5–6). */
+const SIZE_BY_TIER = [3, 3, 4, 5, 6, 6];
 
 export function buildMosaicRounds(tier: number, seed = 0): MosaicRound[] {
   const safeTier = Math.min(Math.max(Math.round(tier), 1), SIZE_BY_TIER.length);

@@ -5,8 +5,8 @@
 > coi là xanh**. Danh sách yêu cầu cần kiểm: [`SRS.md`](../specs/SRS.md); ánh xạ
 > yêu cầu ↔ test ↔ probe ↔ gate: [`RTM.md`](../specs/RTM.md); quy trình: [`../SDLC.md`](../SDLC.md).
 >
-> **Số liệu chốt 2026-10-30** (đo lại sau merge `origin/main`): 70 file test / 1013 test ·
-> 20 probe (19 `.mjs` + 1 `.cjs`) · 4 workflow CI · 3 git hook · main chunk 512 kB / trần
+> **Số liệu chốt 2026-10-30** (đo lại sau T25 nâng trần độ khó): 71 file test / 1034 test ·
+> 21 probe (20 `.mjs` + 1 `.cjs`) · 4 workflow CI · 3 git hook · main chunk 512 kB / trần
 > 600 kB; vendor ngoài entry: `three-vendor` 545.4 kB, `firebase-vendor` 537.9 kB.
 
 ---
@@ -33,9 +33,9 @@
 ```
 Lớp 5  Người lớn đọc to + beta trẻ thật          → §11   (2 phiên/milestone, không tự động)
 Lớp 4  Thiết bị thật: Android/iOS, offline, audio → §7    (qa/mobile.mjs + tay người)
-Lớp 3  Probe trình duyệt trên dist/ (20 probe)    → §6    (npm run qa:smoke)
+Lớp 3  Probe trình duyệt trên dist/ (21 probe)    → §6    (npm run qa:smoke)
 Lớp 2  Build + ngân sách + precache               → §9    (npm run build && npm run check:budget)
-Lớp 1  Unit/integration Vitest (1013 test)        → §5    (npm run test:ci)
+Lớp 1  Unit/integration Vitest (1034 test)        → §5    (npm run test:ci)
 ────────────────────────────────────────────────────────────────────────────────────────────
               npm run verify = typecheck + Lớp 1 + Lớp 2   ← cổng duy nhất
 ```
@@ -80,14 +80,14 @@ Lớp 1  Unit/integration Vitest (1013 test)        → §5    (npm run test:ci)
 `posttest` gọi `scripts/audit-snapshot.mjs` ghi `docs/audit-state.json` và nối
 `docs/AUDIT_REPORT.md` (`AGENTS.md` §1.2).
 
-**Bố trí 70 file theo vai trò:**
+**Bố trí 71 file theo vai trò:**
 
 | Nhóm | File | Kiểm gì |
 |---|---|---|
 | Engine học tập | `answerCheck`, `learning-engine`, `session-composer`, `adaptive-difficulty`, `decision-engine`, `decision-engine-storage`, `personas-and-learning-os`, `lesson-completion`, `fatigue-reset` | chấm đúng/sai, bằng chứng idempotent, NBA deterministic, profile phiên, reset fatigue |
 | Thi thử | `competition-bank`, `competition-engine`, `competition-p36`, `exam-fidelity`, `competition-readiness` | size bank, assemble + `shortfall`, 7 dạng chấm được, seed ổn định, đáp án không trùng, readiness |
 | Nội dung | `content-quality`, `content-validator-t02c`, `curriculum-quality-p41`, `vietnamese-curriculum`, `vietnamese-rhymes`, `math-curriculum`, `math-t11c`, `math-typography`, `english-curriculum`, `life-curriculum`, `t12b-english-units`, `t02d-content-fixes` | số lượng chủ đề/bài/câu, dấu chuẩn GDPT, U+2212, không mojibake, không near-duplicate |
-| Trò chơi | `games-all`, `games-content`, `game-content`, `game-rewards`, `t08-games-hub`, `t15-viet-games`, `t16-math-games`, `t16-math-contract`, `t17a-english-games`, `t17b-coding`, `t17b-scientist`, `t21-fun-games` | builder deterministic 6 bậc, thưởng 1 lần/vòng, hợp đồng câu hỏi, BFS màn lập trình |
+| Trò chơi | `games-all`, `games-content`, `game-content`, `game-rewards`, `t08-games-hub`, `t15-viet-games`, `t16-math-games`, `t16-math-contract`, `t17a-english-games`, `t17b-coding`, `t17b-scientist`, `t21-fun-games`, `t25-difficulty-ladder` | builder deterministic 6 bậc, thưởng 1 lần/vòng, hợp đồng câu hỏi, BFS màn lập trình, **bậc thang độ khó toàn catalog** (trần số 0–100, số phương án, trần nhóm Puzzle, cấm `Math.random`/`Date.now`) |
 | Luyện đọc | `reading-fluency` | 5 bậc, công thức chỉ số, parent rating không đè điểm đo |
 | Tiếng Anh | `kidbox-curriculum`, `kidbox-activities`, `kidbox-learning-os`, `kidbox-bridge-practice`, `english-ioe`, `p32-english-mastery`, `voice-persona`, `english-curriculum` | **0 unit bịa** + 7 nhóm cần nguồn, en-GB fallback, mastery key riêng |
 | Động lực | `t18a-motivation`, `t01-achievements`, `praise-engine`, `t14c-logic`, `t14c-storage`, `t20a-levelup-hooks` | sticker/quest/streak/level, lời khen không từ cấm, hooks order |
@@ -123,7 +123,7 @@ registry của Playwright, cộng `--no-sandbox` khi `CI` được set.
 **Hợp đồng exit code:** in `QA PASS`/`QA FAIL` và **chỉ** exit khác 0 khi probe ghi `errors[]`
 hoặc tự khai `ok: false` (nhiều probe không set `ok` ⇒ thiếu `ok` **không** phải lỗi).
 
-**Danh mục 20 probe:**
+**Danh mục 21 probe:**
 
 | Probe | Kịch bản | Tiêu chí xanh | Chạy khi |
 |---|---|---|---|
@@ -146,6 +146,7 @@ hoặc tự khai `ok: false` (nhiều probe không set `ok` ⇒ thiếu `ok` **k
 | `t01-hotfix.mjs` | achievements (P42/T01) | rule mở thành tựu đúng | đổi motivation |
 | `t01b-fixes.mjs` | header/Esc/back/touch target | như ticket T01B | đổi UI shell |
 | `t02-smoke.mjs` | startup split + network sạch | chunk tách đúng, không request ngoài | đổi chunking |
+| `tier6-ladder-evidence.mjs` | mở 9 trò Ngôn ngữ/Puzzle ở **Màn 6** @390×844, đếm phương án/thẻ/ô/chấm render trong DOM + 9 screenshot | đúng bậc thang (6 phương án, 24 thẻ, mosaic 6×6, 18 chấm, bàn 8×8), 0 tràn ngang, không có phương án ngoài màn hình mà vùng chơi không cuộn, ô bấm ≥ 44 px | đổi bậc thang độ khó / UI lưới chọn đáp án |
 | `p38-browser-probe.cjs` | hồi quy praise/parity (P38) | 0 lỗi console vùng đã đổi | đổi praise |
 
 **Chính sách probe đỏ vì timing (đã ghi `AGENTS.md` §1.3):** chạy lại **một** lần;

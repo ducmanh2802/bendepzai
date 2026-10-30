@@ -144,15 +144,16 @@ export const MemoryCardsGame: React.FC<{ onExit: () => void }> = ({ onExit }) =>
           Đã thử: <span className="font-black">{moves}</span> lượt · Đã tìm: <span className="font-black">{matchedPairs}/{goalPairs}</span> cặp
         </div>
 
-        {/* Cards Grid */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 w-full min-w-0" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+        {/* Cards Grid — bậc cao nhiều cặp hơn nên số cột và cỡ thẻ tự co theo. */}
+        <div className={`grid ${goalPairs >= 9 ? 'grid-cols-5' : goalPairs >= 5 ? 'grid-cols-4' : 'grid-cols-3'} gap-2 md:gap-3 w-full min-w-0`}>
           {cards.map((card) => {
             const showFace = card.isFlipped || card.isMatched;
             return (
               <button
                 key={card.id}
+                data-testid="memory-card"
                 onClick={() => handleCardClick(card.id)}
-                className={`h-24 md:h-28 rounded-2xl border-3 shadow-md flex flex-col items-center justify-center transition-all transform cursor-pointer ${
+                className={`h-20 md:h-24 rounded-2xl border-3 shadow-md flex flex-col items-center justify-center transition-all transform cursor-pointer ${
                   showFace
                     ? 'bg-white border-amber-400 rotate-0 scale-100'
                     : 'bg-gradient-to-br from-amber-400 to-orange-500 border-amber-600 hover:scale-105 active:scale-95'
@@ -160,11 +161,15 @@ export const MemoryCardsGame: React.FC<{ onExit: () => void }> = ({ onExit }) =>
               >
                 {showFace ? (
                   <div className="flex flex-col items-center animate-pop">
-                    <span className="text-3xl md:text-4xl">{card.emoji}</span>
-                    <span className="text-[11px] font-black text-amber-900 mt-1">{card.label}</span>
+                    <span className="text-2xl md:text-4xl">{card.emoji}</span>
+                    {goalPairs >= 9 ? (
+                      <span className="sr-only">{card.label}</span>
+                    ) : (
+                      <span className="text-[11px] font-black text-amber-900 mt-1">{card.label}</span>
+                    )}
                   </div>
                 ) : (
-                  <span className="text-3xl text-white font-black drop-shadow">?</span>
+                  <span className="text-2xl md:text-3xl text-white font-black drop-shadow">?</span>
                 )}
               </button>
             );

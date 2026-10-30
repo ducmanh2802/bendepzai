@@ -3,7 +3,7 @@ import { GameModalWrapper } from './GameModalWrapper';
 import { sound } from '../../services/sound';
 import { useGameStage } from '../../hooks/useGameStage';
 import { defaultRoundsPerTier, getTierMeta } from '../../data/gameLevels';
-import { TIER_CONFIG } from '../../data/games/falling_numbers';
+import { TIER_CONFIG, spawnSequence } from '../../data/games/falling_numbers';
 import type { Condition } from '../../data/games/falling_numbers';
 
 export { TIER_CONFIG };
@@ -28,31 +28,36 @@ export const FallingNumbersMathGame: React.FC<{ onExit: () => void }> = ({ onExi
 
   const config = TIER_CONFIG[Math.min(stage.tier - 1, TIER_CONFIG.length - 1)];
   const condition = config.condition;
+  // T25 — chuỗi bóng tất định theo (bậc, nonce): không còn Math.random.
+  const sequence = useMemo(() => spawnSequence(stage.tier, stage.nonce), [stage.tier, stage.nonce]);
+  const spawnIdx = useRef(0);
 
   useEffect(() => {
     setBalls([]);
+    spawnIdx.current = 0;
     sound.speak(condition.speech);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stage.tier]);
+  }, [stage.tier, stage.nonce]);
 
   // Spawn falling balls
   useEffect(() => {
     if (stage.phase !== 'playing') return;
     const timer = setInterval(() => {
-      const val = Math.floor(Math.random() * config.maxVal) + 1;
+      const i = spawnIdx.current++;
+      const spec = sequence[i % sequence.length];
       const newBall: FallingBall = {
         id: nextId.current++,
-        val,
-        x: Math.floor(Math.random() * 75) + 12,
+        val: spec.val,
+        x: spec.x,
         y: -10,
-        speed: Math.random() * (config.speedMax - config.speedMin) + config.speedMin,
-        color: BALL_COLORS[Math.floor(Math.random() * BALL_COLORS.length)],
+        speed: spec.speed,
+        color: BALL_COLORS[i % BALL_COLORS.length],
       };
       setBalls((prev) => [...prev.slice(-10), newBall]);
     }, config.spawnMs);
 
     return () => clearInterval(timer);
-  }, [stage.phase, stage.tier, config]);
+  }, [stage.phase, stage.tier, stage.nonce, config, sequence]);
 
   // Falling animation
   useEffect(() => {

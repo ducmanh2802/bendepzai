@@ -3,12 +3,15 @@
  * Pure TypeScript, no React imports.
  *
  * Be xep chuoi mui ten roi bam Chay de Gau di toi ruong, tranh da/nuoc.
- * - T1: luoi 4x4, duong thang 2-4 buoc, khong chia khoa, khong vong lap.
- * - T2: 4x4, 2 da, re 1-2 lan.
- * - T3: 5x5, 4 da, duong vong.
- * - T4: 5x5, 5 da + o chia khoa phai lay truoc.
- * - T5: 6x6, 7 da + chia khoa + vong lap "x2".
- * - T6: 6x6, 9 da + chia khoa + vong lap, duong dai hon.
+ * - T1: luoi 4x4, loi giai <= 8 buoc, khong chia khoa, khong vong lap.
+ * - T2: 4x4, 2-4 da, re 1-2 lan, <= 9 buoc.
+ * - T3: 5x5, 4-6 da, duong vong, <= 11 buoc.
+ * - T4: 6x6, 6-8 da + o chia khoa phai lay truoc, <= 13 buoc.
+ * - T5: 7x7, 9-12 da + chia khoa + vong lap "x2", <= 16 buoc.
+ * - T6: 8x8, 13-18 da + chia khoa + vong lap, loi giai toi 14-18 buoc.
+ *
+ * Trần độ dài lời giải theo bậc (`MAX_SOLUTION_BY_TIER`) — T25 nâng từ khoá
+ * cứng 12 bước lên 8/9/11/13/16/18 vì bậc 5–6 cũ đi ngắn y hệt bậc 4.
  *
  * Moi man deu co loi giai: man hinh duoc sinh xac dinh (seeded) bang cach
  * giu mot duong di goc, dat da len cac o con lai, roi kiem lai bang BFS
@@ -82,7 +85,15 @@ export interface SimResult {
 const same = (a: Cell, b: Cell): boolean => a.x === b.x && a.y === b.y;
 const keyOf = (c: Cell): string => `${c.x},${c.y}`;
 
-const TIER_SIZE = [4, 4, 5, 5, 6, 6];
+const TIER_SIZE = [4, 4, 5, 6, 7, 8];
+
+/**
+ * T25 — trần độ dài lời giải theo bậc (trước đây khoá cứng 12 bước cho mọi
+ * bậc, nên bậc 5–6 không dài hơn bậc 4). Bậc thấp vẫn đi ngắn để bé mới học
+ * không bị lạc; bậc cao phải xếp chương trình 16–18 bước.
+ * Trần bậc 1 là 8 vì rương luôn đặt cách xa ≥ 4 ô trên luoi 4×4.
+ */
+const MAX_SOLUTION_BY_TIER = [8, 9, 11, 13, 16, 18];
 
 /**
  * POOL_BY_TIER — moi pool 8 bo tham so (so vong toi da moi cap la 8).
@@ -91,39 +102,39 @@ const TIER_SIZE = [4, 4, 5, 5, 6, 6];
 export const POOL_BY_TIER: LevelParams[][] = [
   [
     { rocks: 1, key: false, loop: false }, { rocks: 2, key: false, loop: false },
-    { rocks: 1, key: false, loop: false }, { rocks: 2, key: false, loop: false },
     { rocks: 0, key: false, loop: false }, { rocks: 1, key: false, loop: false },
     { rocks: 2, key: false, loop: false }, { rocks: 1, key: false, loop: false },
+    { rocks: 0, key: false, loop: false }, { rocks: 2, key: false, loop: false },
   ],
   [
+    { rocks: 3, key: false, loop: false }, { rocks: 4, key: false, loop: false },
     { rocks: 2, key: false, loop: false }, { rocks: 3, key: false, loop: false },
-    { rocks: 2, key: false, loop: false }, { rocks: 3, key: false, loop: false },
-    { rocks: 2, key: false, loop: false }, { rocks: 3, key: false, loop: false },
-    { rocks: 2, key: false, loop: false }, { rocks: 3, key: false, loop: false },
+    { rocks: 4, key: false, loop: false }, { rocks: 2, key: false, loop: false },
+    { rocks: 3, key: false, loop: false }, { rocks: 4, key: false, loop: false },
   ],
   [
+    { rocks: 5, key: false, loop: false }, { rocks: 6, key: false, loop: false },
     { rocks: 4, key: false, loop: false }, { rocks: 5, key: false, loop: false },
-    { rocks: 4, key: false, loop: false }, { rocks: 5, key: false, loop: false },
-    { rocks: 4, key: false, loop: false }, { rocks: 5, key: false, loop: false },
-    { rocks: 4, key: false, loop: false }, { rocks: 5, key: false, loop: false },
+    { rocks: 6, key: false, loop: false }, { rocks: 4, key: false, loop: false },
+    { rocks: 5, key: false, loop: false }, { rocks: 6, key: false, loop: false },
   ],
   [
-    { rocks: 5, key: true, loop: false }, { rocks: 6, key: true, loop: false },
-    { rocks: 5, key: true, loop: false }, { rocks: 6, key: true, loop: false },
-    { rocks: 5, key: true, loop: false }, { rocks: 6, key: true, loop: false },
-    { rocks: 5, key: true, loop: false }, { rocks: 6, key: true, loop: false },
+    { rocks: 7, key: true, loop: false }, { rocks: 8, key: true, loop: false },
+    { rocks: 6, key: true, loop: false }, { rocks: 7, key: true, loop: false },
+    { rocks: 8, key: true, loop: false }, { rocks: 6, key: true, loop: false },
+    { rocks: 7, key: true, loop: false }, { rocks: 8, key: true, loop: false },
   ],
   [
-    { rocks: 7, key: true, loop: true }, { rocks: 8, key: true, loop: true },
-    { rocks: 7, key: true, loop: true }, { rocks: 8, key: true, loop: true },
-    { rocks: 7, key: true, loop: true }, { rocks: 8, key: true, loop: true },
-    { rocks: 7, key: true, loop: true }, { rocks: 8, key: true, loop: true },
+    { rocks: 10, key: true, loop: true }, { rocks: 12, key: true, loop: true },
+    { rocks: 9, key: true, loop: true }, { rocks: 10, key: true, loop: true },
+    { rocks: 12, key: true, loop: true }, { rocks: 11, key: true, loop: true },
+    { rocks: 9, key: true, loop: true }, { rocks: 12, key: true, loop: true },
   ],
   [
-    { rocks: 9, key: true, loop: true }, { rocks: 10, key: true, loop: true },
-    { rocks: 9, key: true, loop: true }, { rocks: 10, key: true, loop: true },
-    { rocks: 9, key: true, loop: true }, { rocks: 10, key: true, loop: true },
-    { rocks: 9, key: true, loop: true }, { rocks: 10, key: true, loop: true },
+    { rocks: 14, key: true, loop: true }, { rocks: 16, key: true, loop: true },
+    { rocks: 13, key: true, loop: true }, { rocks: 15, key: true, loop: true },
+    { rocks: 17, key: true, loop: true }, { rocks: 16, key: true, loop: true },
+    { rocks: 14, key: true, loop: true }, { rocks: 18, key: true, loop: true },
   ],
 ];
 
@@ -269,9 +280,9 @@ export function generateLevel(tier: number, paramIdx: number, nonce = 0): Coding
     draft = { ...draft, rocks };
     sol = solveLevel(draft);
   }
-  // Giu man vua suc be lop 1: loi giai khong dai hon 12 buoc
-  // (UI cho toi da 14 token).
-  while (sol && sol.length > 12 && rocks.length > 0) {
+  // Giu man vua suc be lop 1: loi giai khong dai hon trần theo bậc (T25).
+  const maxSolution = MAX_SOLUTION_BY_TIER[safeTier - 1];
+  while (sol && sol.length > maxSolution && rocks.length > 0) {
     rocks = rocks.slice(0, rocks.length - 1);
     draft = { ...draft, rocks };
     sol = solveLevel(draft);

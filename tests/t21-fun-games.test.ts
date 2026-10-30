@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { defaultRoundsPerTier } from '../src/data/gameLevels';
+import { defaultRoundsPerTier, tierOptionCount } from '../src/data/gameLevels';
 import {
   CONNECT_SHAPES,
   buildConnectRounds,
@@ -46,6 +46,22 @@ describe('Nối Số Tô Màu — connect the dots data', () => {
     expect(shapesForTier(6).length).toBeGreaterThan(shapesForTier(1).length);
   });
 
+  it('T25 — bậc 5–6 nối 16–18 chấm, các chấm mới vẫn đủ xa để bé chạm', () => {
+    expect(Math.max(...shapesForTier(5).map((s) => s.points.length))).toBeGreaterThanOrEqual(16);
+    expect(Math.max(...shapesForTier(6).map((s) => s.points.length))).toBeGreaterThanOrEqual(18);
+    for (const id of ['star8', 'flower9', 'wheel14']) {
+      const shape = CONNECT_SHAPES.find((s) => s.id === id)!;
+      expect(shape.points.length).toBeGreaterThanOrEqual(14);
+      for (let i = 0; i < shape.points.length; i++) {
+        for (let j = i + 1; j < shape.points.length; j++) {
+          const dist = Math.hypot(shape.points[i].x - shape.points[j].x, shape.points[i].y - shape.points[j].y);
+          // 12 đơn vị ≈ 40px trên bàn 340px — sát trần nút 44px của AGENTS.md.
+          expect(dist, `${id} ${i}↔${j}`).toBeGreaterThanOrEqual(12);
+        }
+      }
+    }
+  });
+
   it('builds the right number of rounds with sequential numbered dots', () => {
     const roundsPerTier = defaultRoundsPerTier();
     for (const tier of TIERS) {
@@ -84,33 +100,39 @@ describe('Đoán Bóng Hình — shadow match data', () => {
     }
   });
 
-  it('every round has 4 unique options including the answer', () => {
+  it('số phương án theo bậc (4 → 6), luôn có đáp án và không trùng', () => {
     const roundsPerTier = defaultRoundsPerTier();
     for (const tier of TIERS) {
+      const optionCount = tierOptionCount(tier);
       const rounds = buildShadowRounds(tier, 0);
       expect(rounds).toHaveLength(roundsPerTier[tier - 1]);
       for (const round of rounds) {
-        expect(round.options).toHaveLength(4);
+        expect(round.options).toHaveLength(optionCount);
         expect(round.options).toContain(round.answer);
-        expect(new Set(round.options.map((o) => o.id)).size).toBe(4);
+        expect(new Set(round.options.map((o) => o.id)).size).toBe(optionCount);
         expect(round.id.length).toBeGreaterThan(0);
       }
       expect(new Set(rounds.map((r) => r.id)).size).toBe(rounds.length);
     }
+    expect(tierOptionCount(6)).toBe(6);
   });
 
-  it('keeps easy tiers upright and only tilts/flips later', () => {
-    for (const round of buildShadowRounds(1, 3)) {
-      expect(round.tilt).toBe(0);
-      expect(round.flip).toBe(false);
+  it('giữ bậc 1–2 thẳng đứng, bậc càng cao bóng càng nghiêng (T25)', () => {
+    for (const tier of [1, 2]) {
+      for (const round of buildShadowRounds(tier, 3)) {
+        expect(round.tilt).toBe(0);
+        expect(round.flip).toBe(false);
+      }
     }
-    for (const round of buildShadowRounds(3, 3)) {
-      expect(Math.abs(round.tilt)).toBeLessThanOrEqual(20);
-      expect(round.flip).toBe(false);
-    }
+    for (const round of buildShadowRounds(4, 3)) expect(Math.abs(round.tilt)).toBeLessThanOrEqual(35);
     for (const round of buildShadowRounds(6, 3)) {
-      expect(Math.abs(round.tilt)).toBeLessThanOrEqual(20);
+      expect(Math.abs(round.tilt)).toBeLessThanOrEqual(50);
+      expect(round.flip).toBeTypeOf('boolean');
     }
+    // Bậc cao phải thật sự nghiêng mạnh hơn bậc 4 (không chỉ đổi nhãn).
+    const tilt6 = Math.max(...buildShadowRounds(6, 3).map((r) => Math.abs(r.tilt)));
+    const tilt4 = Math.max(...buildShadowRounds(4, 3).map((r) => Math.abs(r.tilt)));
+    expect(tilt6).toBeGreaterThan(tilt4);
   });
 
   it('is deterministic per (tier, seed)', () => {
@@ -140,10 +162,12 @@ describe('Bé Xếp Hình Mosaic — pixel mosaic data', () => {
 
   it('difficulty ramps grid size and round counts stay sane', () => {
     expect(MOSAIC_ROUNDS_PER_TIER).toHaveLength(6);
+    // T25: 3×3 → 4×4 (T3) → 5×5 (T4) → 6×6 (T5–6).
+    const SIZE_BY_TIER = [3, 3, 4, 5, 6, 6];
     for (const tier of TIERS) {
+      const expectedSize = SIZE_BY_TIER[tier - 1];
       const rounds = buildMosaicRounds(tier, 0);
       expect(rounds).toHaveLength(MOSAIC_ROUNDS_PER_TIER[tier - 1]);
-      const expectedSize = tier <= 2 ? 3 : tier <= 4 ? 4 : 5;
       for (const round of rounds) {
         expect(round.pattern.size).toBe(expectedSize);
         expect(round.palette.map((c) => c.key).sort()).toEqual(
@@ -152,6 +176,9 @@ describe('Bé Xếp Hình Mosaic — pixel mosaic data', () => {
         expect(round.showGhost).toBe(tier <= 2);
         expect(round.goal).toHaveLength(expectedSize);
       }
+      // Pool của cỡ lưới đó phải đủ tranh để không lặp trong cùng một bậc.
+      const poolSize = MOSAIC_PATTERNS.filter((p) => p.size === expectedSize).length;
+      expect(poolSize).toBeGreaterThanOrEqual(MOSAIC_ROUNDS_PER_TIER[tier - 1]);
     }
   });
 

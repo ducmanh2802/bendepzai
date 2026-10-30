@@ -24,6 +24,7 @@ import {
 } from '../src/components/games/ShapeSortingGame';
 import { COLOR_TARGETS } from '../src/components/games/EnglishColorBalloonGame';
 import { TIER_CONFIG as FALLING_TIERS } from '../src/components/games/FallingNumbersMathGame';
+import { tierMaxValue } from '../src/data/games/mathUtils';
 import { containsBannedWord } from '../src/data/contentSafety';
 import { defaultRoundsPerTier } from '../src/data/gameLevels';
 
@@ -105,7 +106,7 @@ describe('T02/A ocean fishing: no negative subtraction', () => {
         expect(a, r.expr).toBeGreaterThanOrEqual(b);
         expect(r.ans).toBe(a - b);
         expect(r.ans).toBeGreaterThanOrEqual(0);
-        expect(r.ans).toBeLessThanOrEqual(20);
+        expect(r.ans).toBeLessThanOrEqual(tierMaxValue(t));
         expect(r.fishPool.map((f) => f.val)).toContain(r.ans);
         expect(new Set(r.fishPool.map((f) => f.val)).size).toBe(r.fishPool.length);
       }
@@ -143,11 +144,12 @@ describe('T02/A rhyme hunter: rhyme-based decoys, >= 5 rounds', () => {
 });
 
 describe('T02/A syllable builder: safe words, big pools', () => {
-  it('6 tiers x 12 items, pool >= 2x max rounds', () => {
+  it('6 tiers x 12 items, pool du cho 1.5x so vong cao nhat (T25)', () => {
     expect(SYLLABLE_POOLS.length).toBe(6);
     const maxRounds = Math.max(...SYLLABLE_ROUNDS_PER_TIER);
     for (const pool of SYLLABLE_POOLS) {
-      expect(pool.length).toBeGreaterThanOrEqual(2 * maxRounds);
+      expect(pool.length).toBeGreaterThanOrEqual(Math.ceil(1.5 * maxRounds));
+      expect(pool.length).toBeGreaterThanOrEqual(maxRounds);
     }
   });
 

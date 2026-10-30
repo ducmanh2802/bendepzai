@@ -6,7 +6,7 @@
  * can never mark a wrong split as correct.
  */
 
-import { seededRng, shuffleSeeded } from '../gameLevels';
+import { defaultRoundsPerTier, seededRng, shuffleSeeded } from '../gameLevels';
 
 export interface SyllablePuzzle {
   word: string;
@@ -163,7 +163,12 @@ export const POOL_BY_TIER: SyllableSeed[][] = [
   ],
 ];
 
-export const SYLLABLE_ROUNDS_PER_TIER = [4, 4, 5, 5, 6, 6];
+/**
+ * T25 — trước đây cố định [4,4,5,5,6,6] (thấp hơn mọi trò khác trong chính sách),
+ * nên bậc 6 chỉ có 6 chữ. Giờ theo `ROUNDS_PER_TIER` của policy: mỗi pool 12 chữ
+ * đủ cho 8 vòng, bé đọc liền mạch hơn.
+ */
+export const SYLLABLE_ROUNDS_PER_TIER = defaultRoundsPerTier();
 
 export function buildSyllableRounds(tier: number, seedOrNonce = 0, seedOverride?: number): SyllablePuzzle[] {
   const safeTier = Math.min(Math.max(Math.round(tier), 1), POOL_BY_TIER.length);

@@ -30,7 +30,12 @@ export const PAIR_POOL: PairDef[] = [
   { pairId: 16, label: 'Chiếc bánh', emoji: '🍰' },
 ];
 
-export const GOALS_PER_TIER = [3, 4, 5, 6, 7, 8];
+/**
+ * T25 — bậc cũ dừng ở 8 cặp (16 thẻ) nên bé cuối lớp 1 thấy "hết thách thức".
+ * Nâng lên 12 cặp (24 thẻ) ở bậc 6 và xáo cả bộ hình theo nonce để mỗi lượt
+ * chơi là một tập hình khác nhau (trước đây luôn lấy 3–8 hình đầu danh sách).
+ */
+export const GOALS_PER_TIER = [3, 4, 6, 8, 10, 12];
 
 export interface MemoryCard {
   id: number;
@@ -59,9 +64,8 @@ export function shouldCountMemoryMistake(
 export function buildMemoryDeck(tier: number, seed = 0): MemoryCard[] {
   const safeTier = Math.min(Math.max(Math.round(tier), 1), GOALS_PER_TIER.length);
   const goalPairs = GOALS_PER_TIER[safeTier - 1];
-  const pool = PAIR_POOL.slice(0, goalPairs);
   const baseSeed = 10000 + safeTier * 133 + seed * 101;
-  const shuffledPool = shuffleSeeded(pool, seededRng(baseSeed));
+  const shuffledPool = shuffleSeeded(PAIR_POOL, seededRng(baseSeed)).slice(0, goalPairs);
   const deck: MemoryCard[] = [];
   let idCounter = 1;
   shuffledPool.forEach((p) => {

@@ -5,7 +5,7 @@
  * tạo ra bóng. Màn cao xoay/lật bóng để khó hơn nhưng vẫn công bằng.
  */
 
-import { defaultRoundsPerTier, seededRng, shuffleSeeded } from '../gameLevels';
+import { defaultRoundsPerTier, seededRng, shuffleSeeded, tierOptionCount } from '../gameLevels';
 
 export interface ShadowItem {
   id: string;
@@ -51,12 +51,13 @@ export interface ShadowRound {
   flip: boolean;
 }
 
-const OPTION_COUNT = 4;
-
 export function buildShadowRounds(tier: number, seed = 0): ShadowRound[] {
   const safeTier = Math.min(Math.max(Math.round(tier), 1), 6);
   const count = defaultRoundsPerTier()[safeTier - 1];
   const rng = seededRng(8200 + safeTier * 131 + Math.max(0, Math.round(seed)) * 1009);
+  const optionCount = tierOptionCount(safeTier);
+  // T25: bóng xoay mạnh hơn ở bậc cao (±20° → ±50°) để silhouette khó nhận ra hơn.
+  const tiltSpread = safeTier <= 2 ? 0 : safeTier <= 4 ? 35 : 50;
 
   const deck = shuffleSeeded(SHADOW_POOL, rng);
   const rounds: ShadowRound[] = [];
@@ -66,11 +67,11 @@ export function buildShadowRounds(tier: number, seed = 0): ShadowRound[] {
     const distractors = shuffleSeeded(
       SHADOW_POOL.filter((item) => item.id !== answer.id),
       rng
-    ).slice(0, OPTION_COUNT - 1);
+    ).slice(0, optionCount - 1);
     const options = shuffleSeeded([answer, ...distractors], rng);
 
-    const rawTilt = Math.round((rng() * 40 - 20) * 10) / 10;
-    const tilt = safeTier >= 3 ? rawTilt : 0;
+    const rawTilt = Math.round((rng() * tiltSpread * 2 - tiltSpread) * 10) / 10;
+    const tilt = rawTilt;
     const flip = safeTier >= 5 ? rng() < 0.5 : false;
 
     rounds.push({

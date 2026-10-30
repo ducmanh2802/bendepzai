@@ -3,8 +3,8 @@
  * part1 + missing = total with NO carrying (lớp 1), total ≤ maxTotal.
  */
 
-import { defaultRoundsPerTier, numericOptions, seededRng } from '../gameLevels';
-import { isNoCarryAdd } from './mathUtils';
+import { defaultRoundsPerTier, numericOptions, seededRng, tierOptionCount } from '../gameLevels';
+import { isNoCarryAdd, tierMaxValue } from './mathUtils';
 
 export interface TowerRound {
   part1: number;
@@ -20,7 +20,8 @@ export function buildTowerRounds(tier: number, seed = 0): TowerRound[] {
   const safeTier = Math.min(Math.max(Math.round(tier), 1), 6);
   const roundsPerTier = defaultRoundsPerTier();
   const count = roundsPerTier[safeTier - 1];
-  const maxTotal = safeTier <= 1 ? 5 : safeTier <= 3 ? 10 : 20;
+  const maxTotal = tierMaxValue(safeTier);
+  const optionCount = tierOptionCount(safeTier);
   const rounds: TowerRound[] = [];
   for (let i = 0; i < count; i++) {
     const rng = seededRng(1300 + safeTier * 37 + seed * 1009 + i * 131);
@@ -36,13 +37,13 @@ export function buildTowerRounds(tier: number, seed = 0): TowerRound[] {
         break;
       }
       if (tries === 79) {
-        total = Math.min(10, maxTotal);
+        total = Math.min(10, maxTotal); // nghiệm an toàn khi mẫu số may rủi không ra
         part1 = Math.floor(total / 2);
       }
     }
     const missing = total - part1;
     const floor = safeTier >= 3 ? 1 : 0;
-    const options = numericOptions(missing, 4, seededRng(1300 + safeTier * 37 + seed * 1009 + i * 131 + 7), floor, maxTotal);
+    const options = numericOptions(missing, optionCount, seededRng(1300 + safeTier * 37 + seed * 1009 + i * 131 + 7), floor, maxTotal);
     rounds.push({ part1, total, missing, options });
   }
   return rounds;

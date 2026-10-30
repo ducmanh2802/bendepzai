@@ -51,6 +51,9 @@ phải kèm đáp án có thể kiểm chứng bằng máy:
   nhưng vẫn không copy đề giữa các bài: phụ huynh sẽ nhận ra.
 - Mỗi câu trắc nghiệm lớp 1 có **2 hoặc 4 phương án**;
   đáp án đúng phải nằm trong `options`, các phương án không trùng nhau.
+  (Quy tắc này tính cho **bài học**; trò chơi trong Hub đi theo bậc thang
+  `TIER_OPTION_COUNT` 4→6 phương án theo bậc — xem `src/data/gameLevels.ts`
+  và `tests/t25-difficulty-ladder.test.ts`.)
 
 ## 5. An toàn nội dung (`src/data/contentSafety.ts`)
 

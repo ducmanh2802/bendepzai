@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from 'vitest';
 
-import { defaultRoundsPerTier } from '../src/data/gameLevels';
+import { defaultRoundsPerTier, tierOptionCount } from '../src/data/gameLevels';
 import { containsBannedWord } from '../src/data/contentSafety';
 import { isNoBorrowSub, isNoCarryAdd } from '../src/data/games/mathUtils';
 import {
@@ -55,9 +55,10 @@ describe('T16 ten_frame_market: vòng chơi', () => {
     }
   });
 
-  it('need đúng (target − have, vòng hỏi chục = số chục); số ≤ 100; 4 số duy nhất, vị trí phân tán', () => {
-    const slots: number[] = [];
+  it('need đúng (target − have, vòng hỏi chục = số chục); số ≤ 100; phương án duy nhất theo bậc, vị trí phân tán', () => {
+    const slotsByTier: number[][] = [[], [], [], [], [], []];
     for (let t = 1; t <= 6; t++) {
+      const optionCount = tierOptionCount(t);
       for (const seed of SEEDS) {
         for (const r of buildMarketRounds(t, seed)) {
           if (r.kind === 'tensUnits' && r.askPart === 'chuc') {
@@ -68,11 +69,11 @@ describe('T16 ten_frame_market: vòng chơi', () => {
           expect(r.have).toBeGreaterThanOrEqual(0);
           expect(r.target).toBeLessThanOrEqual(100);
           expect(r.need).toBeGreaterThanOrEqual(0);
-          expect(r.need).toBeLessThanOrEqual(9);
-          expect(r.options).toHaveLength(4);
-          expect(new Set(r.options).size).toBe(4);
+          expect(r.need).toBeLessThanOrEqual(Math.max(r.target, 10));
+          expect(r.options).toHaveLength(optionCount);
+          expect(new Set(r.options).size).toBe(optionCount);
           expect(r.options).toContain(r.need);
-          slots.push(r.options.indexOf(r.need));
+          slotsByTier[t - 1].push(r.options.indexOf(r.need));
           for (const o of r.options) {
             expect(o).toBeGreaterThanOrEqual(0);
             expect(o).toBeLessThanOrEqual(Math.max(r.target, 10));
@@ -81,8 +82,8 @@ describe('T16 ten_frame_market: vòng chơi', () => {
           expect(r.prompt).toContain('mấy');
         }
       }
+      expectSpread(slotsByTier[t - 1], optionCount, `ten_frame_market T${t}`);
     }
-    expectSpread(slots, 4, 'ten_frame_market');
   });
 
   it('đề không lộ đáp án; chục–đơn vị khớp target; NFC, không từ cấm', () => {
@@ -142,24 +143,34 @@ describe('T16 number_line_hop: vòng chơi', () => {
     }
   });
 
-  it('đích = start + dir·hops·step trong biên tia; 4 phương án duy nhất, vị trí phân tán', () => {
-    const slots: number[] = [];
+  it('đích = start + dir·hops·step trong cửa sổ tia; phương án duy nhất theo bậc, vị trí phân tán', () => {
+    const slotsByTier: number[][] = [[], [], [], [], [], []];
     for (let t = 1; t <= 6; t++) {
+      const optionCount = tierOptionCount(t);
       for (const seed of SEEDS) {
         for (const r of buildHopRounds(t, seed)) {
           expect(r.target).toBe(r.start + r.dir * r.hops * r.step);
           expect(r.target).toBeGreaterThanOrEqual(r.lineStart);
           expect(r.target).toBeLessThanOrEqual(r.lineEnd);
-          expect(r.lineEnd).toBeLessThanOrEqual(100);
-          expect(r.options).toHaveLength(4);
-          expect(new Set(r.options).size).toBe(4);
+          expect(r.start).toBeGreaterThanOrEqual(r.lineStart);
+          expect(r.start).toBeLessThanOrEqual(r.lineEnd);
+          expect(r.lineEnd).toBeLessThanOrEqual(r.rangeEnd);
+          expect(r.rangeEnd).toBeLessThanOrEqual(100);
+          // Cửa sổ đủ rộng để sinh đủ phương án khác nhau.
+          expect(r.lineEnd - r.lineStart + 1).toBeGreaterThanOrEqual(optionCount);
+          expect(r.options).toHaveLength(optionCount);
+          expect(new Set(r.options).size).toBe(optionCount);
           expect(r.options).toContain(r.target);
-          slots.push(r.options.indexOf(r.target));
+          slotsByTier[t - 1].push(r.options.indexOf(r.target));
+          for (const o of r.options) {
+            expect(o).toBeGreaterThanOrEqual(r.lineStart);
+            expect(o).toBeLessThanOrEqual(r.lineEnd);
+          }
           expect(r.prompt).toBe(r.prompt.normalize('NFC'));
         }
       }
+      expectSpread(slotsByTier[t - 1], optionCount, `number_line_hop T${t}`);
     }
-    expectSpread(slots, 4, 'number_line_hop');
   });
 
   it('lớp 1: phép hiện rõ không nhớ/không mượn; đề bằng lời không lộ đáp án', () => {
@@ -184,13 +195,19 @@ describe('T16 number_line_hop: vòng chơi', () => {
     }
   });
 
-  it('độ khó tăng thật: T1 chỉ cộng nhỏ; T2 có trừ; T4 nhảy chục 0–100; T5 đề bằng lời', () => {
+  it('độ khó tăng thật: T1 chỉ cộng nhỏ; T2 có trừ; T3 tia 0–30; T4 nhảy chục 0–100; T5 đề bằng lời 0–70; T6 trộn', () => {
     for (const seed of SEEDS) {
-      expect(buildHopRounds(1, seed).every((r) => r.dir === 1 && r.step === 1)).toBe(true);
+      expect(buildHopRounds(1, seed).every((r) => r.dir === 1 && r.step === 1 && r.rangeEnd === 10)).toBe(true);
       expect(buildHopRounds(2, seed).some((r) => r.dir === -1)).toBe(true);
-      expect(buildHopRounds(4, seed).every((r) => r.step === 10 && r.lineEnd === 100)).toBe(true);
-      expect(buildHopRounds(5, seed).every((r) => r.worded)).toBe(true);
-      expect(buildHopRounds(3, seed).every((r) => r.lineEnd === 20)).toBe(true);
+      expect(buildHopRounds(2, seed).every((r) => r.rangeEnd === 20)).toBe(true);
+      expect(buildHopRounds(3, seed).every((r) => r.rangeEnd === 30 && r.hops * r.step >= 2)).toBe(true);
+      expect(buildHopRounds(4, seed).every((r) => r.step === 10 && r.rangeEnd === 100)).toBe(true);
+      expect(buildHopRounds(5, seed).every((r) => r.worded && r.rangeEnd === 70)).toBe(true);
+      const t6 = buildHopRounds(6, seed);
+      expect(t6.every((r) => r.rangeEnd === 100)).toBe(true);
+      expect(t6.some((r) => r.step === 10)).toBe(true);
+      expect(t6.some((r) => r.worded)).toBe(true);
+      expect(t6.some((r) => r.dir === -1)).toBe(true);
     }
   });
 
