@@ -80,6 +80,20 @@ describe('Service worker contract (§25 offline safety)', () => {
     expect(swSource).toContain("if (request.method !== 'GET') return;");
   });
 
+  it('matches same-origin assets ignoring Vary (offline lazy-chunk fix)', () => {
+    // `vite preview`/CDN có thể trả asset kèm `Vary: Origin`. Khoản precache lưu
+    // theo request KHÔNG có header Origin, còn request script thật của trang thì
+    // CÓ ⇒ `cache.match()` mặc định trượt ⇒ chunk lazy chết `net::ERR_FAILED` khi
+    // tắt mạng dù manifest đủ. Bằng chứng 2026-10-30: qa/offline-pwa.mjs đỏ ở
+    // bước "Vương Quốc Tiếng Việt", hết đỏ khi thêm ignoreVary.
+    expect(swSource).toContain('staleWhileRevalidate(request, CACHE_NAME, { ignoreVary: true })');
+    expect(swSource).toContain('await cache.match(request, matchOptions)');
+    // Fallback điều hướng cũng phải bỏ qua Vary (shell cùng gốc, một khoá duy nhất).
+    expect(swSource).toContain("{ ignoreSearch: true, ignoreVary: true }");
+    // Cross-origin vẫn tôn trọng Vary — không được nhân rộng ignoreVary ra ngoài.
+    expect(swSource).toContain('staleWhileRevalidate(request, CACHE_NAME).catch(');
+  });
+
   it('only caches real responses, tolerating opaque and failed ones', () => {
     expect(swSource).toContain("response.ok || response.type === 'opaque'");
     expect(swSource).toContain('.catch(');

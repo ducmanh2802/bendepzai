@@ -25,6 +25,15 @@
  *   - NEVER cache non-GET requests or anything that is not http(s).
  *
  * The cache name carries a version so a new deploy purges the previous cache.
+ *
+ * FIX offline-lazy (2026-10-30): `vite preview` (và có thể vài CDN) trả asset
+ * kèm `Vary: Origin`. Trả lời đó được Cache API lưu theo khoá là request lúc
+ * fetch — request precache từ SW KHÔNG có header `Origin`, còn request script
+ * thật của trang THÌ CÓ (`Origin: http://localhost:4173`). Vì thế mọi
+ * `cache.match()` mặc định trượt và chunk lazy chết `net::ERR_FAILED` khi tắt
+ * mạng, dù manifest đã precache đủ. Trang mình chỉ lấy asset same-origin do
+ * chính nó sinh (tên đã hash nội dung), nên bỏ qua Vary ở nhánh same-origin
+ * là an toàn; nhánh cross-origin vẫn tôn trọng Vary.
  */
 
 const CACHE_VERSION = 'kho-bau-v3';
@@ -122,16 +131,16 @@ async function handleNavigation(request) {
     cache.put(SHELL_URL, fresh.clone());
     return fresh;
   } catch (error) {
-    const cached = await caches.match(SHELL_URL, { ignoreSearch: true });
+    const cached = await caches.match(SHELL_URL, { ignoreSearch: true, ignoreVary: true });
     if (cached) return cached;
     throw error;
   }
 }
 
 /** Cache-first from a previous visit, refreshed in the background. */
-async function staleWhileRevalidate(request, cacheName) {
+async function staleWhileRevalidate(request, cacheName, matchOptions) {
   const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
+  const cached = await cache.match(request, matchOptions);
 
   const network = fetch(request)
     .then((response) => {
@@ -176,8 +185,12 @@ self.addEventListener('fetch', (event) => {
   }
 
   // 2) Same-origin hashed assets: safe to serve from cache.
+  //    `ignoreVary` — xem ghi chú đầu file: server có thể trả `Vary: Origin`,
+  //    khiến khoá precache (không có Origin) không khớp request script của
+  //    trang (có Origin). Tên file đã hash theo nội dung nên bỏ qua Vary an
+  //    toàn; cross-origin vẫn giữ nguyên tắc tôn trọng Vary.
   if (url.origin === self.location.origin && CACHEABLE_DESTINATIONS.includes(request.destination)) {
-    event.respondWith(staleWhileRevalidate(request, CACHE_NAME));
+    event.respondWith(staleWhileRevalidate(request, CACHE_NAME, { ignoreVary: true }));
     return;
   }
 
