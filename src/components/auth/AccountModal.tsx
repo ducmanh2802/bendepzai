@@ -7,6 +7,9 @@ import { CloudSyncService, type CloudSyncState } from '../../services/cloudSync'
 import { sound } from '../../services/sound';
 import type { ChildProfile } from '../../types';
 
+import firebaseConfig from '../../../firebase-applet-config.json';
+import { Copy, ExternalLink, Check } from 'lucide-react';
+
 interface AccountModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -23,6 +26,19 @@ export const AccountModal: React.FC<AccountModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successNotice, setSuccessNotice] = useState<string | null>(null);
+  const [copiedDomain, setCopiedDomain] = useState(false);
+
+  const currentHostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const firebaseConsoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/authentication/settings`;
+
+  const handleCopyDomain = async () => {
+    sound.playClick?.();
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      await navigator.clipboard.writeText(currentHostname);
+      setCopiedDomain(true);
+      setTimeout(() => setCopiedDomain(false), 2500);
+    }
+  };
 
   if (!isOpen) return null;
   if (typeof document === 'undefined') return null;
@@ -136,9 +152,61 @@ export const AccountModal: React.FC<AccountModalProps> = ({
 
         {/* Alerts */}
         {errorMsg && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border-2 border-rose-200 text-rose-700 text-xs sm:text-sm flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <span className="font-semibold">{errorMsg}</span>
+          <div className="flex flex-col gap-2.5">
+            <div className="p-3.5 rounded-2xl bg-rose-50 border-2 border-rose-200 text-rose-700 text-xs sm:text-sm flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span className="font-semibold">{errorMsg}</span>
+            </div>
+
+            {/* Guided Domain Authorization Box */}
+            {(errorMsg.includes('ủy quyền') || errorMsg.includes('unauthorized-domain')) && (
+              <div className="p-4 rounded-2xl bg-amber-50/90 border-2 border-amber-300 text-xs sm:text-sm text-amber-950 flex flex-col gap-3 shadow-xs">
+                <div className="font-extrabold text-sm flex items-center gap-2 text-amber-900">
+                  <span>🛠️</span>
+                  <span>Cách thêm tên miền vào Firebase (30 giây)</span>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[11px] font-bold text-slate-600">Tên miền của ứng dụng:</span>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 p-2 rounded-xl bg-white border border-amber-200 font-mono text-xs text-slate-800 select-all truncate">
+                      {currentHostname}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={handleCopyDomain}
+                      className="px-3 py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-xs transition-all cursor-pointer shrink-0"
+                    >
+                      {copiedDomain ? (
+                        <>
+                          <Check className="w-3.5 h-3.5" /> Đã chép!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" /> Sao chép
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <ol className="list-decimal list-inside text-xs text-slate-700 space-y-1 font-medium bg-white/60 p-2.5 rounded-xl border border-amber-200/60">
+                  <li>Nhấn nút bên dưới để mở trang <strong>Firebase Authentication Settings</strong>.</li>
+                  <li>Cuộn xuống mục <strong>Authorized domains (Miền được ủy quyền)</strong> rồi bấm <strong>Add domain</strong>.</li>
+                  <li>Dán tên miền vừa sao chép vào rồi bấm <strong>Save</strong>.</li>
+                </ol>
+
+                <a
+                  href={firebaseConsoleUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm"
+                >
+                  <span>Mở Firebase Console để thêm miền</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
+            )}
           </div>
         )}
         {successNotice && (

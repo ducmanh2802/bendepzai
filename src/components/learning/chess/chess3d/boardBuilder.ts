@@ -38,27 +38,27 @@ export function buildChessBoard3D(): BoardMeshRefs {
 
   // Materials
   const lightTileMat = new THREE.MeshStandardMaterial({
-    color: 0xf5eedb, // light cream wood
-    roughness: 0.35,
-    metalness: 0.05,
+    color: 0xfffdf8, // bright satin cream porcelain / light maple
+    roughness: 0.22,
+    metalness: 0.04,
   });
 
   const darkTileMat = new THREE.MeshStandardMaterial({
-    color: 0x8b5a2b, // warm rich walnut
-    roughness: 0.4,
-    metalness: 0.08,
+    color: 0x5b7d42, // bright tournament emerald green (FIDE standard, high contrast & easy on eyes)
+    roughness: 0.28,
+    metalness: 0.06,
   });
 
   const woodFrameMat = new THREE.MeshStandardMaterial({
-    color: 0x3d2314, // deep mahogany border
-    roughness: 0.3,
+    color: 0x4e2712, // rich cherry mahogany border
+    roughness: 0.28,
     metalness: 0.12,
   });
 
   const goldTrimMat = new THREE.MeshStandardMaterial({
-    color: 0xd97706, // subtle gold accent rim
-    roughness: 0.25,
-    metalness: 0.6,
+    color: 0xf59e0b, // brilliant gold accent rim
+    roughness: 0.2,
+    metalness: 0.85,
   });
 
   // 1. Wooden Base Table
