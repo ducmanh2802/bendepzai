@@ -106,6 +106,13 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   `ignoreSearch + ignoreVary`, cross-origin vẫn tôn trọng Vary. Probe chạy lại **3 lần đều
   `QA PASS — 10 step(s), 0 errors`**, học và trả lời câu hỏi được khi offline; hợp đồng
   khoá lại bằng test mới trong `tests/pwa.test.ts`.
+- **Đỏ CI do thiếu lockfile:** lane `3727f04` push lên `main` kèm việc **xoá
+  `package-lock.json`** (3331 dòng) dù message chỉ nói `feat(auth,chess)`; cả 4 workflow đều
+  chạy `npm ci --no-audit --no-fund` nên `npm ci` từ chối cài đặt, và `AGENTS.md` §1.6 coi
+  lockfile là nguồn thật. Merge commit `b123fe9` giữ lại lockfile (package.json giữa hai lane
+  không đổi nên không cần `npm install` lại). Số liệu kiểm kê trong `docs/specs` +
+  `docs/plan` đo lại sau merge: **70 file / 1013 test**, entry `index-_TMkcsWv.js` **512 kB**,
+  `three-vendor` 545.4 / `firebase-vendor` 537.9 / `ChessScreen` 43.5.
 - **Bé lớp 1 không nghe được phép tính (FR-Y02):** đề thi viết ký hiệu — `Tính: 6 + 4 = ?`,
   `Điền số: ... + 27 = 60` — nhưng giọng tiếng Việt của nền tảng bỏ qua `+`, `−`, `=` nên bé
   chỉ nghe "sáu bốn" và mất ngữ cảnh. Đo 2026-10-30: **24/475** câu trong kho thi mang ký

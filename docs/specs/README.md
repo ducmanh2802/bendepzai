@@ -14,12 +14,12 @@ của sản phẩm, từ nghiệp vụ tới từng test. Đọc theo thứ tự
 
 ## Quy ước chung của bộ tài liệu
 
-1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1012 test / 70 file,
-   509 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-10-30** — ngay sau merge
-   `origin/main` mang Firebase cloud-sync + bàn cờ vua WebGL vào — bằng `npx vitest run`,
-   `npm run check:budget` hoặc `ls`. Các số mô tả nội dung học (31/475/1570 câu) giữ nguyên
-   từ đợt đo 2026-10-29 vì merge không đụng `src/data/`. Dấu ✚ trong `BRD.md` nghĩa là
-   "đo trực tiếp từ repo".
+1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1013 test / 70 file,
+   512 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-10-30** — lần cuối ngay sau
+   hai merge `origin/main` (cloud-sync + cờ vua WebGL, rồi `3727f04` auth/chess) — bằng
+   `npx vitest run`, `npm run check:budget` hoặc `ls`. Các số mô tả nội dung học (31/475/1570
+   câu) giữ nguyên từ đợt đo 2026-10-29 vì merge không đụng `src/data/`. Dấu ✚ trong `BRD.md`
+   nghĩa là "đo trực tiếp từ repo".
 2. **Code là nguồn chân lý.** Khi tài liệu cũ (`PRODUCT_SPEC.md`, `MASTER_ROADMAP.md`)
    lệch với `src/`, thì `src/` đúng và tài liệu này phải sửa theo.
 3. **Không có yêu cầu treo.** Một FR không còn chứng cứ phải bị xoá hoặc gắn

@@ -184,11 +184,11 @@ Hai đường, và cả hai đều do người lớn khởi động:
 | Chunk | Nội dung | Lý do |
 |---|---|---|
 | `react-vendor` | `react`, `react-dom` | nhân framework tách khỏi entry để entry không phình theo nội dung |
-| `three-vendor` | `node_modules/three` | bàn cờ vua 3D WebGL **nạp lười**; 544.1 kB không được nằm trên đường tải tiên phong (ADR-17) |
+| `three-vendor` | `node_modules/three` | bàn cờ vua 3D WebGL **nạp lười**; 545.4 kB không được nằm trên đường tải tiên phong (ADR-17) |
 | `firebase-vendor` | `firebase`/`@firebase` | 537.9 kB, chỉ dùng cho cloud-sync tuỳ chọn; tách để entry không phải mang SDK |
 | `math-bank` | `src/data/math/` + `mathCurriculum` | ngân sách sống sót sau khi kho Toán phình |
 | `english-bank` | `src/data/english/` + `englishCurriculum` | tương tự cho kho Anh |
-| entry `index-*.js` | App + services + phần còn lại | **≤ 600 kB (cứng), mục tiêu ≤ 450 kB** — hiện **509 kB** |
+| entry `index-*.js` | App + services + phần còn lại | **≤ 600 kB (cứng), mục tiêu ≤ 450 kB** — hiện **512 kB** |
 
 - Gate: `npm run check:budget` → `scripts/check-bundle-budget.mjs` đọc `dist/index.html`
   để tìm đúng file entry (bảo đảm không cộng nhầm chunk), exit 1 nếu vượt.
@@ -196,7 +196,7 @@ Hai đường, và cả hai đều do người lớn khởi động:
   không thể lệch nhau.
 - Trò chơi nạp lười qua `src/components/games/registry.ts` (`GAME_REGISTRY`, đủ **31** lời gọi `lazy(...)`); 31 trò = 31 chunk nhỏ, không trò nào nằm trong entry.
 - Cờ vua 3D cũng nạp lười: [src/App.tsx:18](file:///D:/trithuc/kho-bau-tri-thuc/src/App.tsx#L18) `lazy(() => import('./components/learning/chess/ChessScreen'))`
-  ⇒ `three-vendor` (544.1 kB) và `ChessScreen` (42.1 kB) chỉ tải khi bé mở bàn cờ; chưa từng mở thì không trả giá.
+  ⇒ `three-vendor` (545.4 kB) và `ChessScreen` (43.5 kB) chỉ tải khi bé mở bàn cờ; chưa từng mở thì không trả giá.
 - Ảnh: emoji + SVG + CSS, không thư viện ảnh. Font tự chứa (không CDN — FR-Y06).
 
 ---
@@ -377,7 +377,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 ### ADR-08 — Ngân sách bundle là gate, không là lời khuyên
 - **Quyết định:** entry ≤ 600 kB chặn `verify`; 450 kB chỉ báo cáo. Script và test dùng
   chung `getBudgetReport()`.
-- **Hệ quả:** áp lực phình entry bị nhìn thấy ngay. **Nợ:** đang 509 kB, cách mục tiêu
+- **Hệ quả:** áp lực phình entry bị nhìn thấy ngay. **Nợ:** đang 512 kB, cách mục tiêu
   ~58 kB; mọi bổ sung lớn vào entry phải kèm lý do.
 
 ### ADR-09 — Bất biến đăng ký trò chơi 4 nơi, khoá bằng test
@@ -397,7 +397,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
   (`Chess3DCanvas.tsx`, 652 dòng) vì cần picking bằng tia và hình khối thật, **với điều kiện**
   ở ADR-17: nằm sau `React.lazy` và trong chunk `three-vendor` riêng.
 - **Hệ quả:** thiết bị yếu vẫn mở cờ tướng mượt; cờ vua 3D là trải nghiệm nặng hơn có chủ
-  đích, trả giá 544.1 kB chỉ khi bé mở màn đó. **Nợ:** chưa có fallback 2D khi
+  đích, trả giá 545.4 kB chỉ khi bé mở màn đó. **Nợ:** chưa có fallback 2D khi
   `requestAnimationFrame`/WebGL context thất bại trên máy cấu hình thấp (§13 nợ #7).
 
 ### ADR-16 — Cloud sync là tuỳ chọn, không phải đường mặc định của dữ liệu
@@ -421,7 +421,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
   và `firebase-vendor` cho `firebase`/`@firebase`; màn dùng chúng luôn được `React.lazy`
   (`App.tsx:18` cho ChessScreen). Gate `check:budget` chỉ đo **entry**, nên nếu ai đó import
   thẳng three.js vào `App.tsx`, entry nhảy ~1.0 MB và gate đỏ ngay.
-- **Hệ quả:** entry giữ 509 kB (< 600 kB) dù tổng build có thêm ~1.08 MB vendor mới;
+- **Hệ quả:** entry giữ 512 kB (< 600 kB) dù tổng build có thêm ~1.08 MB vendor mới;
   người mở cờ vua/đăng nhập trả chi phí tải thêm, người không mở thì không. **Nợ:** ngân sách
   chỉ áp dụng cho entry — chưa có ngưỡng tổng cho từng vendor chunk, và `sw-precache` giờ
   precache cả `three-vendor` (tăng dung lượng cache trên thiết bị yếu).
@@ -470,12 +470,12 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 | Export policy | 17 (693 dòng) | `src/config/policy.ts` |
 | Key `localStorage` | 17 | `STORAGE_KEYS` (16) + key cục bộ IOE (1) |
 | Dependency runtime | 8 | `package.json` → `dependencies` |
-| Test file / test | 70 / 1012 | `npx vitest run` (68 `.ts` + 2 `.tsx`) |
+| Test file / test | 70 / 1013 | `npx vitest run` (68 `.ts` + 2 `.tsx`) |
 | Probe QA | 20 (19 `.mjs` + 1 `.cjs`) | `ls qa/*.mjs qa/*.cjs` (trừ `lib.mjs`, `run-one.mjs`) |
 | Workflow CI | 4 | `.github/workflows/` |
 | MCP server / tool | 5 / 27 | `mcp/` |
-| Main chunk | 509 kB | `npm run check:budget` |
-| Vendor chunk lớn nhất | `three-vendor` 544.1 kB · `firebase-vendor` 537.9 kB · `react-vendor` 213.6 kB | `npm run check:budget` |
+| Main chunk | 512 kB | `npm run check:budget` |
+| Vendor chunk lớn nhất | `three-vendor` 545.4 kB · `firebase-vendor` 537.9 kB · `react-vendor` 213.6 kB | `npm run check:budget` |
 | `App.tsx` / `storage.ts` / `learningOS.ts` / `competitionEngine.ts` / `readingEngine.ts` / `cloudSync.ts` / `firebase.ts` | 436 / 2393 / 842 / 747 / 647 / 224 / 85 dòng | `wc -l` |
 
 ---
@@ -485,7 +485,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 | # | Nợ | Ảnh hưởng | Hướng xử lý |
 |---|---|---|---|
 | 1 | `kho_bau_ioe_store` ngoài `STORAGE_KEYS`, đọc/ghi trực tiếp `localStorage` | thoát khỏi pipeline sanitize; dễ lệch kiểm kê | đưa về registry + `readJSONObject`, thêm test đếm đủ 17 key |
-| 2 | Entry chunk 509 kB so với mục tiêu 450 kB | thiết bị yếu tải chậm hơn mức mong muốn | đo lại sau mỗi mở rộng kho; cân nhắc tách bank Tiếng Việt |
+| 2 | Entry chunk 512 kB so với mục tiêu 450 kB | thiết bị yếu tải chậm hơn mức mong muốn | đo lại sau mỗi mở rộng kho; cân nhắc tách bank Tiếng Việt |
 | 3 | Kid's Box units = 0 | track Anh chưa dùng được như giáo trình | cần nguồn đã xác minh (FR-N04, ADR-15) |
 | 4 | Chưa audit riêng track Kid's Box với trẻ thật | rủi ro trải nghiệm | audit người dùng thật trước khi quảng bá track |
 | 5 | `bun.lock` còn trong repo trong khi npm là nguồn thật | gây nhầm package manager | giữ nguyên + ghi chú (quyết định đã chốt) |
