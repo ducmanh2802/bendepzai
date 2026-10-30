@@ -1,0 +1,196 @@
+{
+  "_comment": "DỮ LIỆU GIẢ ĐỊNH để smoke-test mcp/progress.mjs — không phải hồ sơ của bé nào, không trình bày với phụ huynh như kết quả thật. Shape theo đúng types trong src/types.",
+  "kho_bau_child_profile": {
+    "id": "child_fixture",
+    "name": "Bé A",
+    "grade": 1,
+    "xp": 220,
+    "stars": 18,
+    "gems": 5,
+    "tickets": 4,
+    "streak": 4,
+    "lastActiveDate": "2026-10-29",
+    "completedLessons": ["vn-les-1", "vn-les-2", "math-les-1", "math-les-2", "eng-les-1"],
+    "completedWeeklyChallenges": ["week_1"],
+    "lessonStars": { "vn-les-1": 3, "vn-les-2": 3, "math-les-1": 3, "math-les-2": 2, "eng-les-1": 3 },
+    "chestState": { "vn-les-1": true },
+    "unlockedItems": ["hat_cap", "glasses_nerd", "bag_dino"],
+    "unlockAllLessons": false,
+    "avatarBase": "bear",
+    "equipped": { "hat": "hat_cap", "glasses": "glasses_nerd", "backpack": "bag_dino" },
+    "isDemoData": true
+  },
+  "kho_bau_learning_os_store": {
+    "schemaVersion": "P42-v3",
+    "knowledgeStates": {
+      "vn_alphabet_recognition": {
+        "skillId": "vn_alphabet_recognition",
+        "skillName": "Nhận diện chữ cái",
+        "subject": "tieng-viet",
+        "mastery": 82,
+        "currentLevel": 4,
+        "attemptCount": 21,
+        "correctCount": 18
+      },
+      "vn_rhyme_awareness": {
+        "skillId": "vn_rhyme_awareness",
+        "skillName": "Nhận biết vần",
+        "subject": "tieng-viet",
+        "mastery": 34,
+        "currentLevel": 2,
+        "attemptCount": 9,
+        "correctCount": 3
+      },
+      "math_number_sense_0_10": {
+        "skillId": "math_number_sense_0_10",
+        "skillName": "Cảm số 0-10",
+        "subject": "toan",
+        "mastery": 61,
+        "currentLevel": 3,
+        "attemptCount": 15,
+        "correctCount": 10
+      },
+      "math_word_problem_add": {
+        "skillId": "math_word_problem_add",
+        "skillName": "Toán có lời văn phép cộng",
+        "subject": "toan",
+        "mastery": 22,
+        "currentLevel": 1,
+        "attemptCount": 7,
+        "correctCount": 2
+      }
+    },
+    "recentEvidences": [],
+    "processedEvidenceIds": [],
+    "sessionState": null
+  },
+  "kho_bau_english_mastery_store": {
+    "eng_colors": { "skillName": "Màu sắc", "mastery": 47, "currentLevel": 2, "attemptCount": 8, "correctCount": 4 }
+  },
+  "kho_bau_game_progress": {
+    "version": 1,
+    "games": {
+      "catch_letters": {
+        "unlockedTier": 4,
+        "starsByTier": { "1": 3, "2": 3, "3": 2 },
+        "bestScoreByTier": { "1": 500, "2": 620, "3": 540 },
+        "updatedAt": "2026-10-28"
+      },
+      "shadow_match": {
+        "unlockedTier": 3,
+        "starsByTier": { "1": 3, "2": 1 },
+        "bestScoreByTier": { "1": 300, "2": 120 },
+        "updatedAt": "2026-10-27"
+      }
+    },
+    "updatedAt": "2026-10-28"
+  },
+  "kho_bau_competition_history": {
+    "examResults": [
+      {
+        "id": "exam_fixture_1",
+        "blueprintId": "math-grade1-demo",
+        "examTitle": "Đề thử nghiệm Toán",
+        "subject": "toan",
+        "timestamp": "2026-10-28T09:00:00.000Z",
+        "durationSeconds": 600,
+        "timeUsedSeconds": 420,
+        "totalQuestions": 10,
+        "correctCount": 7,
+        "accuracy": 70,
+        "score": 70,
+        "speedLabel": "Vừa phải",
+        "averageSecondsPerQuestion": 42,
+        "responses": [],
+        "skillBreakdown": {},
+        "strongSkills": ["math_number_sense_0_10"],
+        "weakSkills": ["math_word_problem_add", "math_word_problem_add"],
+        "errorAnalysis": [
+          {
+            "questionId": "q7",
+            "prompt": "Lan có 3 quả, được thêm 2 quả. Hỏi Lan có bao nhiêu quả?",
+            "skillId": "math_word_problem_add",
+            "skillName": "Toán có lời văn phép cộng",
+            "questionType": "multiple_choice",
+            "userAnswer": "3",
+            "correctAnswer": "5",
+            "explanation": "Phép tính là 3 + 2 = 5.",
+            "category": "REASONING_ERROR",
+            "advice": "Đọc đề và gạch chân dữ kiện trước khi tính."
+          }
+        ],
+        "readinessSnapshot": {}
+      }
+    ],
+    "practicedSkills": { "math_word_problem_add": { "attempts": 7, "correct": 2, "lastPracticed": "2026-10-28" } },
+    "speedTrialsCompleted": 2,
+    "remediationPlans": [{ "generatedDate": "2026-10-28", "targetSkills": ["math_word_problem_add"], "completed": false }]
+  },
+  "kho_bau_reading_store": {
+    "schemaVersion": "P42-v3",
+    "metrics": [
+      {
+        "sessionId": "read_fixture_1",
+        "stage": "FLUENCY",
+        "passageId": "pg-1",
+        "subject": "tieng-viet",
+        "accuracy": 91,
+        "comprehensionAccuracy": 66,
+        "questionInterpretationAccuracy": 70,
+        "itemsProcessed": 12,
+        "wordsProcessed": 140,
+        "durationMs": 200000,
+        "averageResponseMs": 4200,
+        "wordsPerMinute": 42,
+        "hesitationCount": 5,
+        "hesitationRatio": 0.3,
+        "difficultyBreakdown": {},
+        "skillPerformance": {},
+        "questionTypePerformance": {},
+        "errors": [],
+        "timestamp": 1761730000000
+      },
+      {
+        "sessionId": "read_fixture_2",
+        "stage": "FLUENCY",
+        "passageId": "pg-2",
+        "subject": "tieng-viet",
+        "accuracy": 95,
+        "comprehensionAccuracy": 80,
+        "questionInterpretationAccuracy": 75,
+        "itemsProcessed": 14,
+        "wordsProcessed": 190,
+        "durationMs": 210000,
+        "averageResponseMs": 3100,
+        "wordsPerMinute": 55,
+        "hesitationCount": 2,
+        "hesitationRatio": 0.14,
+        "difficultyBreakdown": {},
+        "skillPerformance": {},
+        "questionTypePerformance": {},
+        "errors": [],
+        "timestamp": 1761816000000
+      }
+    ],
+    "profile": {
+      "parentRatings": { "pg-1": { "rating": "good", "note": "Con đọc to, rõ." } }
+    }
+  },
+  "kho_bau_motivation": {
+    "schemaVersion": "P42-v3",
+    "stickers": { "star_1": 2, "star_2": 1 },
+    "claimedLevelRewards": [1, 2],
+    "shields": 1,
+    "lastShieldWeek": "2026-W44",
+    "streakDays": ["2026-10-26", "2026-10-27", "2026-10-28", "2026-10-29"],
+    "shieldedDays": [],
+    "shieldsUsedTotal": 1
+  },
+  "kho_bau_analytics": {
+    "gamesPlayedCount": 23,
+    "skillMastery": {
+      "vn_alphabet_recognition": { "subject": "tieng-viet", "attempts": 21, "correctCount": 18 },
+      "math_word_problem_add": { "subject": "toan", "attempts": 7, "correctCount": 2 }
+    }
+  }
+}
