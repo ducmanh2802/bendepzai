@@ -36,6 +36,9 @@ export const GAME_REGISTRY: Record<string, React.LazyExoticComponent<React.Compo
   little_scientist: lazy(() => import('./LittleScientistGame').then((m) => ({ default: m.LittleScientistGame }))),
   memory_cards: lazy(() => import('./MemoryCardsGame').then((m) => ({ default: m.MemoryCardsGame }))),
   coloring_canvas: lazy(() => import('./ColoringCanvasGame').then((m) => ({ default: m.ColoringCanvasGame }))),
+  connect_dots: lazy(() => import('./ConnectDotsGame').then((m) => ({ default: m.ConnectDotsGame }))),
+  shadow_match: lazy(() => import('./ShadowMatchGame').then((m) => ({ default: m.ShadowMatchGame }))),
+  pixel_mosaic: lazy(() => import('./PixelMosaicGame').then((m) => ({ default: m.PixelMosaicGame }))),
 };
 
 export const GAME_COMPONENT_REGISTRY = GAME_REGISTRY;

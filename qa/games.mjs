@@ -35,6 +35,9 @@ const GAME_TITLES = [
   'Nhà Khoa Học Nhí',
   'Lật Thẻ Trí Nhớ Vàng',
   'Bé Tập Vẽ & Tô Màu Diệu Kỳ',
+  'Nối Số Tô Màu',
+  'Đoán Bóng Hình',
+  'Bé Xếp Hình Mosaic',
 ];
 
 const CLICK = { timeout: 12000 };

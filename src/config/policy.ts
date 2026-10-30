@@ -288,6 +288,9 @@ export const LAUNCHABLE_GAME_IDS = [
   'little_scientist',
   'memory_cards',
   'coloring_canvas',
+  'connect_dots',
+  'shadow_match',
+  'pixel_mosaic',
 ] as const;
 
 /** Deterministic seed defaults so every assembly path is reproducible. */
