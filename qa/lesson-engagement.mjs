@@ -227,6 +227,19 @@ export default async function run(page) {
     if (maxCombo < 2) out.errors.push(`combo cao nhất chỉ ${maxCombo}, phải ≥ 2 khi đúng liên tiếp`);
     if (r2.bestCombo !== Math.max(maxCombo, 1))
       out.errors.push(`"Chuỗi dài nhất" hiện ${r2.bestCombo}, phải ${Math.max(maxCombo, 1)}`);
+    // Lượt ôn chỉ được 5 XP luyện lại (StorageService.completeLesson), nên màn
+    // kết quả không được báo lại Sao/Vé của bài đầu tiên (T27).
+    const reviewReward = await page
+      .locator('[data-testid="lesson-review-reward"]')
+      .first()
+      .innerText()
+      .catch(() => '');
+    step('reviewReward', { text: reviewReward.replace(/\s+/g, ' ') });
+    if (!/\+5 XP/.test(reviewReward)) out.errors.push(`lượt ôn không báo +5 XP: "${reviewReward}"`);
+    if (/Sao/.test(reviewReward.replace(/không thêm Sao[^.!]*/i, '')))
+      out.errors.push(`lượt ôn vẫn hứa Sao: "${reviewReward}"`);
+    if (/Vé/.test(reviewReward.replace(/không thêm[^.!]*/i, '')))
+      out.errors.push(`lượt ôn vẫn hứa Vé: "${reviewReward}"`);
     await shot('04-result-three-stars');
 
     // 4) Bố cục điện thoại không tràn ngang.
@@ -235,6 +248,16 @@ export default async function run(page) {
     );
     out.facts.overflowPx = overflowPx;
     if (overflowPx > 2) out.errors.push(`tràn ngang ${overflowPx}px ở màn 390px`);
+
+    // 5) Đổi độ khó ngay ở màn kết quả phải bắt đầu lượt mới, không để bé kẹt
+    // ở màn kết quả "0 / N" với 1 sao (T27).
+    await page.locator('[title^="Chế độ Thử thách"]').first().click(CLICK);
+    await page.waitForSelector('text=Câu hỏi 1', { timeout: 8000 });
+    await page.waitForTimeout(250);
+    const starsGone = await page.locator('[data-testid="lesson-stars"]').count();
+    step('difficultyRestartsRun', { starsGone });
+    if (starsGone > 0) out.errors.push('bấm "Nâng cao" ở màn kết quả vẫn còn màn kết quả');
+    await shot('05-difficulty-restart');
   } catch (e) {
     out.errors.push('EXCEPTION: ' + (e && e.message ? String(e.message).slice(0, 700) : String(e)));
     out.failedAt = out.steps.length ? out.steps[out.steps.length - 1].step : 'start';

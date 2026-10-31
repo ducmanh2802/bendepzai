@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const createMockLocalStorage = () => {
   let store: Record<string, string> = {};
@@ -124,5 +127,50 @@ describe('T26 — lưu tiến độ thế cờ', () => {
     StorageService.markCotuongPuzzleSolved('ct-pz-3');
     StorageService.resetProgress();
     expect(StorageService.getCotuongSolvedPuzzles()).toEqual([]);
+  });
+});
+
+describe('T26 — bàn cờ không nhận thao tác ngoài trạng thái chơi', () => {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const view = readFileSync(
+    join(here, '..', 'src/components/learning/cotuong/CotuongPuzzlesView.tsx'),
+    'utf8'
+  );
+
+  it('chặn chọn quân khi đang hiện nước chiếu suông hoặc đã giải', () => {
+    expect(view).toMatch(/if \(status !== 'playing'\) return;/);
+    expect(view).not.toMatch(/if \(status === 'solved'\) return;/);
+  });
+
+  it('trả bàn cờ sau nước chiếu suông thì xoá cả quân đang chọn và nước hợp lệ', () => {
+    const timerStart = view.indexOf('revertTimer.current = window.setTimeout(');
+    expect(timerStart).toBeGreaterThan(-1);
+    const timer = view.slice(timerStart, view.indexOf('}, 1100);', timerStart));
+    for (const reset of [
+      'setBoard(activePuzzle.createBoard())',
+      'setLastMove(null)',
+      'setSelected(null)',
+      'setLegal([])',
+      'setMissNotice(false)',
+      "setStatus('playing')",
+    ]) {
+      expect(timer, reset).toContain(reset);
+    }
+  });
+
+  it('lời nhắc "chưa chiếu" chỉ hiện sau nước đi sai, không hiện lại sau nước chiếu suông', () => {
+    const missRender = view.indexOf('{status === \'playing\' && missNotice && (');
+    expect(missRender).toBeGreaterThan(-1);
+    expect(view).not.toMatch(/status === 'playing' && misses > 0/);
+    const timerStart = view.indexOf('revertTimer.current = window.setTimeout(');
+    const timer = view.slice(timerStart, view.indexOf('}, 1100);', timerStart));
+    expect(timer).not.toContain('setMissNotice(true)');
+  });
+
+  it('overlay báo đúng: giải lại thế đã giải thì không thêm XP', () => {
+    expect(view).toContain('data-testid="ct-puzzle-reward"');
+    expect(view).toContain('const [rewardedNow, setRewardedNow] = useState(false);');
+    expect(view).toMatch(/const firstTime = StorageService\.markCotuongPuzzleSolved\(activePuzzle\.id\);\s*setRewardedNow\(firstTime\);/);
+    expect(view).toContain('Đã giải trước đó — ôn lại không thêm XP');
   });
 });

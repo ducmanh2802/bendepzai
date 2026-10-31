@@ -5,8 +5,8 @@
 > coi là xanh**. Danh sách yêu cầu cần kiểm: [`SRS.md`](../specs/SRS.md); ánh xạ
 > yêu cầu ↔ test ↔ probe ↔ gate: [`RTM.md`](../specs/RTM.md); quy trình: [`../SDLC.md`](../SDLC.md).
 >
-> **Số liệu chốt 2026-10-31** (đo lại sau T26 cờ tướng + T27 học hấp dẫn hơn): 73 file test / 1052 test ·
-> 23 probe (22 `.mjs` + 1 `.cjs`) · 4 workflow CI · 3 git hook · main chunk 533.6 kB / trần
+> **Số liệu chốt 2026-10-31** (đo lại sau vòng sửa bug T26 cờ tướng + T27 học hấp dẫn hơn): 73 file test / 1058 test ·
+> 23 probe (22 `.mjs` + 1 `.cjs`) · 4 workflow CI · 3 git hook · main chunk 533.8 kB / trần
 > 600 kB; vendor ngoài entry: `three-vendor` 545.4 kB, `firebase-vendor` 537.9 kB.
 
 ---
@@ -35,7 +35,7 @@ Lớp 5  Người lớn đọc to + beta trẻ thật          → §11   (2 phi
 Lớp 4  Thiết bị thật: Android/iOS, offline, audio → §7    (qa/mobile.mjs + tay người)
 Lớp 3  Probe trình duyệt trên dist/ (23 probe)    → §6    (npm run qa:smoke)
 Lớp 2  Build + ngân sách + precache               → §9    (npm run build && npm run check:budget)
-Lớp 1  Unit/integration Vitest (1052 test)        → §5    (npm run test:ci)
+Lớp 1  Unit/integration Vitest (1058 test)        → §5    (npm run test:ci)
 ────────────────────────────────────────────────────────────────────────────────────────────
               npm run verify = typecheck + Lớp 1 + Lớp 2   ← cổng duy nhất
 ```
@@ -198,7 +198,7 @@ Nợ đã biết: selector `qa/games.mjs` từng khiến probe `SKIPPED` ở m�
 | Precache | `tests/sw-precache.test.ts`, `qa/offline-pwa.mjs` | manifest đủ `/assets/*`; placeholder dev ⇒ danh sách rỗng nhưng SW vẫn sống | — |
 | Loại trừ | `node_modules`, `.git`, `dist` không vào manifest | — | — |
 
-**Số đo gần nhất (2026-10-31):** `index-B0-nRwl6.js = 533.6 kB` → PASS trần, **trên** mục tiêu 450 kB.
+**Số đo gần nhất (2026-10-31):** `index-Z0QUlAuF.js = 533.8 kB` → PASS trần, **trên** mục tiêu 450 kB.
 
 ---
 

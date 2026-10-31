@@ -14,9 +14,10 @@ của sản phẩm, từ nghiệp vụ tới từng test. Đọc theo thứ tự
 
 ## Quy ước chung của bộ tài liệu
 
-1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1052 test / 73 file,
-   533.6 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-10-31** — lần cuối ngay sau
-   T26 (cờ tướng luyện thế cờ) và T27 (học hấp dẫn hơn), trên nền hai merge `origin/main`
+1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1058 test / 73 file,
+   533.8 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-10-31** — lần cuối ngay sau
+   vòng sửa bug T26/T27 (bàn cờ trả về, thưởng XP giải lại, lượt ôn 5 XP, đổi độ khó), trên nền
+   hai merge `origin/main`
    (cloud-sync + cờ vua WebGL, rồi `3727f04` auth/chess) và merge `fd3e7da` — bằng
    `npx vitest run`, `npm run check:budget` hoặc `ls`. Các số mô tả nội dung học (31/475/1570
    câu) giữ nguyên từ đợt đo 2026-10-29 vì T26/T27 không đụng `src/data/`. Dấu ✚ trong `BRD.md`

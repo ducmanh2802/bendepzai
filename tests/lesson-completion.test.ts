@@ -47,9 +47,14 @@ describe('lesson result screen', () => {
   });
 
   it('"Học lại" starts the lesson again from a clean state', () => {
-    const retry = body('handleRetryLesson');
+    // Mọi lượt mới đi qua startRun() để không sót trạng thái của lượt trước (T27).
+    expect(body('handleRetryLesson')).toContain('startRun(difficultyMode);');
+    const startRun = lp.slice(
+      lp.indexOf('const startRun = ('),
+      lp.indexOf('\n  };', lp.indexOf('const startRun = ('))
+    );
     for (const reset of ['setCurrentIdx(0)', 'setScore(0)', 'setIsAnswerChecked(false)', 'setIsFinished(false)']) {
-      expect(retry, reset).toContain(reset);
+      expect(startRun, reset).toContain(reset);
     }
   });
 });

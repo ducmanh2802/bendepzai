@@ -199,7 +199,7 @@
 | NFR-M01 | `package.json` (`verify`, `verify:quick`) | — | — | V,H,1,2 | ĐẠT |
 | NFR-M02 | `src/config/policy.ts` (17 export, có rationale) | test theo từng policy block | — | V,1 | ĐẠT |
 | NFR-M03 | ADR-03; `src/services/answerCheck.ts` | `tests/answerCheck.test.ts`, `tests/competition-engine.test.ts` | `qa/question-types.mjs` | V,1 | ĐẠT |
-| NFR-M04 | `tests/` naming | 73 file / 1052 test | — | V,H,1 | ĐẠT |
+| NFR-M04 | `tests/` naming | 73 file / 1058 test | — | V,H,1 | ĐẠT |
 | NFR-M05 | `package.json` (8 runtime deps; `@types/three` sai chỗ — nợ #8 ARCHITECTURE §13) | `tests/t23-mcp-servers.test.ts` | — | V,H,1 | ĐẠT |
 | NFR-M06 | `mcp/lib/server.mjs` | `tests/t23-mcp-servers.test.ts` | — | V,1 | ĐẠT |
 

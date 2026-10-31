@@ -130,7 +130,7 @@ mặc định, GPU/3D nặng ngoài màn cờ vua.
 **Lợi ích:** bé tự học được; phụ huynh có bằng chứng thay vì cảm tính; giáo viên nhận
 được file chẩn đoán; người bảo trì không sợ "sửa nội dung là sập app".
 
-**Chi phí vận hành thực tế (đo 2026-10-31):** `npm run verify` gồm typecheck + 1052 test
+**Chi phí vận hành thực tế (đo 2026-10-31):** `npm run verify` gồm typecheck + 1058 test
 trong 73 file (riêng suite test ~20 s) + build + budget; probe QA cần Chromium của
 Playwright và `dist/`. Không có chi phí server **cho người dùng chưa bật sync**; từ khi có
 `firebase ^13.1.0`, chi phí Firestore thuộc project Firebase của người vận hành và chưa được
@@ -159,9 +159,9 @@ Một bản được gọi là "phát hành được" khi:
 | Bậc độ khó mỗi trò | 6, số câu `[5, 6, 6, 7, 8, 8]` | `defaultRoundsPerTier()` trong `src/data/gameLevels.ts` |
 | Chủ đề / bài / câu nội dung học (đếm **runtime**, import array trong test tạm) | Tiếng Việt 15/58/612 · Toán 13/26/260 · Tiếng Anh 24/40/434 · Em & Cuộc sống 14/26/264 → **tổng 66 chủ đề, 150 bài, 1570 câu** | `*_TOPICS` trong `src/data/*Curriculum.ts` (đếm tĩnh bằng grep bỏ sót câu sinh qua factory) |
 | Luyện đọc | 36 đoạn · 192 câu hỏi | `READING_PASSAGES`, `READING_QUESTIONS` trong `src/data/readingContent.ts` |
-| Unit test | 73 file / 1052 test, xanh | `npx vitest run` (71 `.ts` + 2 `.tsx`) |
+| Unit test | 73 file / 1058 test, xanh | `npx vitest run` (71 `.ts` + 2 `.tsx`) |
 | Probe trình duyệt | 23 probe (22 `.mjs` + 1 `.cjs`, không tính `lib.mjs`, `run-one.mjs`) | `ls qa/*.mjs` |
-| Main chunk | 533.6 kB (ngân sách 600, mục tiêu 450) | `npm run check:budget` |
+| Main chunk | 533.8 kB (ngân sách 600, mục tiêu 450) | `npm run check:budget` |
 | Chunk vendor lớn | `three-vendor` 545.4 kB · `firebase-vendor` 537.9 kB · `react-vendor` 213.6 kB — tất cả ngoài entry | `npm run check:budget` |
 | Kho câu thi | **475 câu** (256 trắc nghiệm · 55 nối · 46 điền · 42 xếp thứ tự · 39 đúng/sai · 24 phân loại · 13 kéo-thả), phủ đủ 26/26 kỹ năng taxonomy; đề thi phân môn: Toán 165 · Tiếng Anh 162 · Tiếng Việt 148 | `COMPETITION_QUESTIONS` (gồm `EXAM_FORMAT_QUESTIONS` 29 · `EXPANSION_QUESTIONS` 54 · `P36_QUESTIONS` 271 · `TOURNAMENT_QUESTIONS` 72), bank version 6 |
 | Blueprint đề thi | 16 preset: 6 mini-test · 2 full-mock · 2 speed-trial · 6 tournament; số câu 6→30 | `EXAM_BLUEPRINTS` trong `src/data/competitionBlueprints.ts` |

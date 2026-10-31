@@ -82,15 +82,41 @@ describe('T27 combo, đồng hồ và ôn câu sai trong LessonPlayerModal', () 
     const start = lp.indexOf('const handleReviewMissed = () => {');
     expect(start).toBeGreaterThan(-1);
     const fn = lp.slice(start, lp.indexOf('\n  };', start));
+    expect(fn).toContain('startRun(difficultyMode, missed.map((m) => m.id))');
+    expect(lp).toMatch(/const onlyMissed = base\.filter\(\(q\) => reviewSet\.has\(q\.id\)\)/);
+  });
+
+  it('mọi lượt mới (đổi độ khó, học lại, ôn câu sai) đều reset đủ trạng thái', () => {
+    const start = lp.indexOf('const startRun = (');
+    expect(start).toBeGreaterThan(-1);
+    const fn = lp.slice(start, lp.indexOf('\n  };', start));
     for (const reset of [
-      'setReviewIds(missed.map((m) => m.id))',
+      'setReviewIds(review)',
       'setCurrentIdx(0)',
       'setScore(0)',
       'setIsFinished(false)',
+      'setBestCombo(0)',
       'setMissed([])',
+      'setElapsedSec(0)',
     ]) {
       expect(fn, reset).toContain(reset);
     }
-    expect(lp).toMatch(/const onlyMissed = base\.filter\(\(q\) => reviewSet\.has\(q\.id\)\)/);
+    // Hai nút độ khó phải đi qua startRun, nếu không bé bấm ở màn kết quả sẽ
+    // thấy "0 / N" ngay trên màn kết quả thay vì bắt đầu lượt mới.
+    expect(lp).toContain("startRun('standard')");
+    expect(lp).toContain("startRun('challenge')");
+    expect(lp).toContain('startRun(difficultyMode);');
+  });
+
+  it('lượt ôn chỉ báo 5 XP luyện lại, không hứa lại Sao/Vé', () => {
+    expect(lp).toContain('data-testid="lesson-review-reward"');
+    expect(lp).toContain('Ôn tập xong! +5 XP luyện lại');
+    const rewardStart = lp.indexOf('data-testid="lesson-review-reward"');
+    const rewardEnd = lp.indexOf(') : (', rewardStart);
+    expect(rewardStart).toBeGreaterThan(-1);
+    expect(rewardEnd).toBeGreaterThan(rewardStart);
+    const reviewBlock = lp.slice(rewardStart, rewardEnd);
+    expect(reviewBlock).not.toContain('lesson.starReward');
+    expect(reviewBlock).not.toContain('Vé Chơi');
   });
 });

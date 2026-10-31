@@ -146,6 +146,22 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
 - **Header bài học tràn ở 390 px (T27):** khi thêm bộ chọn độ khó + cụm điểm vào cùng hàng,
   nút đóng (X) bị đẩy ra ngoài màn hình; tách header thành hai hàng (tên bài + đồng hồ +
   đóng / độ khó + điểm), `min-w-[44px] min-h-[44px]` cho nút đóng, đo lại `overflowPx: 0`.
+- **Vòng sửa bug T26/T27 (soát lại sau khi có bằng chứng trình duyệt), 5 lỗi thật:**
+  - Bàn cờ tướng vẫn nhận thao tác khi đang hiện nước chiếu suông: bé bấm quân trong 1,1 s
+    "bàn cờ tạm" rồi bàn cờ trả về sẽ giữ `selected`/`legal` tính trên thế cờ khác. Chặn mọi
+    thao tác khi `status !== 'playing'`, và timer trả bàn cờ xoá sạch quân đang chọn.
+  - Đã xoá lời nhắc "Nước này chưa chiếu" ngay sau nước **chiếu suông**: trước đây `misses`
+    tăng nên sau khi bàn cờ trả về bé vừa đọc "Chiếu rồi!" lại thấy "chưa chiếu"; tách cờ
+    `missNotice` và tắt trong timer trả bàn cờ.
+  - Overlay thế cờ giải lại vẫn ghi "+25 XP" dù `markCotuongPuzzleSolved` trả `false` và
+    không cộng XP; giờ hiện "Đã giải trước đó — ôn lại không thêm XP" (probe đọc XP trước/sau
+    để chắc không đổi).
+  - Đổi độ khó (Chuẩn/Thử thách) ở **màn kết quả** chỉ reset điểm: bé kẹt ở màn kết quả với
+    "0 / N" và 1 sao. Gom mọi reset vào `startRun()`, dùng chung cho học lại, ôn câu sai và
+    đổi độ khó.
+  - Lượt **ôn câu sai** vẫn hiện khối thưởng "+Sao / +XP / +1 Vé" dù `completeLesson` chỉ
+    cộng 5 XP luyện lại; giờ hiện khối `lesson-review-reward` nói đúng "+5 XP" và ghi rõ
+    không thêm Sao/Vé.
 - **Hồi quy offline (FR-Y03 / NFR-R01):** chunk lazy (`SubjectScreen`,
   `LessonPlayerModal`, `praiseEngine`, `questionAudio`…) chết `net::ERR_FAILED` khi tắt
   mạng, bé không mở được môn học nào — `qa/offline-pwa.mjs` đỏ 2/2 lần chạy. Nguyên nhân
@@ -243,6 +259,12 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   passed, main chunk `index-B0-nRwl6.js` **533.6 kB PASS** (trần 600; con số script in nhãn
   `kB` nhưng chia 1024). Probe mới `qa/cotuong-puzzles.mjs` (5 step) và
   `qa/lesson-engagement.mjs` (3 step) đều `QA PASS`, 0 lỗi.
+- **Đo lại sau vòng sửa bug T26/T27**: `npm run verify` **EXIT=0** — typecheck sạch,
+  **73 file / 1058 test** passed (+6 test hồi quy cho 5 bug), main chunk
+  `index-Z0QUlAuF.js` **533.8 kB PASS**. Probe mở rộng: `qa/cotuong-puzzles.mjs` (7 step:
+  chặn thao tác khi bàn cờ tạm, không thưởng XP khi giải lại) và `qa/lesson-engagement.mjs`
+  (5 step: khối thưởng lượt ôn "+5 XP", đổi độ khó ở màn kết quả mở lượt mới) đều
+  `QA PASS — 0 errors`; `lesson-completion.test.ts` chuyển sang kiểm `startRun()`.
 
 ## [1.0.0] - baseline
 

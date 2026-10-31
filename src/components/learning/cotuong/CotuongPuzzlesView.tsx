@@ -21,9 +21,14 @@ export const CotuongPuzzlesView: React.FC = () => {
   const [lastMove, setLastMove] = useState<E.Move | null>(null);
   const [status, setStatus] = useState<PuzzleStatus>('playing');
   const [misses, setMisses] = useState(0);
+  // Lời nhắc "chưa chiếu" phải tắt khi bàn cờ trả về sau nước chiếu suông, nếu
+  // không bé vừa đọc "Chiếu rồi!" lại thấy "Nước này chưa chiếu" (T26).
+  const [missNotice, setMissNotice] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [solvedIds, setSolvedIds] = useState<string[]>(() => StorageService.getCotuongSolvedPuzzles());
   const [gameKey, setGameKey] = useState(0);
+  // Giải lại thế đã giải trước đó không thưởng XP; overlay phải nói đúng như vậy.
+  const [rewardedNow, setRewardedNow] = useState(false);
   // Nước "chiếu nhưng chưa bí" chỉ hiện trên bàn ~1 giây rồi trả lại thế cờ.
   const revertTimer = useRef<number | null>(null);
 
@@ -44,7 +49,9 @@ export const CotuongPuzzlesView: React.FC = () => {
     setLastMove(null);
     setStatus('playing');
     setMisses(0);
+    setMissNotice(false);
     setShowHint(false);
+    setRewardedNow(false);
     setGameKey((k) => k + 1);
   };
 
@@ -60,13 +67,16 @@ export const CotuongPuzzlesView: React.FC = () => {
     fireCelebrationConfetti();
     sound.speak('Chính xác! Bé đã chiếu bí Tướng Đen!');
     const firstTime = StorageService.markCotuongPuzzleSolved(activePuzzle.id);
+    setRewardedNow(firstTime);
     setSolvedIds(StorageService.getCotuongSolvedPuzzles());
     // Chỉ thưởng XP cho thế cờ giải lần đầu, tránh cày sao bằng cách giải lại.
     if (firstTime) StorageService.recordGamePlayed(25, 2, 'cotuong');
   };
 
   const onSquareClick = (r: number, c: number) => {
-    if (status === 'solved') return;
+    // Đang hiện nước chiếu suông (bàn cờ tạm) hoặc đã giải: không cho chọn quân,
+    // tránh giữ lại nước đi tính trên thế cờ khác sau khi bàn cờ trả về (T26).
+    if (status !== 'playing') return;
 
     if (selected) {
       const mv = legal.find((m) => m.to[0] === r && m.to[1] === c);
@@ -91,12 +101,16 @@ export const CotuongPuzzlesView: React.FC = () => {
           revertTimer.current = window.setTimeout(() => {
             setBoard(activePuzzle.createBoard());
             setLastMove(null);
+            setSelected(null);
+            setLegal([]);
+            setMissNotice(false);
             setStatus('playing');
             setGameKey((k) => k + 1);
           }, 1100);
           return;
         }
         setStatus('playing');
+        setMissNotice(true);
         const nextMisses = misses + 1;
         setMisses(nextMisses);
         if (nextMisses >= MISS_LIMIT_FOR_HINT) setShowHint(true);
@@ -220,7 +234,7 @@ export const CotuongPuzzlesView: React.FC = () => {
               Chiếu rồi! Nhưng Tướng Đen vẫn còn đường thoát — bé tìm nước chiếu bí nhé.
             </div>
           )}
-          {status === 'playing' && misses > 0 && (
+          {status === 'playing' && missNotice && (
             <div
               data-testid="ct-puzzle-feedback"
               className="mb-3 p-2.5 rounded-2xl bg-rose-50 border-2 border-rose-200 text-xs text-rose-800 font-bold animate-shake"
@@ -258,9 +272,16 @@ export const CotuongPuzzlesView: React.FC = () => {
                 <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-xs sm:text-sm text-emerald-900 font-bold text-left leading-relaxed">
                   {activePuzzle.explanation}
                 </div>
-                <div className="flex items-center justify-center gap-3 py-2 bg-amber-50 rounded-2xl border border-amber-200 text-amber-800 font-black text-sm">
+                <div
+                  data-testid="ct-puzzle-reward"
+                  className="flex items-center justify-center gap-3 py-2 bg-amber-50 rounded-2xl border border-amber-200 text-amber-800 font-black text-sm"
+                >
                   <Star className="w-5 h-5 fill-amber-400 text-amber-500" />
-                  <span>+25 XP Thử Thách Cờ Tướng</span>
+                  <span>
+                    {rewardedNow
+                      ? '+25 XP Thử Thách Cờ Tướng'
+                      : 'Đã giải trước đó — ôn lại không thêm XP'}
+                  </span>
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button

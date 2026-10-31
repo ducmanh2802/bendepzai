@@ -74,6 +74,33 @@ export default async function run(page) {
     if (!/chưa chiếu/i.test(missText)) out.errors.push(`lời nhắc nước sai lạ: "${missText}"`);
     await shot('02-miss-feedback');
 
+    // 1b) Nước chiếu suông: bàn cờ hiện 1,1 giây rồi trả lại. Trong lúc đó bấm
+    // quân không được giữ lựa chọn, và sau khi trả bàn cờ không còn quân chọn
+    // hay ô đích cũ (T26 — lựa chọn tính trên thế cờ tạm từng bị giữ lại).
+    await page.locator('[data-testid="ct-puzzle-reset"]').first().click(CLICK);
+    await page.waitForTimeout(200);
+    await makeMove([1, 8], [1, 4]); // Xe chiếu Tướng Đen nhưng chưa bí
+    const checkText = (await page.locator('[data-testid="ct-puzzle-feedback"]').first().innerText()).trim();
+    await cell(1, 4).click(CLICK); // bấm quân Đỏ đang chiếu: phải bị chặn
+    await page.waitForTimeout(120);
+    const selectedDuringCheck = await page.locator('.ct-sel-ring').count();
+    await shot('02b-check-revert');
+    await page.waitForTimeout(1500);
+    const afterRevert = await page.evaluate(() => ({
+      selRing: document.querySelectorAll('.ct-sel-ring').length,
+      targets: document.querySelectorAll('.ct-cell.is-target').length,
+      feedback: !!document.querySelector('[data-testid="ct-puzzle-feedback"]'),
+    }));
+    const progressAfterRevert = await progressText();
+    step('checkRevertGuard', { checkText, selectedDuringCheck, afterRevert, progressAfterRevert });
+    if (!/Chiếu rồi/i.test(checkText)) out.errors.push(`nước chiếu suông không báo đúng: "${checkText}"`);
+    if (selectedDuringCheck > 0)
+      out.errors.push('bấm quân trong lúc hiện nước chiếu suông vẫn tạo quân đang chọn');
+    if (afterRevert.selRing || afterRevert.targets || afterRevert.feedback)
+      out.errors.push(`sau khi trả bàn cờ còn trạng thái cũ: ${JSON.stringify(afterRevert)}`);
+    if (progressAfterRevert !== '0/6 thế')
+      out.errors.push(`trả bàn cờ lại làm tăng tiến độ: "${progressAfterRevert}"`);
+
     // 2) Làm lại rồi giải thế 1: Mã [4,2] → [2,3] chiếu bí.
     await page.locator('[data-testid="ct-puzzle-reset"]').first().click(CLICK);
     await page.waitForTimeout(200);
@@ -85,6 +112,7 @@ export default async function run(page) {
     const ids1 = await solvedIds();
     step('puzzle1Solved', { progress: progress1, ids: ids1, overlay: s1.replace(/\s+/g, ' ').slice(0, 120) });
     if (!/CHIẾU BÍ THÀNH CÔNG/.test(s1)) out.errors.push('không thấy màn chúc mừng chiếu bí');
+    if (!/\+25 XP/.test(s1)) out.errors.push('màn chúc mừng lần đầu không báo +25 XP');
     if (progress1 !== '1/6 thế') out.errors.push(`tiến độ sau thế 1 "${progress1}", phải "1/6 thế"`);
     if (!Array.isArray(ids1) || !ids1.includes('ct-pz-1'))
       out.errors.push(`localStorage chưa lưu ct-pz-1: ${JSON.stringify(ids1)}`);
@@ -127,6 +155,29 @@ export default async function run(page) {
       out.errors.push(`sau reload tiến độ còn "${progressAfterReload}", phải "2/6 thế"`);
     if (solvedBadges < 2) out.errors.push(`chỉ ${solvedBadges} thế hiện huy hiệu "Đã giải", phải ≥ 2`);
     await shot('05-after-reload');
+
+    // 4b) Giải lại thế đã giải: không cộng XP và overlay phải nói rõ (T26).
+    const xpOf = () =>
+      page.evaluate(() => {
+        try {
+          return JSON.parse(localStorage.getItem('kho_bau_child_profile') || '{}').xp ?? 0;
+        } catch {
+          return 'PARSE_ERROR';
+        }
+      });
+    const xpBeforeReplay = await xpOf();
+    await makeMove([4, 2], [2, 3]);
+    await page.locator('[data-testid="ct-puzzle-success"]').first().waitFor({ state: 'visible', timeout: 8000 });
+    const replayRewardText = (
+      await page.locator('[data-testid="ct-puzzle-reward"]').first().innerText()
+    ).trim();
+    const xpAfterReplay = await xpOf();
+    step('replayNoReward', { xpBeforeReplay, xpAfterReplay, replayRewardText });
+    if (!/Đã giải trước đó/.test(replayRewardText))
+      out.errors.push(`overlay giải lại vẫn hứa XP: "${replayRewardText}"`);
+    if (xpAfterReplay !== xpBeforeReplay)
+      out.errors.push(`giải lại thế đã giải vẫn đổi XP: ${xpBeforeReplay} → ${xpAfterReplay}`);
+    await shot('06-replay-no-reward');
 
     // 5) Bố cục điện thoại: không tràn ngang, nút bấm đủ lớn.
     const layout = await page.evaluate(() => {

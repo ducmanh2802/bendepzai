@@ -305,8 +305,12 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
     onClose();
   };
 
-  const handleRetryLesson = () => {
-    sound.playClick();
+  // Bắt đầu một lượt mới (đổi độ khó, học lại, ôn câu sai): xoá sạch trạng thái
+  // của lượt trước. Nếu chỉ reset điểm như trước, bấm đổi độ khó ở màn kết quả
+  // sẽ để bé kẹt ở màn kết quả với "0 / N" và 1 sao (T27).
+  const startRun = (mode: 'standard' | 'challenge', review: string[] | null = null) => {
+    setDifficultyMode(mode);
+    setReviewIds(review);
     setCurrentIdx(0);
     setScore(0);
     setSelectedAnswer(null);
@@ -320,30 +324,19 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
     setCombo(0);
     setBestCombo(0);
     setMissed([]);
-    setReviewIds(null);
     setElapsedSec(0);
     startedAtRef.current = Date.now();
+  };
+
+  const handleRetryLesson = () => {
+    sound.playClick();
+    startRun(difficultyMode);
   };
 
   const handleReviewMissed = () => {
     sound.playClick();
     if (missed.length === 0) return;
-    setReviewIds(missed.map((m) => m.id));
-    setCurrentIdx(0);
-    setScore(0);
-    setSelectedAnswer(null);
-    setOrderedList([]);
-    setMatchingState({});
-    setDragItem(null);
-    setIsAnswerChecked(false);
-    setIsCorrect(false);
-    setShowHint(false);
-    setIsFinished(false);
-    setCombo(0);
-    setBestCombo(0);
-    setMissed([]);
-    setElapsedSec(0);
-    startedAtRef.current = Date.now();
+    startRun(difficultyMode, missed.map((m) => m.id));
   };
 
   const handleRetryCurrentQuestion = () => {
@@ -615,16 +608,7 @@ return (
                 type="button"
                 onClick={() => {
                   sound.playClick();
-                  setDifficultyMode('standard');
-                  setCurrentIdx(0);
-                  setScore(0);
-                  setIsAnswerChecked(false);
-                  setIsCorrect(false);
-                  setCombo(0);
-                  setMissed([]);
-                  setReviewIds(null);
-                  setElapsedSec(0);
-                  startedAtRef.current = Date.now();
+                  startRun('standard');
                 }}
                 title="Chế độ học bình thường"
                 className={`px-2 py-0.5 rounded-full transition-all cursor-pointer ${
@@ -639,16 +623,7 @@ return (
                 type="button"
                 onClick={() => {
                   sound.playClick();
-                  setDifficultyMode('challenge');
-                  setCurrentIdx(0);
-                  setScore(0);
-                  setIsAnswerChecked(false);
-                  setIsCorrect(false);
-                  setCombo(0);
-                  setMissed([]);
-                  setReviewIds(null);
-                  setElapsedSec(0);
-                  startedAtRef.current = Date.now();
+                  startRun('challenge');
                 }}
                 title="Chế độ Thử thách Nâng cao: Đề khó hơn và tặng thêm +50% XP"
                 className={`px-2 py-0.5 rounded-full transition-all cursor-pointer flex items-center gap-0.5 ${
@@ -819,10 +794,10 @@ return (
             </h3>
             <p className="text-slate-600 text-sm md:text-base font-semibold mb-6">
               Bé đã làm đúng <span className="text-amber-600 font-black">{score}</span> /{' '}
-              {activeQuestions.length} câu hỏi của bài học:
+              {activeQuestions.length} {reviewIds ? 'câu ôn tập' : 'câu hỏi của bài học'}:
               <br />
               <span className="text-slate-900 font-bold [overflow-wrap:anywhere]">{lesson.title}</span>
-              {difficultyMode === 'challenge' && (
+              {difficultyMode === 'challenge' && !reviewIds && (
                 <span className="block mt-1 text-xs font-black text-rose-600 bg-rose-50 border border-rose-200 py-1 px-3 rounded-full inline-block">
                   🔥 Thử Thách Nâng Cao Đã Chinh Phục!
                 </span>
@@ -871,7 +846,22 @@ return (
               </button>
             )}
 
-            {/* Earned Rewards — wraps on a 360px phone */}
+            {/* Earned Rewards — wraps on a 360px phone. Lượt ôn chỉ được 5 XP
+                luyện lại (StorageService.completeLesson), không cấp lại Sao/Vé. */}
+            {reviewIds ? (
+              <div
+                data-testid="lesson-review-reward"
+                className="flex flex-col items-center gap-1 py-3 px-4 bg-emerald-50 rounded-2xl border-2 border-emerald-200 mb-6 max-w-full"
+              >
+                <div className="flex items-center gap-2 text-emerald-700 font-black text-base">
+                  <Sparkles className="w-5 h-5 text-emerald-500" aria-hidden="true" />
+                  <span>Ôn tập xong! +5 XP luyện lại</span>
+                </div>
+                <span className="text-[11px] font-bold text-emerald-700">
+                  Ôn lại không thêm Sao hay Vé — bé giữ thành tích bài đầu tiên nhé!
+                </span>
+              </div>
+            ) : (
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 py-3 px-4 bg-amber-50 rounded-2xl border-2 border-amber-200 mb-6 max-w-full">
               <div className="flex items-center gap-2 text-amber-700 font-black text-base">
                 <Star className="w-6 h-6 fill-amber-400 text-amber-500" aria-hidden="true" />
@@ -889,6 +879,7 @@ return (
                 <span>+1 Vé Chơi</span>
               </div>
             </div>
+            )}
 
             <div className="flex items-center gap-3 w-full max-w-sm">
               <button
