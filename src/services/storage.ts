@@ -79,6 +79,8 @@ const STORAGE_KEYS = {
   // T18A — kho động lực (sticker, khiên, số liệu ngày...). Key mới hoàn toàn
   // nên payload cũ không cần migration; sanitizer dựng lại từ mặc định.
   MOTIVATION: 'kho_bau_motivation',
+  // T26 — id các thế cờ tướng bé đã giải (mảng chuỗi ngắn). Key mới hoàn toàn.
+  COTUONG_PUZZLES: 'kho_bau_cotuong_puzzles',
 };
 
 /**
@@ -1478,6 +1480,35 @@ public static getParentSettings(): ParentSettings {
     }
   }
 
+  /**
+   * T26 — thế cờ tướng đã giải. Chỉ giữ id dạng `ct-pz-N`: dữ liệu lạ bị loại để
+   * payload bị sửa tay không làm vỡ màn luyện thế cờ.
+   */
+  public static getCotuongSolvedPuzzles(): string[] {
+    let raw: unknown = null;
+    try {
+      raw = JSON.parse(localStorage.getItem(STORAGE_KEYS.COTUONG_PUZZLES) ?? 'null');
+    } catch {
+      return [];
+    }
+    if (!Array.isArray(raw)) return [];
+    const ids = raw.filter((v): v is string => typeof v === 'string' && /^ct-pz-\d{1,3}$/.test(v));
+    return [...new Set(ids)].slice(0, 100);
+  }
+
+  /** Trả `true` khi thế cờ vừa được giải LẦN ĐẦU (để chỉ thưởng XP một lần). */
+  public static markCotuongPuzzleSolved(puzzleId: string): boolean {
+    if (!/^ct-pz-\d{1,3}$/.test(puzzleId)) return false;
+    const solved = StorageService.getCotuongSolvedPuzzles();
+    if (solved.includes(puzzleId)) return false;
+    try {
+      localStorage.setItem(STORAGE_KEYS.COTUONG_PUZZLES, JSON.stringify([...solved, puzzleId]));
+    } catch {
+      // Hết quota thì thôi — bé vẫn chơi tiếp được.
+    }
+    return true;
+  }
+
   // Record an answered question for adaptive learning & mastery
   public static recordQuestionAnswer(
     skillId: string,
@@ -2360,6 +2391,8 @@ public static getParentSettings(): ParentSettings {
       localStorage.removeItem(STORAGE_KEYS.GAME_NONCE);
       // T18A — kho động lực cũng về trắng (sticker, khiên, số liệu ngày).
       localStorage.removeItem(STORAGE_KEYS.MOTIVATION);
+      // T26 — tiến độ luyện thế cờ tướng.
+      localStorage.removeItem(STORAGE_KEYS.COTUONG_PUZZLES);
     } catch {
       // Storage unavailable: nothing to clear.
     }

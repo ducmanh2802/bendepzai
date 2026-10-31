@@ -18,6 +18,7 @@ import {
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useModalHistory } from '../../hooks/useModalHistory';
 import { useSpeak } from '../../hooks/useSpeak';
+import { formatElapsed, lessonRatingLabel, lessonStarRating } from './lessonEngagement';
 import {
   assertQuestionAudioTarget,
   buildQuestionAudioTarget,
@@ -93,17 +94,31 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
   const [praise, setPraise] = useState<PraiseResult | null>(null);
   const praiseAttemptRef = useRef(0);
   const [difficultyMode, setDifficultyMode] = useState<'standard' | 'challenge'>('standard');
+  // T27 — combo, đồng hồ, danh sách câu sai và chế độ ôn lại câu sai.
+  const [combo, setCombo] = useState(0);
+  const [bestCombo, setBestCombo] = useState(0);
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const [missed, setMissed] = useState<{ id: string; prompt: string; answer: string }[]>([]);
+  const [reviewIds, setReviewIds] = useState<string[] | null>(null);
+  const startedAtRef = useRef<number | null>(null);
+  const resultScrollRef = useRef<HTMLDivElement | null>(null);
 
   const activeQuestions = React.useMemo(() => {
-    if (difficultyMode === 'challenge') {
-      const hardOnly = lesson.questions.filter((q) => q.difficulty >= 2);
-      if (hardOnly.length >= 3) {
-        return hardOnly;
+    const base = (() => {
+      if (difficultyMode === 'challenge') {
+        const hardOnly = lesson.questions.filter((q) => q.difficulty >= 2);
+        if (hardOnly.length >= 3) {
+          return hardOnly;
+        }
+        return [...lesson.questions].sort((a, b) => b.difficulty - a.difficulty);
       }
-      return [...lesson.questions].sort((a, b) => b.difficulty - a.difficulty);
-    }
-    return lesson.questions;
-  }, [lesson.questions, difficultyMode]);
+      return lesson.questions;
+    })();
+    if (!reviewIds) return base;
+    const reviewSet = new Set(reviewIds);
+    const onlyMissed = base.filter((q) => reviewSet.has(q.id));
+    return onlyMissed.length > 0 ? onlyMissed : base;
+  }, [lesson.questions, difficultyMode, reviewIds]);
 
   const question: Question = activeQuestions[currentIdx] || activeQuestions[0];
   const progressPercent = Math.round(((currentIdx + 1) / activeQuestions.length) * 100);
@@ -149,6 +164,29 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
     }, 300);
     return () => clearTimeout(timer);
   }, [currentIdx, question]);
+
+  // T27 — đồng hồ đếm thời gian học, dừng lại khi bé tới màn kết quả.
+  useEffect(() => {
+    if (isFinished) return;
+    if (startedAtRef.current === null) startedAtRef.current = Date.now();
+    const id = window.setInterval(() => {
+      if (startedAtRef.current !== null) {
+        setElapsedSec(Math.floor((Date.now() - startedAtRef.current) / 1000));
+      }
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [isFinished]);
+
+  // Màn kết quả: đưa tiêu điểm vào khung cuộn và về đầu trang, để bé luôn thấy
+  // hàng sao trước. Không dùng autoFocus cho nút "Về bản đồ" vì trình duyệt sẽ
+  // tự cuộn xuống đáy khi danh sách câu sai dài (T27).
+  useEffect(() => {
+    if (!isFinished) return;
+    const el = resultScrollRef.current;
+    if (!el) return;
+    el.scrollTop = 0;
+    el.focus({ preventScroll: true });
+  }, [isFinished]);
 
   const handleSelectOption = (opt: string) => {
     if (isAnswerChecked) return;
@@ -216,10 +254,24 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
     );
 
     if (correct) {
-      sound.playCorrect();
+      const nextCombo = combo + 1;
+      setCombo(nextCombo);
+      setBestCombo((best) => Math.max(best, nextCombo));
+      // Chuỗi từ 2 câu đúng đổi sang tiếng "đi lên" cho bé thấy đà thắng.
+      if (nextCombo >= 2) sound.playCombo();
+      else sound.playCorrect();
+      // Mốc 3 và 5 câu đúng liên tiếp: tung pháo giấy ăn mừng.
+      if (nextCombo === 3 || nextCombo === 5) fireCelebrationConfetti();
       setScore((s) => s + 1);
+      setMissed((list) => list.filter((m) => m.id !== question.id));
     } else {
+      setCombo(0);
       sound.playWrong();
+      setMissed((list) =>
+        list.some((m) => m.id === question.id)
+          ? list
+          : [...list, { id: question.id, prompt: question.prompt, answer: correctAnswerStr }]
+      );
     }
 
     praiseAttemptRef.current += 1;
@@ -265,6 +317,33 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
     setIsCorrect(false);
     setShowHint(false);
     setIsFinished(false);
+    setCombo(0);
+    setBestCombo(0);
+    setMissed([]);
+    setReviewIds(null);
+    setElapsedSec(0);
+    startedAtRef.current = Date.now();
+  };
+
+  const handleReviewMissed = () => {
+    sound.playClick();
+    if (missed.length === 0) return;
+    setReviewIds(missed.map((m) => m.id));
+    setCurrentIdx(0);
+    setScore(0);
+    setSelectedAnswer(null);
+    setOrderedList([]);
+    setMatchingState({});
+    setDragItem(null);
+    setIsAnswerChecked(false);
+    setIsCorrect(false);
+    setShowHint(false);
+    setIsFinished(false);
+    setCombo(0);
+    setBestCombo(0);
+    setMissed([]);
+    setElapsedSec(0);
+    startedAtRef.current = Date.now();
   };
 
   const handleRetryCurrentQuestion = () => {
@@ -411,6 +490,8 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
     }
   };
 
+  const starRating = lessonStarRating(score, activeQuestions.length);
+
   // Compute conditional content to avoid JSX parser issues with ternary operators
   const praiseContent = praise ? (
     <span
@@ -477,7 +558,7 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
         } py-3.5 px-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-base md:text-lg rounded-2xl shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer font-display`}
       >
         <span>
-          {currentIdx + 1 < lesson.questions.length ? 'Câu tiếp theo' : 'Xem kết quả bài học'}
+          {currentIdx + 1 < activeQuestions.length ? 'Câu tiếp theo' : 'Xem kết quả bài học'}
         </span>
         <ArrowRight className="w-5 h-5" />
       </button>
@@ -494,25 +575,40 @@ return (
         tabIndex={-1}
         className="relative w-full max-w-2xl h-[92vh] max-h-[720px] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border-4 border-amber-300"
       >
-        {/* Top Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-amber-50 border-b border-amber-200">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">
-              {lesson.subject === 'tieng-viet' ? '🐻' : lesson.subject === 'toan' ? '🦊' : '🐰'}
-            </span>
-            <div>
-              {/* T20A / B-10 — 220px of title + score pill + close button did
-                  not fit a 360px phone (25px of sideways scroll). */}
-              <h3 className="text-sm md:text-base font-black text-amber-900 truncate max-w-[38vw] md:max-w-xs font-display">
-                {lesson.title}
-              </h3>
-              <p className="text-[11px] text-amber-700 font-bold">
-                Câu hỏi {currentIdx + 1} / {activeQuestions.length}
-              </p>
+        {/* Top Header — 2 hàng ở điện thoại: hàng 1 là tên bài + đồng hồ + nút
+            đóng, hàng 2 là chế độ + số câu đúng. Xếp hết vào một hàng thì nút
+            đóng bị đẩy ra ngoài khung ở màn 390px (T27 đo được). */}
+        <div className="px-4 py-2.5 bg-amber-50 border-b border-amber-200">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-2xl shrink-0">
+                {lesson.subject === 'tieng-viet' ? '🐻' : lesson.subject === 'toan' ? '🦊' : '🐰'}
+              </span>
+              <div className="min-w-0">
+                <h3 className="text-sm md:text-base font-black text-amber-900 truncate max-w-[46vw] md:max-w-xs font-display">
+                  {lesson.title}
+                </h3>
+                <p className="text-[11px] text-amber-700 font-bold">
+                  Câu hỏi {currentIdx + 1} / {activeQuestions.length} · ⏱{' '}
+                  <span data-testid="lesson-timer">{formatElapsed(elapsedSec)}</span>
+                </p>
+              </div>
             </div>
+            <button
+              onClick={() => {
+                notifyComplete();
+                requestClose();
+              }}
+              aria-label="Đóng bài học"
+              title="Đóng bài học (Esc)"
+              data-testid="lesson-close"
+              className="shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition-all active:scale-95"
+            >
+              <X className="w-5 h-5" aria-hidden="true" />
+            </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="mt-1.5 flex items-center justify-between gap-2">
             {/* Difficulty Toggle Pill */}
             <div className="flex items-center bg-amber-200/70 p-0.5 rounded-full border border-amber-300 text-[11px] font-black">
               <button
@@ -524,6 +620,11 @@ return (
                   setScore(0);
                   setIsAnswerChecked(false);
                   setIsCorrect(false);
+                  setCombo(0);
+                  setMissed([]);
+                  setReviewIds(null);
+                  setElapsedSec(0);
+                  startedAtRef.current = Date.now();
                 }}
                 title="Chế độ học bình thường"
                 className={`px-2 py-0.5 rounded-full transition-all cursor-pointer ${
@@ -543,6 +644,11 @@ return (
                   setScore(0);
                   setIsAnswerChecked(false);
                   setIsCorrect(false);
+                  setCombo(0);
+                  setMissed([]);
+                  setReviewIds(null);
+                  setElapsedSec(0);
+                  startedAtRef.current = Date.now();
                 }}
                 title="Chế độ Thử thách Nâng cao: Đề khó hơn và tặng thêm +50% XP"
                 className={`px-2 py-0.5 rounded-full transition-all cursor-pointer flex items-center gap-0.5 ${
@@ -556,22 +662,10 @@ return (
               </button>
             </div>
 
-            <div className="flex items-center gap-1 px-3 py-1 bg-amber-200/80 rounded-full text-xs font-black text-amber-900">
+            <div className="flex items-center gap-1 px-2.5 py-1 bg-amber-200/80 rounded-full text-[11px] font-black text-amber-900">
               <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-600" />
               <span>{score} đúng</span>
             </div>
-            <button
-              onClick={() => {
-                notifyComplete();
-                requestClose();
-              }}
-              aria-label="Đóng bài học"
-              title="Đóng bài học (Esc)"
-              data-testid="lesson-close"
-              className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition-all active:scale-95"
-            >
-              <X className="w-5 h-5" aria-hidden="true" />
-            </button>
           </div>
         </div>
 
@@ -583,10 +677,29 @@ return (
           />
         </div>
 
+        {/* T27 — chuỗi câu đúng liên tiếp */}
+        {combo >= 2 && !isFinished && (
+          <div
+            data-testid="lesson-combo"
+            data-combo={combo}
+            className="flex items-center justify-center gap-1.5 py-1 bg-orange-100 border-b border-orange-200 text-orange-800 text-xs font-black animate-pop"
+          >
+            <span>🔥 Chuỗi {combo} câu đúng liên tiếp!</span>
+            {combo >= 3 && <span>Bé siêu quá!</span>}
+          </div>
+        )}
+
         {/* Question Area */}
         {!isFinished ? (
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 overflow-y-auto p-4 md:p-6">
+            {/* T27 — bé đang ôn lại đúng những câu đã làm sai */}
+            {reviewIds && (
+              <div className="mb-3 px-3 py-2 rounded-xl bg-sky-50 border border-sky-200 text-xs font-black text-sky-800">
+                📚 Đang ôn lại {activeQuestions.length} câu chưa đúng — bé làm chậm thôi nhé!
+              </div>
+            )}
+
             {/* Prompt Card */}
             <div className="bg-amber-50/70 p-4 md:p-5 rounded-2xl border-2 border-amber-200 flex flex-col items-center text-center">
               {question.mediaEmoji && (
@@ -669,10 +782,37 @@ return (
         ) : (
           // Completion Result Screen — kept INSIDE this dialog (one dialog at a
           // time); onComplete fires when the child leaves it (handleFinishAndClose).
-          <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center p-4 md:p-6 text-center animate-pop">
-            <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-4 animate-bounce">
-              <Star className="w-12 h-12 fill-amber-400 text-amber-500" aria-hidden="true" />
+          <div
+            ref={resultScrollRef}
+            tabIndex={-1}
+            className="flex-1 overflow-y-auto flex flex-col p-4 md:p-6 text-center animate-pop focus:outline-none"
+          >
+            {/* my-auto: nội dung ngắn thì căn giữa, nội dung dài (danh sách câu
+                sai) thì bắt đầu từ trên và cuộn được — justify-center sẽ cắt
+                mất hàng sao ở đầu màn hình (T27). */}
+            <div className="my-auto w-full flex flex-col items-center">
+            <div
+              className="flex items-center justify-center gap-1.5 mb-2"
+              data-testid="lesson-stars"
+              data-stars={starRating}
+              role="img"
+              aria-label={`${starRating} trên 3 sao`}
+            >
+              {[1, 2, 3].map((i) => (
+                <Star
+                  key={i}
+                  className={
+                    i <= starRating
+                      ? 'w-11 h-11 md:w-12 md:h-12 fill-amber-400 text-amber-500 animate-pop'
+                      : 'w-11 h-11 md:w-12 md:h-12 text-slate-300'
+                  }
+                  aria-hidden="true"
+                />
+              ))}
             </div>
+            <p data-testid="lesson-rating-label" className="text-amber-700 font-black text-sm md:text-base mb-2">
+              {lessonRatingLabel(starRating)}
+            </p>
 
             <h3 className="text-2xl md:text-3xl font-black text-amber-950 font-display mb-1">
               CHÚC MỪNG BÉ HOÀN THÀNH!
@@ -688,6 +828,48 @@ return (
                 </span>
               )}
             </p>
+
+            {/* T27 — đồng hồ, chuỗi dài nhất, số câu đúng */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-4 text-[11px] md:text-xs font-black">
+              <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800">
+                ⏱ {formatElapsed(elapsedSec)}
+              </span>
+              <span className="px-2.5 py-1 rounded-full bg-orange-50 border border-orange-200 text-orange-800">
+                🔥 Chuỗi dài nhất {bestCombo}
+              </span>
+              <span className="px-2.5 py-1 rounded-full bg-sky-50 border border-sky-200 text-sky-800">
+                🎯 Đúng {score}/{activeQuestions.length}
+              </span>
+            </div>
+
+            {/* T27 — các câu cần ôn lại */}
+            {missed.length > 0 && (
+              <div className="w-full max-w-md text-left mb-4" data-testid="lesson-missed-list">
+                <h4 className="font-black text-slate-800 text-sm mb-2">
+                  Ôn lại {missed.length} câu chưa đúng 📚
+                </h4>
+                <ul className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                  {missed.map((m) => (
+                    <li key={m.id} className="p-2.5 rounded-xl bg-rose-50 border border-rose-200">
+                      <p className="text-xs font-bold text-slate-800 [overflow-wrap:anywhere]">{m.prompt}</p>
+                      <p className="text-[11px] font-black text-emerald-700 [overflow-wrap:anywhere]">
+                        Đáp án đúng: {m.answer}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {missed.length > 0 && (
+              <button
+                onClick={handleReviewMissed}
+                data-testid="lesson-review-missed"
+                className="w-full max-w-sm min-h-[48px] mb-3 py-3 px-4 bg-gradient-to-r from-sky-500 to-indigo-500 text-white font-black rounded-2xl shadow-lg transition-transform active:scale-95 text-sm"
+              >
+                Ôn lại {missed.length} câu chưa đúng 🔁
+              </button>
+            )}
 
             {/* Earned Rewards — wraps on a 360px phone */}
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 py-3 px-4 bg-amber-50 rounded-2xl border-2 border-amber-200 mb-6 max-w-full">
@@ -718,11 +900,11 @@ return (
               </button>
               <button
                 onClick={handleFinishAndClose}
-                autoFocus
                 className="flex-1 min-h-[48px] py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black rounded-2xl shadow-lg transition-transform active:scale-95 text-sm"
               >
                 <span>Về bản đồ</span>
               </button>
+            </div>
             </div>
           </div>
         )}

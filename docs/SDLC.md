@@ -107,7 +107,7 @@ board 3D cờ tướng hiện tại là CSS `perspective`/`preserve-3d`, không 
 |---|---|---|---|
 | `pre-commit` | mỗi commit | chặn `.env*`; `npx tsc --noEmit` nếu có file `.ts/.tsx/.json` thay đổi | ~6 s |
 | `commit-msg` | mỗi commit | validate Conventional Commits | <0.2 s |
-| `pre-push` | mỗi push | `npm run verify:quick` (typecheck + 1035 unit test, 71 file) | ~25 s |
+| `pre-push` | mỗi push | `npm run verify:quick` (typecheck + 1052 unit test, 73 file) | ~25 s |
 
 Cài tự động qua `prepare` khi chạy `npm install`. Nếu bạn clone bằng tool không chạy
 `prepare`, hãy tự chạy `npm run hooks:install`.

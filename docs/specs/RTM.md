@@ -177,7 +177,7 @@
 
 | ID | Nguồn | Test | Probe | Gate | Trạng thái |
 |---|---|---|---|---|---|
-| NFR-P01 | `scripts/check-bundle-budget.mjs` (`MAIN_CHUNK_BUDGET_BYTES`) | `tests/bundle-budget.test.ts` | — | V,2 | ĐẠT — 531.2 kB / 600 kB (mục tiêu 450 **chưa đạt**); `three-vendor` 545.4 + `firebase-vendor` 537.9 ở ngoài entry, có gate riêng bằng ADR-17 |
+| NFR-P01 | `scripts/check-bundle-budget.mjs` (`MAIN_CHUNK_BUDGET_BYTES`) | `tests/bundle-budget.test.ts` | — | V,2 | ĐẠT — 533.6 kB / 600 kB (mục tiêu 450 **chưa đạt**); `three-vendor` 545.4 + `firebase-vendor` 537.9 ở ngoài entry, có gate riêng bằng ADR-17 |
 | NFR-P02 | `src/components/games/registry.ts` | `tests/t02c-startup-split.test.ts` | `qa/t02-smoke.mjs` | V,2 | ĐẠT |
 | NFR-P03 | `src/components/learning/cotuong/cotuongEngine.ts` (node budget) | `tests/cotuong-engine.test.ts` | — | V,1 | ĐẠT |
 | NFR-P04 | `src/config/policy.ts:297` | `tests/game-content.test.ts` | — | V,1 | ĐẠT |
@@ -199,7 +199,7 @@
 | NFR-M01 | `package.json` (`verify`, `verify:quick`) | — | — | V,H,1,2 | ĐẠT |
 | NFR-M02 | `src/config/policy.ts` (17 export, có rationale) | test theo từng policy block | — | V,1 | ĐẠT |
 | NFR-M03 | ADR-03; `src/services/answerCheck.ts` | `tests/answerCheck.test.ts`, `tests/competition-engine.test.ts` | `qa/question-types.mjs` | V,1 | ĐẠT |
-| NFR-M04 | `tests/` naming | 71 file / 1035 test | — | V,H,1 | ĐẠT |
+| NFR-M04 | `tests/` naming | 73 file / 1052 test | — | V,H,1 | ĐẠT |
 | NFR-M05 | `package.json` (8 runtime deps; `@types/three` sai chỗ — nợ #8 ARCHITECTURE §13) | `tests/t23-mcp-servers.test.ts` | — | V,H,1 | ĐẠT |
 | NFR-M06 | `mcp/lib/server.mjs` | `tests/t23-mcp-servers.test.ts` | — | V,1 | ĐẠT |
 
@@ -276,7 +276,7 @@
 
 ## 7. Ma trận ngược: test không phục vụ yêu cầu nào?
 
-71 file test đều nằm trong ít nhất một dòng §2 hoặc §3 ở trên (mới: `tests/chess-3d.test.ts` → FR-C06; `tests/firebase-cloud-sync.test.ts` đổi tên thành `tests/firebase-auth-sync.test.ts` → FR-Y08/Y09/NFR-C01; `tests/t24-speech-math-operators.test.ts` → FR-Y02; `tests/t25-difficulty-ladder.test.ts` → FR-G04/G05), **ngoại trừ** các file sau —
+73 file test đều nằm trong ít nhất một dòng §2 hoặc §3 ở trên (mới: `tests/chess-3d.test.ts` → FR-C06; `tests/firebase-cloud-sync.test.ts` đổi tên thành `tests/firebase-auth-sync.test.ts` → FR-Y08/Y09/NFR-C01; `tests/t24-speech-math-operators.test.ts` → FR-Y02; `tests/t25-difficulty-ladder.test.ts` → FR-G04/G05; `tests/t26-cotuong-puzzles.test.ts` → FR-C06; `tests/t27-lesson-engagement.test.ts` → FR-M01/FR-S08), **ngoại trừ** các file sau —
 chúng bảo vệ *chất lượng nền* chứ không bảo vệ một FR riêng lẻ:
 
 | File | Vai trò thật |
@@ -299,8 +299,8 @@ chưa được ghi vào SRS (phải thêm FR hoặc xoá test).
 | FR có bằng chứng tự động (`tests/`) | 82/88 | 7 FR chỉ có probe (`FR-Y01`, `FR-M08`, `FR-C05`, `FR-S01`, `NFR-A04/A05`…) |
 | NFR | 25 | 24 ĐẠT · 1 đạt một phần (NFR-P01: dưới ngân sách cứng, trên mục tiêu 450 kB) |
 | DC | 17 | 17 có nguồn + test · **1 lỗ hổng thiết kế** (DC-17 key ngoài registry) |
-| Probe | 20 | 20/20 có chủ đích |
-| Test file | 69 | 69/69 có ánh xạ (`firebase-auth-sync` đổi tên từ `firebase-cloud-sync`; `chess-3d` thêm mới) |
+| Probe | 23 | 23/23 có chủ đích |
+| Test file | 73 | 73/73 có ánh xạ (`firebase-auth-sync` đổi tên từ `firebase-cloud-sync`; `chess-3d`, `t26-cotuong-puzzles`, `t27-lesson-engagement` thêm mới) |
 | Yêu cầu **không đo được** | 1 | BG-01 (cần telemetry thật — bị chặn bởi ADR-01, không phải lỗi code) |
 
 ## 9. Cách cập nhật tài liệu này
@@ -309,5 +309,5 @@ chưa được ghi vào SRS (phải thêm FR hoặc xoá test).
 2. Xoá tính năng trong code ⇒ xoá dòng RTM và dòng SRS (giữ lại lịch sử ở `CHANGELOG.md`).
 3. Một dòng RTM chỉ chuyển sang ĐẠT khi output lệnh thật được dán vào PR/Issue —
    không dựa vào số liệu MCP (`AGENTS.md` §1.7, docs/SDLC.md §10).
-4. Số liệu kiểm kê (31 game / 475 câu / 70 test / 531.2 kB…) chỉ được sửa khi vừa đo lại
+4. Số liệu kiểm kê (31 game / 475 câu / 73 test / 533.6 kB…) chỉ được sửa khi vừa đo lại
    bằng `npx vitest run`, `npm run check:budget` hoặc `ls`.

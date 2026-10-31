@@ -10,16 +10,16 @@ của sản phẩm, từ nghiệp vụ tới từng test. Đọc theo thứ tự
 | 3 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | *Ghép như thế nào, dữ liệu đi đâu, vì sao chọn vậy?* | 17 ADR, sơ đồ tầng + luồng dữ liệu |
 | 4 | [`RTM.md`](RTM.md) | *Yêu cầu nào được chứng minh ở đâu? Test nào không phục vụ gì?* | ma trận xuôi + ngược, tổng kết độ phủ |
 | 5 | [`../plan/TASK_PLAN.md`](../plan/TASK_PLAN.md) | *Đã làm gì (P25→P43) và sẽ làm gì tiếp (EP-A…EP-F)?* | WBS 12 gói, 4 milestone |
-| 6 | [`../plan/TEST_PLAN.md`](../plan/TEST_PLAN.md) | *Kiểm bằng lớp nào, chạy lệnh nào, khi nào xanh?* | 5 lớp, 21 probe, bảng "đổi gì → chạy gì" |
+| 6 | [`../plan/TEST_PLAN.md`](../plan/TEST_PLAN.md) | *Kiểm bằng lớp nào, chạy lệnh nào, khi nào xanh?* | 5 lớp, 23 probe, bảng "đổi gì → chạy gì" |
 
 ## Quy ước chung của bộ tài liệu
 
-1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1035 test / 71 file,
-   531.2 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-10-30** — lần cuối ngay sau
-   T25 nâng trần độ khó, trên nền hai merge `origin/main` (cloud-sync + cờ vua WebGL, rồi
-   `3727f04` auth/chess) — bằng
+1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1052 test / 73 file,
+   533.6 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-10-31** — lần cuối ngay sau
+   T26 (cờ tướng luyện thế cờ) và T27 (học hấp dẫn hơn), trên nền hai merge `origin/main`
+   (cloud-sync + cờ vua WebGL, rồi `3727f04` auth/chess) và merge `fd3e7da` — bằng
    `npx vitest run`, `npm run check:budget` hoặc `ls`. Các số mô tả nội dung học (31/475/1570
-   câu) giữ nguyên từ đợt đo 2026-10-29 vì merge không đụng `src/data/`. Dấu ✚ trong `BRD.md`
+   câu) giữ nguyên từ đợt đo 2026-10-29 vì T26/T27 không đụng `src/data/`. Dấu ✚ trong `BRD.md`
    nghĩa là "đo trực tiếp từ repo".
 2. **Code là nguồn chân lý.** Khi tài liệu cũ (`PRODUCT_SPEC.md`, `MASTER_ROADMAP.md`)
    lệch với `src/`, thì `src/` đúng và tài liệu này phải sửa theo.
