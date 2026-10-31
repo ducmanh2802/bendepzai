@@ -301,6 +301,7 @@ export const CotuongBoard3D: React.FC<Props> = ({
                 key={key}
                 className={`ct-piece ${isSelected(r, c) ? 'is-selected' : ''}`}
                 data-color={piece.color}
+                data-piece={`${piece.color}-${piece.type}`}
                 style={{
                   left: `${xPct(c)}%`,
                   top: `${yPct(r)}%`,

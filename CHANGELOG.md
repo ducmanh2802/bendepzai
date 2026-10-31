@@ -239,6 +239,15 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   - **Cả modal render lại mỗi giây:** `setInterval` đặt state đồng hồ ở component cha nên
     toàn bộ đề/ảnh/nút render lại 1 lần/giây. Tách `<LessonClock startedAt paused>` riêng,
     `elapsedSec` chỉ tính một lần lúc kết thúc bài.
+- **Quân cờ tướng trông "dán phẳng" lên mặt bàn (T30, bé báo bằng ảnh chụp):** đo trên build thật
+  cho thấy hai nguyên nhân CSS, không phải lỗi thứ tự vẽ (`elementsFromPoint` trả mặt quân #4
+  so với lưới #9 — quân đã nằm trên lưới). (1) Bóng tiếp đất khai `inset: 16% 8% -2% 8%` nên nằm
+  lọt hoàn toàn trong lòng quân, không bao giờ nhìn thấy; (2) `.ct-piece__base` cùng kích thước
+  với mặt quân nên không có thành, quân chỉ là một hình tròn in trên gỗ. Sửa: bóng đổ tràn dưới
+  quân (`top: 54%`, `bottom: -24%`, đậm hơn, ở `translateZ(0.6px)`); đế `inset: 2% 2% -6% 2%`
+  thò 6% dưới mặt quân với gradient gỗ tối dần (thành quân); mặt quân nâng `translateZ(14px)`
+  và thêm bóng thường `0 2px 0` làm mép thành. Chế độ "Góc 2D" (`perspective: none`) vẫn giữ
+  được khối vì toàn bộ hiệu ứng nằm trong mặt phẳng, không phụ thuộc `translateZ`.
 
 ### Tests
 - `tests/t24-speech-math-operators.test.ts` — 18 test cho lớp phát âm phép tính: cộng/trừ/
@@ -321,6 +330,20 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   `kB` nhưng chia 1024). Probe: `qa/lesson-smooth.mjs` **8 step** và
   `qa/lesson-engagement.mjs` (5 step, đồng hồ chạy 0:07 rồi đứng yên, lượt ôn 9/9 → 3 sao),
   `qa/golden-path.mjs` (28 step) đều `QA PASS — 0 errors`.
+- `tests/t30-cotuong-piece-depth.test.ts` — 7 test khoá khối CSS của quân: bóng đổ tràn dưới quân
+  (`top: 54%` / `bottom: -24%`, không còn `inset: 16% 8% -2% 8%`), đế có `inset` đáy âm (lộ thành
+  quân) và `translateZ` thấp hơn mặt quân, mặt quân có bóng thường `0 2px 0` + viền `128, 86, 36`,
+  trạng thái chọn nâng cao hơn 14px và giữ viền vàng, thứ tự render shadow → base → face, cùng
+  hợp đồng của probe (đo pixel bằng `zlib.inflateSync`, có đo cả "Góc 2D").
+- `qa/cotuong-depth.mjs` — probe mới (3 step): đo thứ tự vẽ 3 lớp quân so với lưới
+  (`elementsFromPoint`, tạm bật `pointer-events` cho quân vì mặc định là `none`), đo đế thò dưới
+  mặt quân (`rimBelowFacePx`), và **giải mã PNG** ảnh chụp để so độ sáng nền bàn ngay dưới quân
+  với phía trên (`contactShadowDelta`). `node qa/run-one.mjs qa/cotuong-depth.mjs` →
+  `QA PASS — 3 step(s), 0 errors` (`rimBelowFacePx: 3`, `contactShadowDelta: 11` ở 3D / `12` ở 2D,
+  `faceLuma: 191`).
+- **Đo lại sau T30**: `npm run verify` **EXIT=0** — typecheck sạch, **76 file / 1075 test** passed
+  (+7 test `t30`), main chunk `index-BJHmn7nJ.js` **533.9 kB PASS**. `qa/cotuong-puzzles.mjs`
+  (8 step) vẫn `QA PASS — 0 errors`.
 
 ## [1.0.0] - baseline
 

@@ -188,7 +188,7 @@ Hai đường, và cả hai đều do người lớn khởi động:
 | `firebase-vendor` | `firebase`/`@firebase` | 537.9 kB, chỉ dùng cho cloud-sync tuỳ chọn; tách để entry không phải mang SDK |
 | `math-bank` | `src/data/math/` + `mathCurriculum` | ngân sách sống sót sau khi kho Toán phình |
 | `english-bank` | `src/data/english/` + `englishCurriculum` | tương tự cho kho Anh |
-| entry `index-*.js` | App + services + phần còn lại | **≤ 600 kB (cứng), mục tiêu ≤ 450 kB** — hiện **533.8 kB** |
+| entry `index-*.js` | App + services + phần còn lại | **≤ 600 kB (cứng), mục tiêu ≤ 450 kB** — hiện **533.9 kB** |
 
 - Gate: `npm run check:budget` → `scripts/check-bundle-budget.mjs` đọc `dist/index.html`
   để tìm đúng file entry (bảo đảm không cộng nhầm chunk), exit 1 nếu vượt.
@@ -377,7 +377,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 ### ADR-08 — Ngân sách bundle là gate, không là lời khuyên
 - **Quyết định:** entry ≤ 600 kB chặn `verify`; 450 kB chỉ báo cáo. Script và test dùng
   chung `getBudgetReport()`.
-- **Hệ quả:** áp lực phình entry bị nhìn thấy ngay. **Nợ:** đang 533.8 kB, cách mục tiêu
+- **Hệ quả:** áp lực phình entry bị nhìn thấy ngay. **Nợ:** đang 533.9 kB, cách mục tiêu
   ~84 kB; mọi bổ sung lớn vào entry phải kèm lý do.
 
 ### ADR-09 — Bất biến đăng ký trò chơi 4 nơi, khoá bằng test
@@ -456,7 +456,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 
 ---
 
-## 12. Kiểm kê kiến trúc (đo 2026-10-31, sau vòng sửa bug T26/T27, audit UI T28 + làm mượt luồng học T29)
+## 12. Kiểm kê kiến trúc (đo 2026-10-31, sau vòng sửa bug T26/T27, audit UI T28, làm mượt luồng học T29 + độ dày quân cờ T30)
 
 | Hạng | Số | Nguồn |
 |---|---|---|
@@ -470,11 +470,11 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 | Export policy | 17 (693 dòng) | `src/config/policy.ts` |
 | Key `localStorage` | 17 | `STORAGE_KEYS` (16) + key cục bộ IOE (1) |
 | Dependency runtime | 8 | `package.json` → `dependencies` |
-| Test file / test | 75 / 1068 | `npx vitest run` (73 `.ts` + 2 `.tsx`) |
-| Probe QA | 25 (24 `.mjs` + 1 `.cjs`) | `ls qa/*.mjs qa/*.cjs` (trừ `lib.mjs`, `run-one.mjs`) |
+| Test file / test | 76 / 1075 | `npx vitest run` (74 `.ts` + 2 `.tsx`) |
+| Probe QA | 26 (25 `.mjs` + 1 `.cjs`) | `ls qa/*.mjs qa/*.cjs` (trừ `lib.mjs`, `run-one.mjs`) |
 | Workflow CI | 4 | `.github/workflows/` |
 | MCP server / tool | 5 / 27 | `mcp/` |
-| Main chunk | 533.8 kB | `npm run check:budget` |
+| Main chunk | 533.9 kB | `npm run check:budget` |
 | Vendor chunk lớn nhất | `three-vendor` 545.4 kB · `firebase-vendor` 537.9 kB · `react-vendor` 213.6 kB | `npm run check:budget` |
 | `App.tsx` / `storage.ts` / `learningOS.ts` / `competitionEngine.ts` / `readingEngine.ts` / `cloudSync.ts` / `firebase.ts` | 436 / 2426 / 842 / 747 / 647 / 224 / 85 dòng | `wc -l` |
 
