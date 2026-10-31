@@ -174,3 +174,20 @@ describe('T26 — bàn cờ không nhận thao tác ngoài trạng thái chơi',
     expect(view).toContain('Đã giải trước đó — ôn lại không thêm XP');
   });
 });
+
+describe('T26 — lưới cờ thẳng với giao điểm quân', () => {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const board = readFileSync(
+    join(here, '..', 'src/components/learning/cotuong/CotuongBoard3D.tsx'),
+    'utf8'
+  );
+
+  it('đường kẻ, cung Tướng và dấu mốc dùng cùng lề M với quân cờ', () => {
+    const start = board.indexOf('<g transform={`translate(${M} ${M})`}>');
+    expect(start).toBeGreaterThan(-1);
+    const group = board.slice(start, board.indexOf('</g>', start));
+    for (const part of ['{lines}', 'M3,0 L5,2 M5,0 L3,2', 'M3,7 L5,9 M5,7 L3,9', '{MARKS.map']) {
+      expect(group, part).toContain(part);
+    }
+  });
+});

@@ -456,7 +456,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 
 ---
 
-## 12. Kiểm kê kiến trúc (đo 2026-10-31, sau vòng sửa bug T26/T27)
+## 12. Kiểm kê kiến trúc (đo 2026-10-31, sau vòng sửa bug T26/T27 + audit UI T28)
 
 | Hạng | Số | Nguồn |
 |---|---|---|
@@ -470,8 +470,8 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 | Export policy | 17 (693 dòng) | `src/config/policy.ts` |
 | Key `localStorage` | 17 | `STORAGE_KEYS` (16) + key cục bộ IOE (1) |
 | Dependency runtime | 8 | `package.json` → `dependencies` |
-| Test file / test | 73 / 1058 | `npx vitest run` (71 `.ts` + 2 `.tsx`) |
-| Probe QA | 23 (22 `.mjs` + 1 `.cjs`) | `ls qa/*.mjs qa/*.cjs` (trừ `lib.mjs`, `run-one.mjs`) |
+| Test file / test | 74 / 1062 | `npx vitest run` (72 `.ts` + 2 `.tsx`) |
+| Probe QA | 24 (23 `.mjs` + 1 `.cjs`) | `ls qa/*.mjs qa/*.cjs` (trừ `lib.mjs`, `run-one.mjs`) |
 | Workflow CI | 4 | `.github/workflows/` |
 | MCP server / tool | 5 / 27 | `mcp/` |
 | Main chunk | 533.8 kB | `npm run check:budget` |
@@ -485,7 +485,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 | # | Nợ | Ảnh hưởng | Hướng xử lý |
 |---|---|---|---|
 | 1 | `kho_bau_ioe_store` ngoài `STORAGE_KEYS`, đọc/ghi trực tiếp `localStorage` | thoát khỏi pipeline sanitize; dễ lệch kiểm kê | đưa về registry + `readJSONObject`, thêm test đếm đủ 17 key |
-| 2 | Entry chunk 533.6 kB so với mục tiêu 450 kB | thiết bị yếu tải chậm hơn mức mong muốn | đo lại sau mỗi mở rộng kho; cân nhắc tách bank Tiếng Việt |
+| 2 | Entry chunk 533.8 kB so với mục tiêu 450 kB | thiết bị yếu tải chậm hơn mức mong muốn | đo lại sau mỗi mở rộng kho; cân nhắc tách bank Tiếng Việt |
 | 3 | Kid's Box units = 0 | track Anh chưa dùng được như giáo trình | cần nguồn đã xác minh (FR-N04, ADR-15) |
 | 4 | Chưa audit riêng track Kid's Box với trẻ thật | rủi ro trải nghiệm | audit người dùng thật trước khi quảng bá track |
 | 5 | `bun.lock` còn trong repo trong khi npm là nguồn thật | gây nhầm package manager | giữ nguyên + ghi chú (quyết định đã chốt) |

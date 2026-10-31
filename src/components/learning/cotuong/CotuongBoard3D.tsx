@@ -132,12 +132,16 @@ const BoardSvg: React.FC = () => {
   }
   return (
     <svg className="ct-grid" viewBox={`0 0 ${VW} ${VH}`} aria-hidden="true" focusable="false">
-      {lines}
-      <path d="M3,0 L5,2 M5,0 L3,2" />
-      <path d="M3,7 L5,9 M5,7 L3,9" />
-      {MARKS.map(([r, c]) => (
-        <path key={`m${r}-${c}`} d={gridMarks(r, c)} className="ct-mark" />
-      ))}
+      {/* Lưới phải dùng cùng lề M với xPct/yPct của quân cờ; nếu vẽ từ (0,0),
+          mỗi quân sẽ lệch gần một ô và hàng/cột cuối nằm ngoài đường biên. */}
+      <g transform={`translate(${M} ${M})`}>
+        {lines}
+        <path d="M3,0 L5,2 M5,0 L3,2" />
+        <path d="M3,7 L5,9 M5,7 L3,9" />
+        {MARKS.map(([r, c]) => (
+          <path key={`m${r}-${c}`} d={gridMarks(r, c)} className="ct-mark" />
+        ))}
+      </g>
     </svg>
   );
 };

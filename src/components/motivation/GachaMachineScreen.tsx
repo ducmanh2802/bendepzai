@@ -15,6 +15,22 @@ interface GachaMachineScreenProps {
 
 const MAX_DAILY_DRAWS = 5;
 
+// Vị trí đống sticker trong cửa kính, tính theo % khung để màn hình rộng hay
+// hẹp đều xếp đều; bản cũ xoay 8 sticker quanh tâm với bán kính 60px nên trên
+// khung ngang chúng dồn thành một cục giữa kính (lỗi UI bé báo).
+const PILE_SLOTS = [
+  { left: 12, top: 76, rotate: -12 },
+  { left: 26, top: 84, rotate: 9 },
+  { left: 40, top: 73, rotate: -7 },
+  { left: 55, top: 85, rotate: 13 },
+  { left: 70, top: 74, rotate: -10 },
+  { left: 86, top: 81, rotate: 7 },
+  { left: 19, top: 59, rotate: 11 },
+  { left: 37, top: 56, rotate: -14 },
+  { left: 63, top: 57, rotate: 12 },
+  { left: 81, top: 60, rotate: -8 },
+];
+
 export const GachaMachineScreen: React.FC<GachaMachineScreenProps> = ({
   profile,
   onBack,
@@ -150,41 +166,47 @@ export const GachaMachineScreen: React.FC<GachaMachineScreenProps> = ({
           {/* Machine body */}
           <div className="relative w-full h-full max-w-xl max-h-[400px] flex flex-col items-center justify-center">
             {/* Glass window */}
-            <div className="relative w-full h-3/4 bg-white/80 rounded-xl border-4 border-amber-300 shadow-inner flex items-center justify-center p-4">
-              {/* Stickers floating inside */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                {Array.from({ length: 8 }).map((_, i) => {
-                  const angle = (i / 8) * Math.PI * 2;
-                  const radius = isSpinning ? 80 : 60;
-                  const speed = isSpinning ? 3 : 0.5;
-                  const currentAngle = angle + (Date.now() / 1000) * speed;
-                  return (
-                    <span
-                      key={i}
-                      className="absolute text-3xl md:text-4xl transition-all duration-300"
-                      style={{
-                        transform: `translate(${Math.cos(currentAngle) * radius}px, ${Math.sin(currentAngle) * radius}px)`,
-                        opacity: isSpinning ? 0.7 : 1,
-                      }}
-                    >
-                      {STICKERS[i % STICKERS.length].emoji}
-                    </span>
-                  );
-                })}
+            <div
+              className="relative w-full h-3/4 bg-white/80 rounded-xl border-4 border-amber-300 shadow-inner flex items-center justify-center p-4"
+              data-testid="gacha-window"
+            >
+              {/* Stickers resting in a pile at the bottom of the glass */}
+              <div
+                className={`absolute inset-x-2 top-8 bottom-1 pointer-events-none ${
+                  isSpinning ? 'gacha-shuffle' : ''
+                }`}
+                aria-hidden="true"
+                data-testid="gacha-pile"
+              >
+                {PILE_SLOTS.map((slot, i) => (
+                  <span
+                    key={i}
+                    className="absolute text-2xl md:text-3xl drop-shadow-sm"
+                    data-testid="gacha-sticker"
+                    style={{
+                      left: `${slot.left}%`,
+                      top: `${slot.top}%`,
+                      transform: `translate(-50%, -50%) rotate(${slot.rotate}deg)`,
+                      opacity: isSpinning ? 0.75 : 1,
+                    }}
+                  >
+                    {STICKERS[i % STICKERS.length].emoji}
+                  </span>
+                ))}
               </div>
 
               {/* Claw */}
               <div
                 ref={machineRef}
-                className={`absolute top-4 left-1/2 -translate-x-1/2 z-10 transition-all duration-500 ${
-                  isSpinning ? 'animate-claw-drop' : ''
-                }`}
+                className={`absolute top-0 left-1/2 z-10 ${isSpinning ? 'animate-claw-drop' : ''}`}
+                style={{ transform: 'translate(-50%, 0)' }}
+                data-testid="gacha-claw"
               >
                 <div className="flex flex-col items-center">
-                  <div className="w-1 h-16 bg-amber-700 rounded-t" />
-                  <div className="flex gap-1">
-                    <span className="text-3xl transform rotate-12">🤏</span>
-                    <span className="text-3xl transform -rotate-12">🤏</span>
+                  <div className="w-1.5 h-14 bg-gradient-to-b from-slate-400 to-slate-600 rounded-b" />
+                  <div className="relative w-11 h-7">
+                    <span className="absolute left-0 top-0 w-6 h-7 border-l-4 border-b-4 border-slate-500 rounded-bl-full" />
+                    <span className="absolute right-0 top-0 w-6 h-7 border-r-4 border-b-4 border-slate-500 rounded-br-full" />
                   </div>
                 </div>
               </div>
@@ -204,12 +226,15 @@ export const GachaMachineScreen: React.FC<GachaMachineScreenProps> = ({
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Draw button overlay */}
+        {/* Draw button — nằm dưới máy, không đè lên đống sticker (T28) */}
+        <div className="mt-4 flex justify-center">
           <button
             onClick={handleDraw}
             disabled={!canDraw || isSpinning}
-            className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-20 px-8 py-4 rounded-2xl font-black text-lg transition-all shadow-xl ${
+            data-testid="gacha-draw"
+            className={`px-8 py-4 rounded-2xl font-black text-lg transition-all shadow-xl ${
               isSpinning
                 ? 'bg-slate-400 text-slate-200 cursor-wait animate-pulse'
                 : canDraw
@@ -242,7 +267,7 @@ export const GachaMachineScreen: React.FC<GachaMachineScreenProps> = ({
           <SectionTitle icon="📜" size="md">
             Lịch Sử Gần Đây
           </SectionTitle>
-          <div className="flex flex-wrap gap-2 justify-center">
+          <div className="flex flex-wrap gap-2 justify-center" data-testid="gacha-history">
             {drawHistory.map((stickerId, idx) => {
               const sticker = getStickerById(stickerId);
               if (!sticker) return null;

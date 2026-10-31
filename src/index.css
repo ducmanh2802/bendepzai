@@ -299,6 +299,95 @@
   animation: gradient-pan 8s ease infinite;
 }
 
+/* T28 — các lớp animate-* đã dùng trong UI nhưng chưa từng được khai báo
+   (Tailwind không sinh class tuỳ biến): modal, máy gắp sticker, sao trang trí
+   trước đây đứng im. */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.08); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.55); }
+  50% { box-shadow: 0 0 0 7px rgba(251, 191, 36, 0); }
+}
+
+@keyframes claw-drop {
+  0%, 100% { transform: translate(-50%, 0); }
+  45%, 60% { transform: translate(-50%, 30px); }
+}
+
+@keyframes gacha-jumble {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-3px, -2px); }
+  50% { transform: translate(3px, 1px); }
+  75% { transform: translate(-2px, 2px); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out both;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out both;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-pop-in {
+  animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2.6s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 1.8s ease-in-out infinite;
+}
+
+.animate-claw-drop {
+  animation: claw-drop 1.1s ease-in-out infinite;
+}
+
+.gacha-shuffle {
+  animation: gacha-jumble 0.7s ease-in-out infinite;
+}
+
 /* ---------- Modern kid UI primitives ---------- */
 .kb-card {
   background: var(--color-kb-card);

@@ -162,6 +162,21 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   - Lượt **ôn câu sai** vẫn hiện khối thưởng "+Sao / +XP / +1 Vé" dù `completeLesson` chỉ
     cộng 5 XP luyện lại; giờ hiện khối `lesson-review-reward` nói đúng "+5 XP" và ghi rõ
     không thêm Sao/Vé.
+- **Audit UI T28 — sửa các lỗi nhìn thấy được từ ảnh chụp của bé:**
+  - **Bàn cờ tướng lệch quân:** lưới, cung Tướng và dấu mốc được vẽ từ `(0,0)` trong khi
+    quân đặt theo lề `M = 0.95` ô, nên mỗi quân lệch gần một ô và hàng/cột biên nằm ngoài
+    đường bao. Bọc toàn bộ lưới trong `<g transform="translate(M M)">`; probe đo lại 10
+    đường ngang + 16 đường dọc khớp tọa độ quân.
+  - **Máy gắp sticker dồn cục:** 8 sticker được xoay quanh tâm cửa kính với bán kính 60 px
+    (lại tính bằng `Date.now()` mỗi lần render nên không hề quay), trên khung ngang chúng
+    chụm thành một cục. Xếp 10 sticker theo % khung (2 lớp đống ở đáy kính), thêm hiệu ứng
+    `gacha-jumble` + `claw-drop`, và đưa nút "Gắp Ngay" xuống **dưới** máy thay vì đè lên
+    đống sticker.
+  - **9 lớp `animate-*` chưa từng khai báo CSS** (`fade-in`, `slide-down`, `pop-in`,
+    `pulse-slow`, `float-slow`, `bounce-subtle`, `spin-slow`, `pulse-ring`, `claw-drop`):
+    modal tài khoản/lên cấp/kết quả và máy gắp đứng im vì Tailwind không sinh class tuỳ
+    biến. Khai báo đủ trong `src/index.css`, kèm guard `tests/t28-ui-polish.test.ts` quét
+    mọi `animate-*` trong `src/**/*.tsx`.
 - **Hồi quy offline (FR-Y03 / NFR-R01):** chunk lazy (`SubjectScreen`,
   `LessonPlayerModal`, `praiseEngine`, `questionAudio`…) chết `net::ERR_FAILED` khi tắt
   mạng, bé không mở được môn học nào — `qa/offline-pwa.mjs` đỏ 2/2 lần chạy. Nguyên nhân
@@ -265,6 +280,15 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   chặn thao tác khi bàn cờ tạm, không thưởng XP khi giải lại) và `qa/lesson-engagement.mjs`
   (5 step: khối thưởng lượt ôn "+5 XP", đổi độ khó ở màn kết quả mở lượt mới) đều
   `QA PASS — 0 errors`; `lesson-completion.test.ts` chuyển sang kiểm `startRun()`.
+- **Đo lại sau audit UI T28**: `npm run verify` **EXIT=0** — typecheck sạch,
+  **74 file / 1062 test** passed (+4 test: 1 lưới bàn cờ ở `t26`, 3 test chống hồi quy UI ở
+  `t28`), main chunk
+  `index-PGWPiTgJ.js` **533.8 kB PASS** (nhãn script là `kB` nhưng chia 1024). Probe:
+  `qa/cotuong-puzzles.mjs` (8 step, thêm `gridAlignment` + ảnh bàn cờ đầy đủ) và probe mới
+  `qa/gacha-machine.mjs` (4 step: 10 sticker trải 68% bề ngang kính, `claw-drop` +
+  `gacha-jumble` chạy khi gắp, vé 5 → 4, lịch sử hiện sticker) đều `QA PASS`;
+  `qa/golden-path.mjs` (28 step), `qa/games.mjs` (31/31) và `qa/lesson-engagement.mjs`
+  (5 step) cũng `QA PASS`.
 
 ## [1.0.0] - baseline
 

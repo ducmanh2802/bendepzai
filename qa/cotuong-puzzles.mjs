@@ -14,19 +14,28 @@ export default async function run(page) {
   const out = { errors: [], shots: [], facts: {}, steps: [] };
   const CLICK = { timeout: 15000 };
 
-  const shot = async (name) => {
+  const shot = async (name, opts = {}) => {
     const file = path.join(OUT, name + '.png');
-    await page.screenshot({ path: file, fullPage: false });
+    await page.screenshot({ path: file, fullPage: false, ...opts });
     out.shots.push(file);
   };
   const step = (name, detail) => out.steps.push({ step: name, ...detail });
 
   const heading = page.locator('h1:has-text("Vương Quốc Cờ Tướng")').first();
-  const openCotuong = async () => {
+  const openCotuong = async (captureFullBoard = false) => {
     await page.waitForSelector('[data-testid="nav-home"]:visible', { timeout: 20000 });
     if (!(await heading.count())) {
       await page.locator('button:has-text("Cờ Tướng")').first().click(CLICK);
       await heading.waitFor({ state: 'visible', timeout: 20000 });
+    }
+    if (captureFullBoard) {
+      // Màn Cờ Tướng mở ở thẻ "Quân cờ" (danh sách quân), bàn cờ chỉ hiện khi
+      // bấm "Chơi 3D" — chờ ô cờ ngay từ đầu sẽ timeout như bản QA trước.
+      await page.locator('button:has-text("Chơi 3D")').first().click(CLICK);
+      await page.waitForSelector('[data-testid="ct-cell-9-4"]', { timeout: 20000 });
+      await page.locator('.ct-scene').first().scrollIntoViewIfNeeded();
+      await page.waitForTimeout(500);
+      await shot('00-full-board', { fullPage: true });
     }
     await page.locator('button:has-text("Luyện thế cờ")').first().click(CLICK);
     await page.waitForSelector('[data-testid="ct-cell-4-2"]', { timeout: 20000 });
@@ -55,13 +64,53 @@ export default async function run(page) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.evaluate(() => localStorage.clear());
     await page.reload();
-    await openCotuong();
+    await openCotuong(true);
 
     const tabs = await page.locator('[data-testid^="ct-puzzle-tab-"]').count();
     const startProgress = await progressText();
     step('puzzlesOpened', { tabs, startProgress });
     if (tabs !== 6) out.errors.push(`có ${tabs} thẻ thế cờ, phải đủ 6`);
     if (startProgress !== '0/6 thế') out.errors.push(`tiến độ ban đầu "${startProgress}", phải "0/6 thế"`);
+
+    // Lưới và quân phải dùng cùng lề M. Bản lỗi vẽ đường kẻ từ (0,0) trong khi
+    // quân ở (M+c,M+r), khiến quân biên nằm ngoài khung gần một ô.
+    const grid = await page.evaluate(() => {
+      const svg = document.querySelector('.ct-grid');
+      if (!svg) return null;
+      const viewBox = (svg.getAttribute('viewBox') || '').split(/\s+/).map(Number);
+      const m = (viewBox[2] - 8) / 2;
+      const group = svg.querySelector('g');
+      const lines = [...svg.querySelectorAll('line')].map((el) => ({
+        x1: Number(el.getAttribute('x1')),
+        y1: Number(el.getAttribute('y1')),
+        x2: Number(el.getAttribute('x2')),
+        y2: Number(el.getAttribute('y2')),
+      }));
+      const horizontal = lines.filter((l) => l.y1 === l.y2).sort((a, b) => a.y1 - b.y1);
+      const vertical = lines.filter((l) => l.x1 === l.x2).sort((a, b) => a.x1 - b.x1);
+      const close = (a, b) => Math.abs(a - b) < 0.001;
+      // Đường kẻ nằm trong <g transform="translate(M M)"> nên phải cộng M khi
+      // so với quân cờ — chính phép cộng này là thứ bản lỗi đã quên.
+      const transform = group ? group.getAttribute('transform') : '';
+      const tr = /translate\(\s*([\d.]+)[\s,]+([\d.]+)\s*\)/.exec(transform || '');
+      const tx = tr ? Number(tr[1]) : 0;
+      const ty = tr ? Number(tr[2]) : 0;
+      return {
+        m,
+        transform: transform || null,
+        horizontalY: horizontal.map((l) => l.y1 + ty),
+        verticalX: vertical.map((l) => l.x1 + tx),
+        horizontalOk:
+          horizontal.length === 10 &&
+          horizontal.every((l, i) => close(l.y1 + ty, m + i) && close(l.x1 + tx, m) && close(l.x2 + tx, m + 8)),
+        verticalOk:
+          vertical.length === 16 &&
+          vertical.every((l) => close(l.x1 + tx, m + Math.round(l.x1 + tx - m))),
+      };
+    });
+    step('gridAlignment', grid || { missing: true });
+    if (!grid || !grid.horizontalOk || !grid.verticalOk)
+      out.errors.push(`lưới cờ lệch tọa độ quân: ${JSON.stringify(grid)}`);
     await shot('01-puzzle-board');
 
     // 1) Nước hợp lệ nhưng không chiếu: Xe đỏ [1,8] → [1,6].
