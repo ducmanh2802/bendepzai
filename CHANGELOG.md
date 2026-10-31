@@ -221,6 +221,24 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   mới ghi lại văn bản thật sự vào utterance và **FAIL nếu còn ký hiệu thô**:
   `QA PASS — 9 step(s), 0 errors` (2/2 lần chạy, `symbolicSeen: 4`, `symbolicSpoken: 4`,
   `rawSpoken: []`).
+- **Luồng học chưa mượt (T29) — 5 lỗi thật, sửa sau khi đo bằng probe trình duyệt:**
+  - **Mất thanh "Kiểm tra câu trả lời" khi cuộn:** thanh hành động nằm *trong* vùng
+    `overflow-y-auto`, nên đề dài (hoặc khi mở bàn phím) đẩy nút xuống dưới đáy và bé phải
+    cuộn ngược lên mới bấm được. Tách thanh thành anh em `shrink-0` nằm ngoài vùng cuộn;
+    probe đo `barInsideScroller: false`, thanh đứng yên `barTop 714..766` khi cuộn hết đề.
+  - **Câu mới mở ở giữa:** `scrollTop` dính lại từ câu trước nên đề tiếp theo xuất hiện
+    không ở đầu. Reset `scrollTop = 0` khi đổi câu, trong `startRun()` (học lại / ôn câu sai
+    / đổi độ khó) và cuộn lên đầu khi "Thử lại câu này".
+  - **Banner chuỗi câu đúng làm nhảy đề:** banner `combo` chèn thêm một hàng vào luồng nên
+    toàn bộ đề dịch xuống mỗi khi tạo/thoát chuỗi. Đặt vào slot cố định `h-6`
+    (`data-testid="lesson-combo-slot"`) luôn chiếm chỗ; probe đo `comboSlotHeight: 24`,
+    `comboShift: 0`, `barShift: 0`.
+  - **Không thấy phản hồi đúng/sai:** với đề dài, phản hồi nằm dưới đáy vùng cuộn nên bé
+    trả lời xong không thấy kết quả. Thêm `feedbackRef.scrollIntoView({ block: 'nearest',
+    behavior: 'smooth' })` sau khi chấm; probe đo `feedbackVisible: true`.
+  - **Cả modal render lại mỗi giây:** `setInterval` đặt state đồng hồ ở component cha nên
+    toàn bộ đề/ảnh/nút render lại 1 lần/giây. Tách `<LessonClock startedAt paused>` riêng,
+    `elapsedSec` chỉ tính một lần lúc kết thúc bài.
 
 ### Tests
 - `tests/t24-speech-math-operators.test.ts` — 18 test cho lớp phát âm phép tính: cộng/trừ/
@@ -289,6 +307,20 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   `gacha-jumble` chạy khi gắp, vé 5 → 4, lịch sử hiện sticker) đều `QA PASS`;
   `qa/golden-path.mjs` (28 step), `qa/games.mjs` (31/31) và `qa/lesson-engagement.mjs`
   (5 step) cũng `QA PASS`.
+- `tests/t29-lesson-smooth.test.ts` — 6 test khoá cấu trúc màn học: vùng cuộn đóng **trước**
+  thanh hành động (đếm độ sâu `<div>`), thanh là sibling `shrink-0` có viền trên, đúng 2 chỗ
+  reset `scrollTop = 0`, có `feedbackRef.scrollIntoView({ block: 'nearest' })`, slot combo
+  `h-6` đứng trước banner và banner đứng trước nút gửi, không còn banner ngoài luồng cũ, và
+  `LessonClock` là component riêng với chữ ký `{ startedAt, paused }`.
+- `qa/lesson-smooth.mjs` — probe mới (8 step) đo trên trình duyệt 390×844: thanh không nằm
+  trong scroller, cuộn hết đề vẫn thấy thanh, tạo được chuỗi ≥2 câu đúng, `comboShift` /
+  `barShift` ≤ 2 px, `scrollTop ≤ 4` sau mỗi "Câu tiếp theo", phản hồi hiện trong tầm nhìn,
+  0 tràn ngang; chụp 4 ảnh (`01-question-open` … `04-next-question`).
+- **Đo lại sau T29**: `npm run verify` **EXIT=0** — typecheck sạch, **75 file / 1068 test**
+  passed (+6 test `t29`), main chunk `index-AUAPmuH2.js` **533.8 kB PASS** (nhãn script là
+  `kB` nhưng chia 1024). Probe: `qa/lesson-smooth.mjs` **8 step** và
+  `qa/lesson-engagement.mjs` (5 step, đồng hồ chạy 0:07 rồi đứng yên, lượt ôn 9/9 → 3 sao),
+  `qa/golden-path.mjs` (28 step) đều `QA PASS — 0 errors`.
 
 ## [1.0.0] - baseline
 

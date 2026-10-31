@@ -456,7 +456,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 
 ---
 
-## 12. Kiểm kê kiến trúc (đo 2026-10-31, sau vòng sửa bug T26/T27 + audit UI T28)
+## 12. Kiểm kê kiến trúc (đo 2026-10-31, sau vòng sửa bug T26/T27, audit UI T28 + làm mượt luồng học T29)
 
 | Hạng | Số | Nguồn |
 |---|---|---|
@@ -470,8 +470,8 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 | Export policy | 17 (693 dòng) | `src/config/policy.ts` |
 | Key `localStorage` | 17 | `STORAGE_KEYS` (16) + key cục bộ IOE (1) |
 | Dependency runtime | 8 | `package.json` → `dependencies` |
-| Test file / test | 74 / 1062 | `npx vitest run` (72 `.ts` + 2 `.tsx`) |
-| Probe QA | 24 (23 `.mjs` + 1 `.cjs`) | `ls qa/*.mjs qa/*.cjs` (trừ `lib.mjs`, `run-one.mjs`) |
+| Test file / test | 75 / 1068 | `npx vitest run` (73 `.ts` + 2 `.tsx`) |
+| Probe QA | 25 (24 `.mjs` + 1 `.cjs`) | `ls qa/*.mjs qa/*.cjs` (trừ `lib.mjs`, `run-one.mjs`) |
 | Workflow CI | 4 | `.github/workflows/` |
 | MCP server / tool | 5 / 27 | `mcp/` |
 | Main chunk | 533.8 kB | `npm run check:budget` |

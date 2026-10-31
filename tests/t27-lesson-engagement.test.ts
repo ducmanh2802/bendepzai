@@ -58,7 +58,12 @@ describe('T27 combo, đồng hồ và ôn câu sai trong LessonPlayerModal', () 
   it('đồng hồ chạy trong bài và dừng ở màn kết quả', () => {
     expect(lp).toContain('data-testid="lesson-timer"');
     expect(lp).toContain('formatElapsed(elapsedSec)');
-    expect(lp).toMatch(/if \(isFinished\) return;\s*if \(startedAtRef\.current === null\)/);
+    // T29 — đồng hồ tách thành LessonClock để mỗi giây chỉ ô giờ re-render,
+    // và dừng hẳn khi bé vào màn kết quả (paused={isFinished}).
+    expect(lp).toContain(
+      'const LessonClock: React.FC<{ startedAt: number | null; paused: boolean }>'
+    );
+    expect(lp).toContain('<LessonClock startedAt={startedAt} paused={isFinished} />');
   });
 
   it('màn kết quả có 3 sao, lời khen, danh sách câu sai và nút ôn lại', () => {

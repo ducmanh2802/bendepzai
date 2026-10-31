@@ -10,11 +10,11 @@ của sản phẩm, từ nghiệp vụ tới từng test. Đọc theo thứ tự
 | 3 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | *Ghép như thế nào, dữ liệu đi đâu, vì sao chọn vậy?* | 17 ADR, sơ đồ tầng + luồng dữ liệu |
 | 4 | [`RTM.md`](RTM.md) | *Yêu cầu nào được chứng minh ở đâu? Test nào không phục vụ gì?* | ma trận xuôi + ngược, tổng kết độ phủ |
 | 5 | [`../plan/TASK_PLAN.md`](../plan/TASK_PLAN.md) | *Đã làm gì (P25→P43) và sẽ làm gì tiếp (EP-A…EP-F)?* | WBS 12 gói, 4 milestone |
-| 6 | [`../plan/TEST_PLAN.md`](../plan/TEST_PLAN.md) | *Kiểm bằng lớp nào, chạy lệnh nào, khi nào xanh?* | 5 lớp, 24 probe, bảng "đổi gì → chạy gì" |
+| 6 | [`../plan/TEST_PLAN.md`](../plan/TEST_PLAN.md) | *Kiểm bằng lớp nào, chạy lệnh nào, khi nào xanh?* | 5 lớp, 25 probe, bảng "đổi gì → chạy gì" |
 
 ## Quy ước chung của bộ tài liệu
 
-1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1062 test / 74 file,
+1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1068 test / 75 file,
    533.8 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-10-31** — lần cuối ngay sau
    audit UI T28 (lưới bàn cờ thẳng quân, máy gắp sticker xếp đống, 9 lớp hoạt ảnh còn thiếu),
    sau khi đã sửa vòng bug T26/T27; trên nền

@@ -5,8 +5,8 @@
 > coi là xanh**. Danh sách yêu cầu cần kiểm: [`SRS.md`](../specs/SRS.md); ánh xạ
 > yêu cầu ↔ test ↔ probe ↔ gate: [`RTM.md`](../specs/RTM.md); quy trình: [`../SDLC.md`](../SDLC.md).
 >
-> **Số liệu chốt 2026-10-31** (đo lại sau vòng sửa bug T26 cờ tướng, T27 học hấp dẫn hơn và audit UI T28): 74 file test / 1062 test ·
-> 24 probe (23 `.mjs` + 1 `.cjs`) · 4 workflow CI · 3 git hook · main chunk 533.8 kB / trần
+> **Số liệu chốt 2026-10-31** (đo lại sau vòng sửa bug T26 cờ tướng, T27 học hấp dẫn hơn, audit UI T28 và làm mượt luồng học T29): 75 file test / 1068 test ·
+> 25 probe (24 `.mjs` + 1 `.cjs`) · 4 workflow CI · 3 git hook · main chunk 533.8 kB / trần
 > 600 kB; vendor ngoài entry: `three-vendor` 545.4 kB, `firebase-vendor` 537.9 kB.
 
 ---
@@ -33,9 +33,9 @@
 ```
 Lớp 5  Người lớn đọc to + beta trẻ thật          → §11   (2 phiên/milestone, không tự động)
 Lớp 4  Thiết bị thật: Android/iOS, offline, audio → §7    (qa/mobile.mjs + tay người)
-Lớp 3  Probe trình duyệt trên dist/ (24 probe)    → §6    (npm run qa:smoke)
+Lớp 3  Probe trình duyệt trên dist/ (25 probe)    → §6    (npm run qa:smoke)
 Lớp 2  Build + ngân sách + precache               → §9    (npm run build && npm run check:budget)
-Lớp 1  Unit/integration Vitest (1062 test)        → §5    (npm run test:ci)
+Lớp 1  Unit/integration Vitest (1068 test)        → §5    (npm run test:ci)
 ────────────────────────────────────────────────────────────────────────────────────────────
               npm run verify = typecheck + Lớp 1 + Lớp 2   ← cổng duy nhất
 ```
@@ -80,7 +80,7 @@ Lớp 1  Unit/integration Vitest (1062 test)        → §5    (npm run test:ci)
 `posttest` gọi `scripts/audit-snapshot.mjs` ghi `docs/audit-state.json` và nối
 `docs/AUDIT_REPORT.md` (`AGENTS.md` §1.2).
 
-**Bố trí 74 file theo vai trò:**
+**Bố trí 75 file theo vai trò:**
 
 | Nhóm | File | Kiểm gì |
 |---|---|---|
@@ -123,7 +123,7 @@ registry của Playwright, cộng `--no-sandbox` khi `CI` được set.
 **Hợp đồng exit code:** in `QA PASS`/`QA FAIL` và **chỉ** exit khác 0 khi probe ghi `errors[]`
 hoặc tự khai `ok: false` (nhiều probe không set `ok` ⇒ thiếu `ok` **không** phải lỗi).
 
-**Danh mục 24 probe:**
+**Danh mục 25 probe:**
 
 | Probe | Kịch bản | Tiêu chí xanh | Chạy khi |
 |---|---|---|---|
@@ -151,6 +151,7 @@ hoặc tự khai `ok: false` (nhiều probe không set `ok` ⇒ thiếu `ok` **k
 | `lesson-engagement.mjs` | 2 lượt bài học đầu tiên @390×844: lượt 1 chọn sai để ghi lại đáp án đúng, kiểm sao/đồng hồ/danh sách câu sai, bấm "Ôn lại" rồi trả lời đúng từng câu | sao khớp tỉ lệ đúng, đồng hồ đứng yên ở màn kết quả, combo tăng (`data-combo`), lượt ôn 9/9 → 3 sao + 0 câu sai, 0 tràn ngang | đổi `LessonPlayerModal` / `lessonEngagement.ts` |
 | `p38-browser-probe.cjs` | hồi quy praise/parity (P38) | 0 lỗi console vùng đã đổi | đổi praise |
 | `gacha-machine.mjs` | Máy Gắp @390×844: đo đống sticker trong cửa kính, bấm gắp, xem kết quả + lịch sử | 10 sticker trải ≥ 55% bề ngang kính, không tràn khung, `claw-drop` + `gacha-jumble` chạy khi gắp, trừ 1 vé, lịch sử hiện sticker, 0 tràn ngang | đổi `GachaMachineScreen` / hoạt ảnh UI |
+| `lesson-smooth.mjs` | Luồng học @390×844: đo thanh hành động, vị trí cuộn sau mỗi câu, ô combo và phản hồi | thanh "Kiểm tra/Câu tiếp theo" **ngoài** vùng cuộn và luôn thấy, `scrollTop = 0` khi sang câu mới, ô combo cao 24 px nên dải hiện không đẩy đề (shift ≤ 2 px), phản hồi nằm trong tầm nhìn, 0 tràn ngang | đổi `LessonPlayerModal` / combo / đồng hồ |
 
 **Chính sách probe đỏ vì timing (đã ghi `AGENTS.md` §1.3):** chạy lại **một** lần;
 nếu vẫn đỏ ⇒ là lỗi thật; khi báo cáo phải dán `errors[]` + `failedAt`, không chỉ exit code.
@@ -199,7 +200,7 @@ Nợ đã biết: selector `qa/games.mjs` từng khiến probe `SKIPPED` ở m�
 | Precache | `tests/sw-precache.test.ts`, `qa/offline-pwa.mjs` | manifest đủ `/assets/*`; placeholder dev ⇒ danh sách rỗng nhưng SW vẫn sống | — |
 | Loại trừ | `node_modules`, `.git`, `dist` không vào manifest | — | — |
 
-**Số đo gần nhất (2026-10-31):** `index-PGWPiTgJ.js = 533.8 kB` → PASS trần, **trên** mục tiêu 450 kB.
+**Số đo gần nhất (2026-10-31):** `index-AUAPmuH2.js = 533.8 kB` → PASS trần, **trên** mục tiêu 450 kB.
 
 ---
 

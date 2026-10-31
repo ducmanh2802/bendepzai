@@ -57,6 +57,25 @@ interface LessonPlayerModalProps {
 
 type MatchingState = Record<string, string>;
 
+// T29 — đồng hồ đếm trong component riêng: mỗi giây chỉ ô giờ cập nhật thay vì
+// re-render cả đề bài, đáp án và phản hồi (bản cũ đặt interval ở modal).
+const LessonClock: React.FC<{ startedAt: number | null; paused: boolean }> = ({
+  startedAt,
+  paused,
+}) => {
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    if (paused || startedAt === null) return;
+    const tick = () => setSeconds(Math.floor((Date.now() - startedAt) / 1000));
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [startedAt, paused]);
+
+  return <span data-testid="lesson-timer">{formatElapsed(seconds)}</span>;
+};
+
 export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
   lesson,
   onClose,
@@ -97,11 +116,14 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
   // T27 — combo, đồng hồ, danh sách câu sai và chế độ ôn lại câu sai.
   const [combo, setCombo] = useState(0);
   const [bestCombo, setBestCombo] = useState(0);
+  // Thời lượng chốt lại khi bé vào màn kết quả; đồng hồ tự đếm ở LessonClock.
   const [elapsedSec, setElapsedSec] = useState(0);
+  const [startedAt, setStartedAt] = useState<number | null>(() => Date.now());
   const [missed, setMissed] = useState<{ id: string; prompt: string; answer: string }[]>([]);
   const [reviewIds, setReviewIds] = useState<string[] | null>(null);
-  const startedAtRef = useRef<number | null>(null);
   const resultScrollRef = useRef<HTMLDivElement | null>(null);
+  const questionScrollRef = useRef<HTMLDivElement | null>(null);
+  const feedbackRef = useRef<HTMLDivElement | null>(null);
 
   const activeQuestions = React.useMemo(() => {
     const base = (() => {
@@ -157,6 +179,9 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
     setIsAnswerChecked(false);
     setIsCorrect(false);
     setShowHint(false);
+    // T29 — câu mới phải bắt đầu từ đầu. Giữ scrollTop của câu trước thì đề mới
+    // mở ra đã bị cắt mất phần trên (qa/lesson-smooth.mjs đo được).
+    if (questionScrollRef.current) questionScrollRef.current.scrollTop = 0;
 
     if (!StorageService.getParentSettings().questionAutoplay) return;
     const timer = setTimeout(() => {
@@ -165,17 +190,12 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
     return () => clearTimeout(timer);
   }, [currentIdx, question]);
 
-  // T27 — đồng hồ đếm thời gian học, dừng lại khi bé tới màn kết quả.
+  // T29 — phản hồi đúng/sai nằm cuối vùng cuộn; đưa vào tầm nhìn ngay sau khi
+  // chấm để bé thấy lời khen/đáp án mà không phải tự kéo xuống.
   useEffect(() => {
-    if (isFinished) return;
-    if (startedAtRef.current === null) startedAtRef.current = Date.now();
-    const id = window.setInterval(() => {
-      if (startedAtRef.current !== null) {
-        setElapsedSec(Math.floor((Date.now() - startedAtRef.current) / 1000));
-      }
-    }, 1000);
-    return () => window.clearInterval(id);
-  }, [isFinished]);
+    if (!isAnswerChecked) return;
+    feedbackRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [isAnswerChecked]);
 
   // Màn kết quả: đưa tiêu điểm vào khung cuộn và về đầu trang, để bé luôn thấy
   // hàng sao trước. Không dùng autoFocus cho nút "Về bản đồ" vì trình duyệt sẽ
@@ -290,6 +310,7 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
       setCurrentIdx(currentIdx + 1);
     } else {
       // Rewards are saved right away; the result screen shows them.
+      setElapsedSec(startedAt === null ? 0 : Math.floor((Date.now() - startedAt) / 1000));
       setIsFinished(true);
       finishedRef.current = true;
       sound.playLevelUp();
@@ -325,7 +346,8 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
     setBestCombo(0);
     setMissed([]);
     setElapsedSec(0);
-    startedAtRef.current = Date.now();
+    setStartedAt(Date.now());
+    if (questionScrollRef.current) questionScrollRef.current.scrollTop = 0;
   };
 
   const handleRetryLesson = () => {
@@ -348,6 +370,8 @@ export const LessonPlayerModal: React.FC<LessonPlayerModalProps> = ({
     setIsAnswerChecked(false);
     setIsCorrect(false);
     setShowHint(true);
+    // Gợi ý nằm dưới đề bài; đưa bé về đầu câu để đọc gợi ý.
+    questionScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     const retryPraise = resolvePraise({
       subject: toPraiseSubject(question.subject),
       outcome: 'ENCOURAGEMENT',
@@ -583,7 +607,7 @@ return (
                 </h3>
                 <p className="text-[11px] text-amber-700 font-bold">
                   Câu hỏi {currentIdx + 1} / {activeQuestions.length} · ⏱{' '}
-                  <span data-testid="lesson-timer">{formatElapsed(elapsedSec)}</span>
+                  <LessonClock startedAt={startedAt} paused={isFinished} />
                 </p>
               </div>
             </div>
@@ -652,22 +676,29 @@ return (
           />
         </div>
 
-        {/* T27 — chuỗi câu đúng liên tiếp */}
-        {combo >= 2 && !isFinished && (
-          <div
-            data-testid="lesson-combo"
-            data-combo={combo}
-            className="flex items-center justify-center gap-1.5 py-1 bg-orange-100 border-b border-orange-200 text-orange-800 text-xs font-black animate-pop"
-          >
-            <span>🔥 Chuỗi {combo} câu đúng liên tiếp!</span>
-            {combo >= 3 && <span>Bé siêu quá!</span>}
-          </div>
-        )}
-
         {/* Question Area */}
         {!isFinished ? (
         <div className="flex-1 flex flex-col min-h-0">
-          <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          {/* T29 — ô combo cao cố định: hiện/ẩn dải không đẩy đề bài xuống
+              (trước đây dải chèn thêm một hàng làm cả câu hỏi nhảy ~24px). */}
+          <div
+            data-testid="lesson-combo-slot"
+            className={`h-6 shrink-0 overflow-hidden flex items-center justify-center ${
+              combo >= 2 ? 'bg-orange-100 border-b border-orange-200' : ''
+            }`}
+          >
+            {combo >= 2 && (
+              <div
+                data-testid="lesson-combo"
+                data-combo={combo}
+                className="flex items-center justify-center gap-1.5 text-xs font-black text-orange-800 animate-pop"
+              >
+                <span>🔥 Chuỗi {combo} câu đúng liên tiếp!</span>
+                {combo >= 3 && <span>Bé siêu quá!</span>}
+              </div>
+            )}
+          </div>
+          <div ref={questionScrollRef} className="flex-1 overflow-y-auto p-4 md:p-6">
             {/* T27 — bé đang ôn lại đúng những câu đã làm sai */}
             {reviewIds && (
               <div className="mb-3 px-3 py-2 rounded-xl bg-sky-50 border border-sky-200 text-xs font-black text-sky-800">
@@ -741,17 +772,18 @@ return (
             </div>
 
             {/* Bottom Feedback (trong vùng cuộn) */}
-            <div>
+            <div ref={feedbackRef}>
               {bottomFeedback}
             </div>
+          </div>
 
-            {/*
-              T01B/2 — thanh hành động DÍNH ĐÁY modal: nút "Kiểm tra"/"Câu tiếp
-              theo" luôn thấy ở 375×667, không phải cuộn. Nằm ngoài vùng cuộn.
-            */}
-            <div className="shrink-0 border-t-2 border-amber-200 bg-white/95 backdrop-blur px-4 md:px-6 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-              {submitButton}
-            </div>
+          {/*
+            T29 — thanh hành động DÍNH ĐÁY modal, thực sự NẰM NGOÀI vùng cuộn.
+            Bản trước đặt khối này bên trong `overflow-y-auto` dù chú thích nói
+            ngược lại, nên nút "Kiểm tra" bị cuộn mất ở máy nhỏ.
+          */}
+          <div className="shrink-0 border-t-2 border-amber-200 bg-white/95 backdrop-blur px-4 md:px-6 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            {submitButton}
           </div>
         </div>
         ) : (
