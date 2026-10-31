@@ -88,16 +88,19 @@ export default async function run(page, ui) {
     if (!(await page.getByRole('button', { name: /Kiểm tra câu trả lời/ }).count())) break;
   }
 
-  // T20B contract: finishing the last question auto-closes the player. This is
-  // a save/persist gate — no in-modal "CHÚC MỪNG" screen exists any more.
+  // Thẻ kết quả (sao/XP/"Về bản đồ") được giữ lại sau câu cuối theo T20A/B-03 —
+  // trước đây player tự đóng nên hợp đồng cũ "tự đóng" đã sai (T31). Điều kiện
+  // đúng: bài đã được ghi nhận VÀ hộp thoại đã đóng hoặc đang ở màn kết quả.
   const completion = await page.evaluate(() => {
     const profile = JSON.parse(localStorage.getItem('kho_bau_child_profile') || '{}');
     return {
       completedLessons: (profile.completedLessons || []).length,
       lessonModalOpen: !!document.querySelector('[data-testid="lesson-close"]'),
+      resultScreen: !!document.querySelector('[data-testid="lesson-stars"]'),
     };
   });
-  const completed = completion.completedLessons >= 1 && !completion.lessonModalOpen;
+  const completed =
+    completion.completedLessons >= 1 && (!completion.lessonModalOpen || completion.resultScreen);
   const minOptions = optionCounts.length
     ? Math.min(...optionCounts.filter((o) => !o.isTrueFalse).map((o) => o.count))
     : 0;

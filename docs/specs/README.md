@@ -14,10 +14,10 @@ của sản phẩm, từ nghiệp vụ tới từng test. Đọc theo thứ tự
 
 ## Quy ước chung của bộ tài liệu
 
-1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1075 test / 76 file,
-   533.8 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-10-31** — lần cuối ngay sau
-   audit UI T28 (lưới bàn cờ thẳng quân, máy gắp sticker xếp đống, 9 lớp hoạt ảnh còn thiếu),
-   sau khi đã sửa vòng bug T26/T27; trên nền
+1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1091 test / 77 file,
+   533.5 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-10-31** — lần cuối ngay sau
+   vòng soát bug T31 (bẫy focus popup bài học, header tràn nút "Ba Mẹ", thoại gấu lẫn chữ Hàn,
+   cờ vua 3D thiếu fallback WebGL), sau khi đã sửa vòng bug T26/T27 và audit UI T28; trên nền
    hai merge `origin/main`
    (cloud-sync + cờ vua WebGL, rồi `3727f04` auth/chess) và merge `fd3e7da` — bằng
    `npx vitest run`, `npm run check:budget` hoặc `ls`. Các số mô tả nội dung học (31/475/1570

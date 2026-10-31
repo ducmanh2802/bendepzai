@@ -4,6 +4,7 @@ import { getTopicsBySubject } from '../../data/curriculum';
 import { StorageService } from '../../services/storage';
 import { sound } from '../../services/sound';
 import { LessonPlayerModal } from '../learning/LessonPlayerModal';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { ArrowLeft, CheckCircle2, Star, Sparkles, Play, Lock, Volume2, X } from 'lucide-react';
 import { KidButton, Pill, ProgressStars } from '../ui';
 
@@ -46,6 +47,9 @@ export const SubjectScreen: React.FC<SubjectScreenProps> = ({
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
   const [showLessonPopup, setShowLessonPopup] = useState<Lesson | null>(null);
   const [scrollContainerRef, setScrollContainerRef] = useState<HTMLDivElement | null>(null);
+  // Popup giới thiệu bài là hộp thoại thật: phải bẫy Tab và trả focus về nút
+  // bài học khi đóng, nếu không bé dùng bàn phím/switch sẽ lạc ra sau lớp phủ.
+  const lessonPopupRef = useFocusTrap<HTMLDivElement>(!!showLessonPopup);
   const profile = StorageService.getChildProfile();
 
   const subjectInfo = {
@@ -163,6 +167,19 @@ export const SubjectScreen: React.FC<SubjectScreenProps> = ({
     setShowLessonPopup(null);
     setActiveLesson(lesson);
   };
+
+  // Esc đóng popup giới thiệu, giống mọi hộp thoại khác trong app.
+  useEffect(() => {
+    if (!showLessonPopup) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setShowLessonPopup(null);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [showLessonPopup]);
 
   const handleLessonComplete = () => {
     // T20A / B-03 — this used to also unmount the lesson, so the player's own
@@ -463,7 +480,17 @@ export const SubjectScreen: React.FC<SubjectScreenProps> = ({
 
       {/* Lesson Popup Modal */}
       {showLessonPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-pop" role="dialog" aria-modal="true">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-pop"
+          role="dialog"
+          aria-modal="true"
+          aria-label={showLessonPopup.title}
+          ref={lessonPopupRef}
+          tabIndex={-1}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setShowLessonPopup(null);
+          }}
+        >
           <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border-4 border-amber-300 p-6 animate-pop select-none">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg md:text-xl font-black text-slate-900 font-display">{showLessonPopup.title}</h3>

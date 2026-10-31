@@ -76,7 +76,7 @@ export const AuthButton: React.FC<AuthButtonProps> = ({ profile }) => {
               />
             </div>
 
-            <span className="hidden min-[420px]:inline max-w-[85px] sm:max-w-[120px] truncate font-black text-emerald-950">
+            <span className="hidden xl:inline max-w-[120px] truncate font-black text-emerald-950">
               {syncState.user?.displayName || 'Đã lưu'}
             </span>
 
@@ -107,8 +107,11 @@ export const AuthButton: React.FC<AuthButtonProps> = ({ profile }) => {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
               />
             </svg>
-            <span className="text-amber-950 font-black whitespace-nowrap">
-              <span className="hidden min-[480px]:inline">Đăng nhập </span>Google
+            {/* T31 — dưới xl (1280) chỉ giữ biểu tượng: nhãn chữ đẩy nút
+                "Ba Mẹ" ra ngoài màn hình ở 375/768/1024 (qa/mobile-home.mjs
+                đo được). aria-label vẫn mô tả đầy đủ cho trình đọc màn hình. */}
+            <span className="hidden xl:inline text-amber-950 font-black whitespace-nowrap">
+              Đăng nhập Google
             </span>
           </>
         )}

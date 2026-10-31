@@ -90,6 +90,11 @@ async function body(page, ui) {
   });
   await page.reload();
   await page.waitForSelector('[data-testid="nav-home"]:visible', { timeout: 20000 });
+  // Thẻ gợi ý nạp engine bất đồng bộ (chunk riêng); đọc text ngay sau khi vào
+  // trang sẽ thấy skeleton và báo thiếu thẻ (T31 — đỏ giả do timing).
+  await page
+    .waitForSelector('[data-testid="decision-engine-card"]', { timeout: 20000 })
+    .catch(() => {});
 
   const homeText = await page.evaluate(() => document.body.innerText);
   const nextBestAction = /Hôm Nay Bé Nên Học Gì|Bé Nên Làm Gì Tiếp Theo/.test(homeText);

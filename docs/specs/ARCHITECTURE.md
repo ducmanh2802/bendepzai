@@ -188,7 +188,7 @@ Hai đường, và cả hai đều do người lớn khởi động:
 | `firebase-vendor` | `firebase`/`@firebase` | 537.9 kB, chỉ dùng cho cloud-sync tuỳ chọn; tách để entry không phải mang SDK |
 | `math-bank` | `src/data/math/` + `mathCurriculum` | ngân sách sống sót sau khi kho Toán phình |
 | `english-bank` | `src/data/english/` + `englishCurriculum` | tương tự cho kho Anh |
-| entry `index-*.js` | App + services + phần còn lại | **≤ 600 kB (cứng), mục tiêu ≤ 450 kB** — hiện **533.9 kB** |
+| entry `index-*.js` | App + services + phần còn lại | **≤ 600 kB (cứng), mục tiêu ≤ 450 kB** — hiện **533.5 kB** |
 
 - Gate: `npm run check:budget` → `scripts/check-bundle-budget.mjs` đọc `dist/index.html`
   để tìm đúng file entry (bảo đảm không cộng nhầm chunk), exit 1 nếu vượt.
@@ -289,7 +289,7 @@ Hai đường, và cả hai đều do người lớn khởi động:
     `src/components/learning/cotuong/CotuongBoard3D.tsx`; quân cờ mang `id` ổn định để trượt,
     không remount. Không thêm dependency nào.
   - Cờ **vua**: WebGL thật bằng three.js — `src/components/learning/chess/chess3d/Chess3DCanvas.tsx`
-    (652 dòng: `WebGLRenderer` :186, `Raycaster` :96 cho picking, `Scene` :173), gắn vào
+    (682 dòng: `WebGLRenderer` :200, `Raycaster` :99 cho picking, `Scene` :185), gắn vào
     `ChessGame.tsx:326`, `three-vendor` tách chunk và chỉ tải qua `React.lazy`.
 
 ---
@@ -377,7 +377,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 ### ADR-08 — Ngân sách bundle là gate, không là lời khuyên
 - **Quyết định:** entry ≤ 600 kB chặn `verify`; 450 kB chỉ báo cáo. Script và test dùng
   chung `getBudgetReport()`.
-- **Hệ quả:** áp lực phình entry bị nhìn thấy ngay. **Nợ:** đang 533.9 kB, cách mục tiêu
+- **Hệ quả:** áp lực phình entry bị nhìn thấy ngay. **Nợ:** đang 533.5 kB, cách mục tiêu
   ~84 kB; mọi bổ sung lớn vào entry phải kèm lý do.
 
 ### ADR-09 — Bất biến đăng ký trò chơi 4 nơi, khoá bằng test
@@ -398,7 +398,8 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
   ở ADR-17: nằm sau `React.lazy` và trong chunk `three-vendor` riêng.
 - **Hệ quả:** thiết bị yếu vẫn mở cờ tướng mượt; cờ vua 3D là trải nghiệm nặng hơn có chủ
   đích, trả giá 545.4 kB chỉ khi bé mở màn đó. **Nợ:** chưa có fallback 2D khi
-  `requestAnimationFrame`/WebGL context thất bại trên máy cấu hình thấp (§13 nợ #7).
+  `requestAnimationFrame`/WebGL; nếu máy không tạo được context (tablet cũ, chế độ tiết kiệm
+  pin) `Chess3DCanvas` gọi `onUnsupported` để `ChessGame` tự chuyển sang bàn 2D (T31).
 
 ### ADR-16 — Cloud sync là tuỳ chọn, không phải đường mặc định của dữ liệu
 - **Bối cảnh:** Firebase vào repo từ một lane khác; nếu mặc định bật, mọi tiến độ của trẻ
@@ -456,7 +457,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 
 ---
 
-## 12. Kiểm kê kiến trúc (đo 2026-10-31, sau vòng sửa bug T26/T27, audit UI T28, làm mượt luồng học T29 + độ dày quân cờ T30)
+## 12. Kiểm kê kiến trúc (đo 2026-10-31, sau vòng sửa bug T26/T27, audit UI T28, làm mượt luồng học T29, độ dày quân cờ T30 và vòng soát bug T31)
 
 | Hạng | Số | Nguồn |
 |---|---|---|
@@ -470,11 +471,11 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 | Export policy | 17 (693 dòng) | `src/config/policy.ts` |
 | Key `localStorage` | 17 | `STORAGE_KEYS` (16) + key cục bộ IOE (1) |
 | Dependency runtime | 8 | `package.json` → `dependencies` |
-| Test file / test | 76 / 1075 | `npx vitest run` (74 `.ts` + 2 `.tsx`) |
+| Test file / test | 77 / 1091 | `npx vitest run` (75 `.ts` + 2 `.tsx`) |
 | Probe QA | 26 (25 `.mjs` + 1 `.cjs`) | `ls qa/*.mjs qa/*.cjs` (trừ `lib.mjs`, `run-one.mjs`) |
 | Workflow CI | 4 | `.github/workflows/` |
 | MCP server / tool | 5 / 27 | `mcp/` |
-| Main chunk | 533.9 kB | `npm run check:budget` |
+| Main chunk | 533.5 kB | `npm run check:budget` |
 | Vendor chunk lớn nhất | `three-vendor` 545.4 kB · `firebase-vendor` 537.9 kB · `react-vendor` 213.6 kB | `npm run check:budget` |
 | `App.tsx` / `storage.ts` / `learningOS.ts` / `competitionEngine.ts` / `readingEngine.ts` / `cloudSync.ts` / `firebase.ts` | 436 / 2426 / 842 / 747 / 647 / 224 / 85 dòng | `wc -l` |
 
@@ -485,12 +486,11 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 | # | Nợ | Ảnh hưởng | Hướng xử lý |
 |---|---|---|---|
 | 1 | `kho_bau_ioe_store` ngoài `STORAGE_KEYS`, đọc/ghi trực tiếp `localStorage` | thoát khỏi pipeline sanitize; dễ lệch kiểm kê | đưa về registry + `readJSONObject`, thêm test đếm đủ 17 key |
-| 2 | Entry chunk 533.8 kB so với mục tiêu 450 kB | thiết bị yếu tải chậm hơn mức mong muốn | đo lại sau mỗi mở rộng kho; cân nhắc tách bank Tiếng Việt |
+| 2 | Entry chunk 533.5 kB so với mục tiêu 450 kB | thiết bị yếu tải chậm hơn mức mong muốn | đo lại sau mỗi mở rộng kho; cân nhắc tách bank Tiếng Việt |
 | 3 | Kid's Box units = 0 | track Anh chưa dùng được như giáo trình | cần nguồn đã xác minh (FR-N04, ADR-15) |
 | 4 | Chưa audit riêng track Kid's Box với trẻ thật | rủi ro trải nghiệm | audit người dùng thật trước khi quảng bá track |
 | 5 | `bun.lock` còn trong repo trong khi npm là nguồn thật | gây nhầm package manager | giữ nguyên + ghi chú (quyết định đã chốt) |
 | 6 | Probe deep-flow thỉnh thoảng đỏ do timing | nhiễu tín hiệu QA | chạy lại 1 lần, dán `errors[]` + `failedAt` (AGENTS.md §1.3) |
-| 7 | `Chess3DCanvas` không có fallback khi tạo WebGL context thất bại | máy cấu hình thấp / trình duyệt cũ có thể chỉ thấy màn trống | bắt `WebGLRenderer` exception, fallback sang bàn CSS 3D như cờ tướng, thêm test |
 | 8 | `@types/three` nằm trong `dependencies` thay vì `devDependencies` | lệch kiểm kê "8 dependency runtime", dễ bị hiểu là package runtime | chuyển sang `devDependencies` (một dòng `package.json` + `package-lock.json`); phát sinh từ commit của lane khác, cần người duyệt vì đụng dependency |
 | 9 | Cloud sync mới test bằng mock (`tests/firebase-auth-sync.test.ts`); GET cross-origin đi qua stale-while-revalidate của `public/sw.js:185` | chưa chứng minh hành xử với project Firebase thật và lúc offline; nguy cơ nhận response cũ từ `firestore.googleapis.com` | smoke test có tài khoản thật + cân nhắc loại `firestore.googleapis.com`/`*.googleapis.com` khỏi nhánh cache cross-origin |
 | 10 | `npm install` báo 4 lỗ hổng severity cao | rủi ro chuỗi cung ứng ở dev/vendor deps | `npm audit` có chủ đích, đọc từng advisory trước khi nâng cấp (không tự ý downgrade) |

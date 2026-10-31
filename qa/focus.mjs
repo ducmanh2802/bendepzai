@@ -33,6 +33,7 @@ export default async function run(page, ui) {
     await page.getByRole('button', { name: /Tiếng Việt/ }).first().click(CLICK);
     await page.waitForSelector('text=Vương Quốc Tiếng Việt', { timeout: 20000 });
     const trigger = page.locator('[data-testid^="lesson-button-"]').first();
+    const triggerTestId = await trigger.getAttribute('data-testid');
     // T20A / B-01: the adventure path overlaps its nodes for topics with many
     // lessons, so a mouse click never lands on the intended node. Keyboard
     // activation reaches the same handler.
@@ -75,8 +76,12 @@ export default async function run(page, ui) {
     await page.getByRole('button', { name: 'Đóng bài học' }).click(CLICK);
     await page.waitForTimeout(500);
     const afterClose = await activeInfo(page);
-    out.tests[out.tests.length - 1].focusRestoredToTrigger =
-      (afterClose.label || '').includes('Vào học') || (afterClose.label || '').includes('Học lại');
+    // Nút bài học giờ có aria-label kiểu "Bài …, đang học" (T07); nhận diện
+    // bằng data-testid đã chụp trước khi mở, không đoán theo chữ trên nhãn.
+    const restoredTestId = await page.evaluate(
+      () => document.activeElement?.getAttribute('data-testid') || null
+    );
+    out.tests[out.tests.length - 1].focusRestoredToTrigger = restoredTestId === triggerTestId;
     out.tests[out.tests.length - 1].landedAfterClose = afterClose.label;
   }
 

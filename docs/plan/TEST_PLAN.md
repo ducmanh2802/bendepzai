@@ -5,8 +5,8 @@
 > coi là xanh**. Danh sách yêu cầu cần kiểm: [`SRS.md`](../specs/SRS.md); ánh xạ
 > yêu cầu ↔ test ↔ probe ↔ gate: [`RTM.md`](../specs/RTM.md); quy trình: [`../SDLC.md`](../SDLC.md).
 >
-> **Số liệu chốt 2026-10-31** (đo lại sau vòng sửa bug T26 cờ tướng, T27 học hấp dẫn hơn, audit UI T28 và làm mượt luồng học T29, độ dày quân cờ T30): 76 file test / 1075 test ·
-> 26 probe (25 `.mjs` + 1 `.cjs`) · 4 workflow CI · 3 git hook · main chunk 533.9 kB / trần
+> **Số liệu chốt 2026-10-31** (đo lại sau vòng sửa bug T26 cờ tướng, T27 học hấp dẫn hơn, audit UI T28, làm mượt luồng học T29, độ dày quân cờ T30 và vòng soát bug T31): 77 file test / 1091 test ·
+> 26 probe (25 `.mjs` + 1 `.cjs`) · 4 workflow CI · 3 git hook · main chunk 533.5 kB / trần
 > 600 kB; vendor ngoài entry: `three-vendor` 545.4 kB, `firebase-vendor` 537.9 kB.
 
 ---
@@ -35,7 +35,7 @@ Lớp 5  Người lớn đọc to + beta trẻ thật          → §11   (2 phi
 Lớp 4  Thiết bị thật: Android/iOS, offline, audio → §7    (qa/mobile.mjs + tay người)
 Lớp 3  Probe trình duyệt trên dist/ (26 probe)    → §6    (npm run qa:smoke)
 Lớp 2  Build + ngân sách + precache               → §9    (npm run build && npm run check:budget)
-Lớp 1  Unit/integration Vitest (1075 test)        → §5    (npm run test:ci)
+Lớp 1  Unit/integration Vitest (1091 test)        → §5    (npm run test:ci)
 ────────────────────────────────────────────────────────────────────────────────────────────
               npm run verify = typecheck + Lớp 1 + Lớp 2   ← cổng duy nhất
 ```
@@ -80,7 +80,7 @@ Lớp 1  Unit/integration Vitest (1075 test)        → §5    (npm run test:ci)
 `posttest` gọi `scripts/audit-snapshot.mjs` ghi `docs/audit-state.json` và nối
 `docs/AUDIT_REPORT.md` (`AGENTS.md` §1.2).
 
-**Bố trí 76 file theo vai trò:**
+**Bố trí 77 file theo vai trò:**
 
 | Nhóm | File | Kiểm gì |
 |---|---|---|
@@ -93,7 +93,7 @@ Lớp 1  Unit/integration Vitest (1075 test)        → §5    (npm run test:ci)
 | Động lực | `t18a-motivation`, `t01-achievements`, `praise-engine`, `t14c-logic`, `t14c-storage`, `t20a-levelup-hooks` | sticker/quest/streak/level, lời khen không từ cấm, hooks order |
 | Persistence | `t14c-storage`, `date-utils`, `parent-and-demo`, `firebase-auth-sync` | sanitize, `isRealDateKey`, export/import, **trạng thái offline khi chưa đăng nhập**, hợp nhất `Math.max`/`Set` union (mock Firestore) |
 | Âm thanh & giọng đọc | `question-audio-routing`, `voice-persona`, `t24-speech-math-operators` | nút "Đọc câu hỏi" luôn lấy canonical text (không rò rỉ đáp án/option/giải thích), persona + fallback en-GB, **phép tính `+ − =` đọc thành lời** mà không đổi chữ hiển thị |
-| Hệ thống | `bundle-budget`, `pwa`, `sw-precache`, `mobile-layout`, `t02c-startup-split`, `p41-font-encoding` | ngân sách chunk, precache, layout, tách chunk, font/dấu |
+| Hệ thống | `bundle-budget`, `pwa`, `sw-precache`, `mobile-layout`, `t02c-startup-split`, `p41-font-encoding`, `t31-bug-hunt-fixes` | ngân sách chunk, precache, layout, tách chunk, font/dấu, **hợp đồng tĩnh của 5 lỗi T31 + 7 probe đã sửa** |
 | Cờ | `cotuong-engine`, `chess-3d`, `t30-cotuong-piece-depth` | luật (mã/tượng/pháo/tốt/tướng đối mặt/tự bỏ chiếu), node budget, `applyMove`; mesh 12 quân có shadow, bàn 64 ô + hitbox, marker nước đi/chiếu, nước mở đầu hợp lệ với engine; **độ nổi của quân cờ tướng** (bóng tiếp đất tràn ra ngoài đĩa, thành quân thò dưới mặt quân, thứ tự 3 lớp) |
 | Tooling | `t23-mcp-servers` | 5 server tồn tại, `node --check`, 0 import ngoài, `progress/` gitignored, 4 danh sách đăng ký khớp |
 
@@ -201,7 +201,7 @@ Nợ đã biết: selector `qa/games.mjs` từng khiến probe `SKIPPED` ở m�
 | Precache | `tests/sw-precache.test.ts`, `qa/offline-pwa.mjs` | manifest đủ `/assets/*`; placeholder dev ⇒ danh sách rỗng nhưng SW vẫn sống | — |
 | Loại trừ | `node_modules`, `.git`, `dist` không vào manifest | — | — |
 
-**Số đo gần nhất (2026-10-31):** `index-BJHmn7nJ.js = 533.9 kB` → PASS trần, **trên** mục tiêu 450 kB.
+**Số đo gần nhất (2026-10-31):** `index-hJ50GmCf.js = 533.5 kB` → PASS trần, **trên** mục tiêu 450 kB.
 
 ---
 

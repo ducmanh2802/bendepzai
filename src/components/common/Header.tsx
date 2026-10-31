@@ -24,12 +24,12 @@ const getTimeOfDay = (): 'sáng' | 'chiều' | 'tối' => {
 
 const getEncouragementPhrase = (timeOfDay: 'sáng' | 'chiều' | 'tối', hasStreak: boolean): string => {
   const phrases: Record<'sáng' | 'chiều' | 'tối', string> = {
-    sáng: 'Chào buổi sáng bé oir!',
-    chiều: 'Bé làm tốt lắm!',
-    tối: 'Ngủ gật đi bé, gấu sẽ chờ bé mai!',
+    sáng: 'Chào buổi sáng, bé ơi!',
+    chiều: 'Chào buổi chiều, bé làm tốt lắm!',
+    tối: 'Tối rồi, bé nhớ ngủ sớm nhé!',
   };
   if (hasStreak) {
-    return 'Bền bỉ lắm bé!';
+    return 'Bé học đều lắm, giỏi quá!';
   }
   return phrases[timeOfDay];
 };
@@ -67,49 +67,20 @@ const NavLink: React.FC<{
 
 const bearReactionPhrases = [
   'Gấu rất thích khi bé chơi với gấu!',
-  'Bé đang làm tốt lắm, gấu đang 지켜 thu!',
-  'Hết! Gấu cười lên!',
-  'Bouncing!',
-  'Hết lâu rưỡi!',
+  'Bé đang làm tốt lắm, gấu cổ vũ bé!',
+  'Gấu vui quá, bé ơi!',
+  'Bé giỏi lắm, gấu tự hào về bé!',
+  'Bé chạm nhẹ thôi nhé, gấu thích lắm!',
 ];
 
-const bearRandomReaction = (
-  setShowBearReaction: React.Dispatch<React.SetStateAction<boolean>>
-): void => {
-  const randomIndex = Math.floor(Math.random() * bearReactionPhrases.length);
-  const phrase = bearReactionPhrases[randomIndex];
-
-  // Play corresponding sound
+// Đọc đúng câu vừa chọn. Trước đây TTS đọc các từ đệm vô nghĩa (cười, hắt
+// hơi...) nên bé nghe không khớp câu chào; lỗi âm thanh không hiện trong ảnh
+// chụp hay text nên phải khoá bằng test (T31).
+const bearRandomReaction = (): void => {
+  const phrase = bearReactionPhrases[Math.floor(Math.random() * bearReactionPhrases.length)];
   if (typeof window !== 'undefined' && !sound.getMuted()) {
-    try {
-      if (randomIndex === 0) {
-        // Laugh
-        const utterance = new SpeechSynthesisUtterance('haha');
-        utterance.rate = 0.8;
- utterance.pitch = 1.3;
-        window.speechSynthesis.speak(utterance);
-      } else if (randomIndex === 1) {
-        // Encouragement
-        const utterance = new SpeechSynthesisUtterance('chanh');
-        utterance.rate = 0.7;
- utterance.pitch = 1.1;
-        window.speechSynthesis.speak(utterance);
-      } else if (randomIndex === 2) {
-        // Sneeze
-        const utterance = new SpeechSynthesisUtterance('huh');
- utterance.rate = 0.5;
- utterance.pitch = 0.8;
-        window.speechSynthesis.speak(utterance);
-      } else {
-        // Just play click
-        sound.playClick();
-      }
-    } catch {}
+    sound.speak(phrase, 'vi-VN');
   }
-
-  // Show temporary visual feedback
-  setShowBearReaction(true);
-  setTimeout(() => setShowBearReaction(false), 2000);
 };
 
 export const Header: React.FC<HeaderProps> = ({
@@ -121,7 +92,6 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isMuted, setIsMuted] = React.useState(sound.getMuted());
   const [lastPhraseTime, setLastPhraseTime] = useState<number>(0);
-  const [showBearReaction, setShowBearReaction] = useState(false);
 
   // Check days since last play using analytics todayDate
   useEffect(() => {
@@ -152,9 +122,7 @@ export const Header: React.FC<HeaderProps> = ({
   // Handle bear touch reaction
   const handleBearClick = () => {
     sound.playClick();
-    bearRandomReaction(setShowBearReaction);
-    setShowBearReaction(true);
-    setTimeout(() => setShowBearReaction(false), 2000);
+    bearRandomReaction();
   };
 
   const handleToggleSound = () => {

@@ -164,7 +164,17 @@ export default async function run(page, ui) {
   await page.waitForSelector('text=Vương Quốc Tiếng Việt', { timeout: 20000 });
   await openFirstLesson(page);
   await page.waitForSelector('[role=dialog]', { timeout: 20000 });
-  const promptBefore = await page.locator('[role=dialog]').innerText();
+  // So nội dung câu hỏi, KHÔNG so cả hộp thoại: đồng hồ bài học chạy 0:00→0:03
+  // trong lúc chờ nên so innerText cả khối luôn báo "câu đổi" dù đề không đổi
+  // (T31 đo được).
+  const questionText = () =>
+    page.evaluate(() => {
+      const dlg = document.querySelector('[role=dialog]');
+      if (!dlg) return '';
+      const timer = dlg.querySelector('[data-testid="lesson-timer"]')?.textContent || '';
+      return dlg.innerText.split(timer).join('').replace(/\s+/g, ' ').trim();
+    });
+  const promptBefore = await questionText();
 
   await page.evaluate(() => {
     Object.defineProperty(document, 'hidden', { value: true, configurable: true });
@@ -182,7 +192,7 @@ export default async function run(page, ui) {
   await page.waitForTimeout(500);
 
   const dialogSurvived = (await page.locator('[role=dialog]').count()) > 0;
-  const promptAfter = dialogSurvived ? await page.locator('[role=dialog]').innerText() : '';
+  const promptAfter = dialogSurvived ? await questionText() : '';
   const stillAnswerable = dialogSurvived && (await page.locator('[role=dialog] [data-testid=answer-option]').count()) > 0;
   out.interruption = {
     dialogSurvived,

@@ -356,6 +356,7 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             status={status}
             isThinking={thinking}
             onSquareClick={onSquareClick}
+            onUnsupported={() => setViewMode('2d')}
           />
         ) : (
           /* 2D Fallback Board */

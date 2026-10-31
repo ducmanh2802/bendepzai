@@ -28,17 +28,23 @@ export default async function run(page, ui) {
   );
   step('registered', { ok: true });
 
-  // Give the worker a moment to claim clients and finish precaching.
-  await page.waitForTimeout(1500);
-
-  const swState = await page.evaluate(async () => {
-    const reg = await navigator.serviceWorker.getRegistration();
-    return {
-      scope: reg ? reg.scope : null,
-      active: !!(reg && reg.active),
-      controller: !!navigator.serviceWorker.controller,
-    };
-  });
+  // Đăng ký xong chưa chắc đã active (worker còn installing + precache 85 file).
+  // Poll trạng thái thật từ Node thay vì waitForFunction với predicate async —
+  // Playwright trả về ngay khi predicate trả Promise nên đọc sớm báo active
+  // false dù worker vẫn đang cài (T31).
+  let swState = null;
+  for (let i = 0; i < 120; i += 1) {
+    swState = await page.evaluate(async () => {
+      const reg = await navigator.serviceWorker.getRegistration();
+      return {
+        scope: reg ? reg.scope : null,
+        active: !!(reg && reg.active && reg.active.state === 'activated'),
+        controller: !!navigator.serviceWorker.controller,
+      };
+    });
+    if (swState.active) break;
+    await page.waitForTimeout(200);
+  }
   step('workerState', swState);
   if (!swState.active) out.errors.push('service worker never became active');
 

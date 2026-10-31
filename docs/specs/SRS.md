@@ -218,7 +218,7 @@ Cột **Gate** chỉ cổng nào chặn nếu vi phạm: `V` = `npm run verify` 
 | FR-C03 | Engine negamax + alpha-beta có **node budget** để không chặn UI thread | ngân sách node chặn; đo thời gian mỗi nước | [src/components/learning/cotuong/cotuongEngine.ts](file:///D:/trithuc/kho-bau-tri-thuc/src/components/learning/cotuong/cotuongEngine.ts), `tests/cotuong-engine.test.ts` | V |
 | FR-C04 | Luật bị khoá bằng test: cản chân Mã, mắt Tượng, Pháo cần đúng một screen, tốt ngang sau hà, hai Tướng không đối mặt, không tự bỏ chiếu, `applyMove` cập nhật bàn | mỗi điều khoản ≥ 1 case test | `tests/cotuong-engine.test.ts`, [docs/cotuong.md](file:///D:/trithuc/kho-bau-tri-thuc/docs/cotuong.md) | V |
 | FR-C05 | Màn cờ có hướng dẫn và thế cờ demo cho bé lớp 1, không áp lực điểm | `ChessTutorial.tsx` + `ChessMoveDemo.tsx` tồn tại; nút Gợi ý/Hoàn tác ở `ChessGame.tsx:288`–`:303` | `src/components/learning/chess/`, [docs/cotuong.md](file:///D:/trithuc/kho-bau-tri-thuc/docs/cotuong.md) | Q |
-| FR-C06 | Bàn **cờ vua** 3D bằng WebGL (three.js): quân là mesh ghép có đổ bóng, bàn 64 ô + hitbox, đánh dấu nước hợp lệ/chiếu bằng marker, chọn quân bằng `Raycaster`; có **Gợi ý** (`hintMove`) và **Hoàn tác** (`handleUndo` — lấy lại cả nước bé và nước máy đáp lại), 3 mức độ; **nạp lười** và ở chunk `three-vendor` riêng để entry không phình | `pieceGeometries` sinh mesh đủ 12 quân trắng/đen có `castShadow`; `boardBuilder` đủ 64 ô + highlight; ChessScreen đứng sau `React.lazy`; `check:budget` vẫn PASS | [src/components/learning/chess/chess3d/Chess3DCanvas.tsx](file:///D:/trithuc/kho-bau-tri-thuc/src/components/learning/chess/chess3d/Chess3DCanvas.tsx), [src/App.tsx:18](file:///D:/trithuc/kho-bau-tri-thuc/src/App.tsx#L18), `tests/chess-3d.test.ts` | V, Q |
+| FR-C06 | Bàn **cờ vua** 3D bằng WebGL (three.js): quân là mesh ghép có đổ bóng, bàn 64 ô + hitbox, đánh dấu nước hợp lệ/chiếu bằng marker, chọn quân bằng `Raycaster`; có **Gợi ý** (`hintMove`) và **Hoàn tác** (`handleUndo` — lấy lại cả nước bé và nước máy đáp lại), 3 mức độ; **nạp lười** và ở chunk `three-vendor` riêng để entry không phình; máy không tạo được WebGL context (tablet cũ, tiết kiệm pin) thì tự chuyển sang bàn 2D thay vì màn trống (T31) | `pieceGeometries` sinh mesh đủ 12 quân trắng/đen có `castShadow`; `boardBuilder` đủ 64 ô + highlight; ChessScreen đứng sau `React.lazy`; `check:budget` vẫn PASS | [src/components/learning/chess/chess3d/Chess3DCanvas.tsx](file:///D:/trithuc/kho-bau-tri-thuc/src/components/learning/chess/chess3d/Chess3DCanvas.tsx), [src/App.tsx:18](file:///D:/trithuc/kho-bau-tri-thuc/src/App.tsx#L18), `tests/chess-3d.test.ts` | V, Q |
 
 ---
 
@@ -248,7 +248,7 @@ Cột **Gate** chỉ cổng nào chặn nếu vi phạm: `V` = `npm run verify` 
 | NFR-M01 | Bảo trì | Một cổng duy nhất: `npm run verify` = typecheck + test + build + budget | exit 0 | [package.json](file:///D:/trithuc/kho-bau-tri-thuc/package.json) scripts | V, C |
 | NFR-M02 | Bảo trì | Mọi ngưỡng nghiệp vụ nằm trong `src/config/policy.ts`, có rationale + test | 17 export policy, 693 dòng | `src/config/policy.ts` | V |
 | NFR-M03 | Bảo trì | UI không quyết định correctness/score/mastery/readiness | engine là chỗ chấm duy nhất | FR-L03, FR-E05, `AGENTS.md` §0 principle 1 | V |
-| NFR-M04 | Bảo trì | Tên test `tests/t<NN>-<chủ đề>.test.ts`; hành vi mới ⇒ test mới | 76 file / 1075 test | `AGENTS.md` §2 | V, H |
+| NFR-M04 | Bảo trì | Tên test `tests/t<NN>-<chủ đề>.test.ts`; hành vi mới ⇒ test mới | 77 file / 1091 test | `AGENTS.md` §2 | V, H |
 | NFR-M05 | Bảo trì | Không thêm dependency nếu chưa hỏi; runtime deps = 8 | `package.json` không đổi ngoài kế hoạch (`firebase`, `three`, `@types/three` vào repo cùng merge từ lane khác — đã ghi nợ vì `@types/three` lẽ ra thuộc `devDependencies`) | `AGENTS.md` §1.4 | H, C |
 | NFR-M06 | Bảo trì | MCP layer zero-dependency, stdio tự viết | 0 import ngoài `node:*` trong `mcp/**` | `tests/t23-mcp-servers.test.ts` | V |
 
@@ -365,10 +365,10 @@ Chi tiết từng dòng: xem [`RTM.md`](RTM.md).
 
 | Hạng | Kết quả 2026-10-31 (sau vòng sửa bug T26/T27) |
 |---|---|
-| `npm run verify` | **EXIT=0** — typecheck sạch · 76 file / 1075 test pass · build OK · main chunk 533.9 kB → PASS |
+| `npm run verify` | **EXIT=0** — typecheck sạch · 77 file / 1091 test pass · build OK · main chunk 533.5 kB → PASS |
 | Probe QA | cần chạy lại trên `dist/` sau mỗi thay đổi UI (xem `docs/SDLC.md` §5) |
 | FR chưa đạt / cần nguồn | FR-N04 (Kid's Box units = 0), BG-01 (vẫn chưa đo được: sync là tuỳ chọn nên không có số liệu server), FR-Y09 mới chỉ đạt một phần (chưa test với project Firebase thật) |
-| Nợ ghi nhận | mục tiêu chunk 450 kB chưa đạt (đang 533.9 kB); audit riêng cho track Kid's Box trước khi dùng với trẻ; WebGL chưa có fallback thiết bị yếu; `@types/three` sai chỗ; `npm install` báo 4 lỗ hổng severity cao |
+| Nợ ghi nhận | mục tiêu chunk 450 kB chưa đạt (đang 533.5 kB); audit riêng cho track Kid's Box trước khi dùng với trẻ; `@types/three` sai chỗ; `npm install` báo 4 lỗ hổng severity cao |
 
 *Sửa tài liệu này khi sửa code. Một FR không còn chứng cứ phải bị xoá hoặc gắn "KHÔNG CÒN ĐÚNG",
 không được để treo.*

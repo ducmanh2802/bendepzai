@@ -35,6 +35,8 @@ interface Chess3DCanvasProps {
   isThinking: boolean;
   onSquareClick: (r: number, c: number) => void;
   className?: string;
+  /** Máy không có WebGL (tablet cũ, chế độ tiết kiệm pin) → bàn 2D. */
+  onUnsupported?: () => void;
 }
 
 export type CameraPreset = 'iso' | 'pov' | 'top';
@@ -59,6 +61,7 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
   isThinking,
   onSquareClick,
   className = '',
+  onUnsupported,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -166,6 +169,15 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
     const container = containerRef.current;
     if (!container) return;
 
+    // Máy không có WebGL2/WebGL thì dựng renderer sẽ ném lỗi và cả màn hình
+    // của bé trắng xoá (app chưa có ErrorBoundary). Chuyển hẳn sang bàn 2D.
+    const probeCanvas = document.createElement('canvas');
+    const gl = probeCanvas.getContext('webgl2') || probeCanvas.getContext('webgl');
+    if (!gl) {
+      onUnsupported?.();
+      return;
+    }
+
     const width = container.clientWidth || 600;
     const height = container.clientHeight || 550;
 
@@ -183,11 +195,19 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
     cameraRef.current = camera;
 
     // 3. Renderer
-    const renderer = new THREE.WebGLRenderer({
-      antialias: !isSoftwareGl.current,
-      powerPreference: 'high-performance',
-      alpha: false,
-    });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        antialias: !isSoftwareGl.current,
+        powerPreference: 'high-performance',
+        alpha: false,
+      });
+    } catch {
+      // Trình duyệt báo có WebGL nhưng tạo context thất bại (hết bộ nhớ GPU,
+      // bị chặn theo chính sách). Bàn 2D vẫn chơi được nên không chặn bé.
+      onUnsupported?.();
+      return;
+    }
     rendererRef.current = renderer;
     renderer.setSize(width, height);
     renderer.setPixelRatio(isSoftwareGl.current ? 1 : Math.min(window.devicePixelRatio, 2));
@@ -338,6 +358,11 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
     // Clean up previous piece meshes
     pieceMeshes.current.forEach((mesh) => {
       scene.remove(mesh);
+      // Hình học tạo mới cho từng quân mỗi lần đổi thế cờ; không dispose thì
+      // bộ nhớ GPU tăng dần suốt ván (T31). Material dùng chung, giữ nguyên.
+      mesh.traverse((child) => {
+        if (child instanceof THREE.Mesh) child.geometry.dispose();
+      });
     });
     pieceMeshes.current.clear();
 

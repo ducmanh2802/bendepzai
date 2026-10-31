@@ -281,6 +281,14 @@ export default async function run(page, ui) {
     await page.reload();
     await page.waitForSelector('[data-testid="nav-home"]:visible', { timeout: 20000 });
 
+    // Lần nạp đầu sau khi lên level sẽ mở hộp mừng (quà level chỉ nhận 1 lần).
+    // Phải đóng trước khi bấm tiếp, nếu không nó chặn mọi click (T31).
+    const levelUpClose = page.getByRole('button', { name: 'Tuyệt Vời!' });
+    if (await levelUpClose.count()) {
+      await levelUpClose.first().click(CLICK);
+      await page.waitForTimeout(300);
+    }
+
     // ---- Vietnamese lesson quick pass at 375 (diacritics + image-choice) ---
     await page.setViewportSize({ width: 375, height: 667 });
     await page.locator('[data-testid="nav-home"]:visible').first().click(CLICK);

@@ -248,6 +248,23 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   thò 6% dưới mặt quân với gradient gỗ tối dần (thành quân); mặt quân nâng `translateZ(14px)`
   và thêm bóng thường `0 2px 0` làm mép thành. Chế độ "Góc 2D" (`perspective: none`) vẫn giữ
   được khối vì toàn bộ hiệu ứng nằm trong mặt phẳng, không phụ thuộc `translateZ`.
+- **Vòng soát bug T31 (5 lỗi thật, mỗi lỗi tái hiện bằng probe trước khi sửa):**
+  - **Popup giới thiệu bài học không bẫy focus** (`qa/focus.mjs` đỏ): `SubjectScreen` mở
+    `role="dialog"` nhưng Tab đi xuyên xuống bản đồ phía sau, không có nhãn cho trình đọc
+    màn hình và không đóng được bằng Esc. Dùng `useFocusTrap`, `aria-label`, `tabIndex={-1}`,
+    bấm nền để đóng, Esc để đóng; focus trả về đúng nút đã mở popup.
+  - **Header tràn, nút "Ba Mẹ" ra ngoài màn hình** (`qa/mobile-home.mjs` + `qa/t01b-fixes.mjs`
+    đỏ): nút đăng nhập Google chiếm chỗ nên ở 375/768/1024 px khu vực phụ huynh bị đẩy khỏi
+    viewport (đo 10/42/90 px). Chữ nút auth chỉ hiện từ `xl`, giữ icon + `aria-label`.
+  - **Thoại gấu lẫn chữ Hàn và câu vô nghĩa** (`Header.tsx`): một câu còn nguyên chữ Hàn,
+    các câu "Bouncing!", "Hết lâu rưỡi!", lời chào "bé oir"; TTS đọc các từ đệm
+    vô nghĩa. Viết lại 5 câu tiếng Việt trọn nghĩa, đọc đúng cả câu qua `sound.speak(...,
+    'vi-VN')`, sửa lời chào theo buổi và câu khen chuỗi ngày học.
+  - **Bàn cờ vua 3D trắng màn khi máy không có WebGL:** không có `ErrorBoundary` nên tạo
+    `WebGLRenderer` thất bại là sập cả tab. `Chess3DCanvas` dò context trước, bắt exception
+    khi tạo renderer và báo `onUnsupported`; `ChessGame` tự chuyển sang bàn 2D.
+  - **Rò rỉ GPU khi đổi bàn cờ:** mỗi lần cập nhật thế cờ, mesh cũ bị bỏ khỏi scene nhưng
+    `geometry` không `dispose()`; dọn kèm geometry của mọi mesh con.
 
 ### Tests
 - `tests/t24-speech-math-operators.test.ts` — 18 test cho lớp phát âm phép tính: cộng/trừ/
@@ -344,6 +361,29 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
 - **Đo lại sau T30**: `npm run verify` **EXIT=0** — typecheck sạch, **76 file / 1075 test** passed
   (+7 test `t30`), main chunk `index-BJHmn7nJ.js` **533.9 kB PASS**. `qa/cotuong-puzzles.mjs`
   (8 step) vẫn `QA PASS — 0 errors`.
+- `tests/t31-bug-hunt-fixes.test.ts` — 16 test khoá lại các lỗi T31: `SubjectScreen` có
+  `useFocusTrap`/`aria-label`/Esc/bấm nền; `AuthButton` không còn nhãn hiện ở `min-[420px]`/
+  `min-[480px]` mà chỉ từ `xl`; thoại gấu không có Hangul, không còn "Bouncing!" /
+  "Hết lâu rưỡi!", TTS đi qua `sound.speak(phrase` và không tự tạo
+  `SpeechSynthesisUtterance` với từ đệm; `Chess3DCanvas` dò WebGL, bọc `try/catch` khi tạo
+  renderer, gọi `onUnsupported` và `child.geometry.dispose()`; cùng hợp đồng của 7 probe vừa
+  sửa (focus/mobile/golden-path/t01b/offline/p41-curriculum/p41-font).
+- **7 probe đo sai được sửa để QA nói đúng sự thật:** `qa/focus.mjs` so `data-testid` thay vì
+  nhãn nút cũ ("Vào học"/"Học lại"); `qa/mobile.mjs` bỏ chuỗi đồng hồ đang chạy khỏi đề khi so
+  sánh; `qa/golden-path.mjs` chờ card `decision-engine-card` (chunk nạp lười); `qa/t01b-fixes.mjs`
+  nhận nút CTA nhà "Học tiếp|Bắt đầu:"; `qa/offline-pwa.mjs` poll trạng thái service worker từ
+  Node thay vì `waitForFunction` với predicate async (Playwright trả về ngay); 
+  `qa/p41-curriculum-quality.mjs` chấp nhận màn kết quả còn mở sau câu cuối (T20A/B-03);
+  `qa/p41-font-visual.mjs` đóng hộp mừng lên level trước khi bấm tiếp.
+- **Đo lại sau T31**: `npm run verify` **EXIT=0** — typecheck sạch, **77 file / 1091 test** passed
+  (+16 test `t31`), main chunk `index-hJ50GmCf.js` **533.5 kB PASS**. 24 probe trên đúng dist đó
+  đều `QA PASS — 0 errors`: `games` 31/31 mount + thưởng `0→0→1→2`, `mobile-home`
+  `headerOffscreen: 0` ở 8 bề rộng, `focus` `focusRestoredToTrigger: true`, `offline-pwa` 10 step
+  (`active: true, controller: true`), `p41-font-visual` 13 step, `p41-curriculum-quality` 5 step,
+  `lesson-types` 137 step, `golden-path` 28 step, `decision-engine` 12 step, `audio` 9 step,
+  `question-types` 9 step, `lesson-smooth` 8 step, `cotuong-puzzles` 8 step, `lesson-engagement` /
+  `gacha-machine` / `cotuong-depth` / `responsive-a11y` / `mobile` / `mobile-golden` /
+  `kidbox-focus` / `decision-engine-a11y` / `t01-hotfix` / `t01b-fixes` / `tier6-ladder-evidence`.
 
 ## [1.0.0] - baseline
 

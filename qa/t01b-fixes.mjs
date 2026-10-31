@@ -226,7 +226,11 @@ export default async function run(page, ui) {
     const btns = Array.from(document.querySelectorAll('button'));
     probe('bottom-nav', visible('[data-testid="nav-games"]'));
     probe('top-parent', document.querySelector('header [aria-label="Khu vực dành cho Ba Mẹ"]'));
-    const hint = btns.find((b) => /Bản Đồ Học Tập/.test(b.textContent || ''));
+    // CTA trang chủ đã đổi thành "Học tiếp" / "Bắt đầu: <gợi ý>" (T27);
+    // chữ "Bản Đồ Học Tập" cũ không còn nên probe luôn đo null (T31).
+    const hint = btns.find((b) =>
+      /^(Học tiếp|Bắt đầu:)/.test((b.getAttribute('aria-label') || b.textContent || '').trim())
+    );
     probe('home-cta', hint);
     return res;
   });
