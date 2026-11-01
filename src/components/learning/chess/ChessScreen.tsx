@@ -148,7 +148,7 @@ export const ChessScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       {tab === 'illustrate' && (
         <div className="p-4 rounded-2xl bg-white border-2 border-slate-200 space-y-4">
           <h3 className="font-black text-lg">Minh họa: Xe (Rook) đi được những ô nào?</h3>
-          <div className="grid grid-cols-8 gap-[2px] p-[2px] rounded-lg bg-[#2f1d10] max-w-xs mx-auto">
+          <div className="grid grid-cols-8 gap-[3px] p-[3px] rounded-lg bg-[#241609] max-w-xs mx-auto">
             {Array.from({ length: 64 }).map((_, i) => {
               const r = Math.floor(i / 8), c = i % 8;
               const isRook = r === 3 && c === 3;

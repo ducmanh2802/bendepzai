@@ -57,6 +57,16 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   Binh Nhập Cung, Mã Hậu Pháo, Song Xe Tảo Cung).
 
 ### Changed
+- **Kẻ đậm đường ô cờ vua (đợt T37):** ảnh chụp bàn 3D cho thấy rãnh 0.07 của đợt T35 gần như
+  biến mất khi nhìn nghiêng, nên đường kẻ được vẽ thẳng lên mặt bàn thay vì chỉ dựa vào khe gỗ.
+  `src/components/learning/chess/chess3d/boardBuilder.ts`: mặt lát `0.93 → 0.9` trên pitch 1.0
+  (khe 0.1), thêm tấm lưới `board_grid_lines` 8×8 đặt **sát dưới đỉnh ô** (`tileHeight − 0.001`,
+  vẫn thấp hơn mặt ô nên test chống-che-bàn còn nguyên) với `CanvasTexture` vẽ 9+9 nét
+  `#241609` rộng 0.14 — nằm cùng mặt phẳng với ô nên phối cảnh không làm mảnh nữa; mảng phủ
+  nước đi `0.9 → 0.86` để không đè lên nét kẻ. Bàn 2D (`ChessGame`), demo nước đi
+  (`ChessMoveDemo`) và bảng minh họa (`ChessScreen`) đổi đường kẻ ô từ
+  `inset_0_0_0_2px rgba(47,29,16,0.9)` sang `inset_0_0_0_3px rgba(36,22,9,1)` (dày hơn, đặc 100%),
+  khung `border-2 #2f1d10 → border-[3px] #241609`, minh họa `gap/p-[2px] → [3px]`.
 - **Việt hoá các chuỗi còn sót (đợt T36):** toàn bộ nhãn hiển thị cho bé/ba mẹ đổi sang tiếng
   Việt — 186 dòng trong 34 file `src/`. Nhãn đảo & bài học (`Đảo Phiêu Lưu Tiếng Anh`,
   `Chữ Cái ABC`, `Những Con Số 1 – 10`, `Dạng Bài Mới`), tên linh vật `Thỏ Tiếng Anh`,
@@ -380,6 +390,14 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
     `memory-card`, `karaoke-read-all` và `answer-option` + `data-correct` cho `spelling_duel`.
 
 ### Tests
+- `tests/t34-chess-real-set.test.ts` — **12 test** (thêm 1 cho đợt T37): test mới khoá tấm lưới
+  `board_grid_lines` phải 8×8, nằm dưới mặt lát không quá 0.002 và `transparent`; test rãnh kẻ
+  siết thêm điều kiện **khe ≥ 0.1 pitch** (trước chỉ buộc "hẹp hơn 1"); test đường kẻ 2D đổi hằng
+  `LINE` sang `inset_0_0_0_3px_rgba(36,22,9,1)` và chặn ngược chuỗi `inset_0_0_0_2px` để nét mờ
+  đợt cũ không quay lại.
+- Đo lại sau đợt T37 (`npm run verify` **EXIT=0**): **81 file / 1155 test**, main chunk
+  `index-BdiF4Xw9.js` **534.3 kB PASS**, `ChessScreen` 53.3 kB (từ 52.8), `three-vendor` 572.6 kB
+  không đổi, 28 probe, 39 service, 95 component `.tsx`, 31 trò chơi khớp 4 nơi đăng ký.
 - `tests/t36-viet-labels.test.ts` — 9 test khoá đợt Việt hoá: nhãn `GAMES_CATALOG` /
   huy hiệu / kỹ năng đấu trường / bảng kỹ năng tiếng Anh phải có dấu và không lẫn từ đã có
   từ Việt; 12 nhãn đảo + tiêu đề bài học của `ENGLISH_TOPICS` (trừ Unit sách Kid's Box) cũng

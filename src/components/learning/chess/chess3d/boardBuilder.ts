@@ -30,6 +30,33 @@ function createCoordTexture(text: string): THREE.Texture {
 }
 
 /**
+ * Đường kẻ ô vẽ thẳng lên mặt bàn thay vì chỉ dựa vào khe gỗ. Khe thật thì bị
+ * phối cảnh làm mảnh gần mất hút khi bé nhìn nghiêng; tấm lưới này nằm sát mặt
+ * ô nên nhìn từ góc nào cũng còn nguyên nét kẻ.
+ */
+function createGridTexture(cellSize: number, lineSize: number, lineColor: string): THREE.Texture | null {
+  if (typeof document === 'undefined') return null;
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 1024;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    ctx.clearRect(0, 0, 1024, 1024);
+    ctx.fillStyle = lineColor;
+    const cellPx = 1024 / 8;
+    const linePx = Math.round(lineSize / cellSize * cellPx);
+    for (let i = 0; i <= 8; i++) {
+      const p = i * cellPx - linePx / 2;
+      ctx.fillRect(p, 0, linePx, 1024);
+      ctx.fillRect(0, p, 1024, linePx);
+    }
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+/**
  * Vân gỗ procedural. Không dùng Math.random: cùng `variant` phải ra cùng một
  * tấm gỗ, nếu không mỗi lần dựng bàn là một hoa văn khác và ảnh QA không so
  * được với nhau.
@@ -127,7 +154,7 @@ export function buildChessBoard3D(): BoardMeshRefs {
   // 3. 64 Squares (8x8) — pitch 1.0 nhưng mặt lát nhỏ hơn một chút để rãnh tối
   // bên dưới lộ ra thành đường kẻ, như bàn cờ ghép từ 64 miếng gỗ thật.
   const pitch = 1.0;
-  const tileSize = 0.93;
+  const tileSize = 0.9;
   const tileHeight = 0.06;
   const tileGeom = new THREE.BoxGeometry(tileSize, tileHeight, tileSize);
 
@@ -136,6 +163,21 @@ export function buildChessBoard3D(): BoardMeshRefs {
   inlay.receiveShadow = true;
   inlay.name = 'board_inlay';
   boardGroup.add(inlay);
+
+  // Lưới kẻ ô vẽ ngay sát mặt lát (thấp hơn 0.001 để lún vào khe, không che quân).
+  const gridTex = createGridTexture(pitch, 0.14, '#241609');
+  const gridPlane = new THREE.Mesh(
+    new THREE.PlaneGeometry(8, 8),
+    new THREE.MeshBasicMaterial({
+      ...(gridTex ? { map: gridTex } : {}),
+      transparent: true,
+      depthWrite: false,
+    })
+  );
+  gridPlane.rotation.x = -Math.PI / 2;
+  gridPlane.position.y = tileHeight - 0.001;
+  gridPlane.name = 'board_grid_lines';
+  boardGroup.add(gridPlane);
 
   // Invisible hitbox plane for raycasting
   const hitGeom = new THREE.PlaneGeometry(pitch, pitch);
@@ -304,8 +346,8 @@ export function createSelectedMarker(): THREE.Group {
  */
 export function createLastMoveMarker(): THREE.Group {
   const group = new THREE.Group();
-  // Hẹp hơn mặt lát (0.93) để mảng xanh không tràn qua rãnh kẻ ô.
-  const fillGeom = new THREE.PlaneGeometry(0.9, 0.9);
+  // Hẹp hơn mặt lát (0.9) để mảng xanh không tràn qua đường kẻ ô.
+  const fillGeom = new THREE.PlaneGeometry(0.86, 0.86);
   fillGeom.rotateX(-Math.PI / 2);
   const fillMat = new THREE.MeshBasicMaterial({
     color: 0x7fb069,

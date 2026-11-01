@@ -38,14 +38,14 @@ export const ChessMoveDemo: React.FC = () => {
       <h3 className="font-black text-lg">Demo nước đi: {d.label}</h3>
       <div className="relative mx-auto rounded-[22px] border-[5px] border-[#3f2817] bg-[#5b3a21] p-2" style={{ width: 'min(92vw, 330px)' }}>
         <div style={{ aspectRatio: '1' }} className="relative">
-          <div className="grid grid-cols-8 w-full h-full border-2 border-[#2f1d10] rounded-md overflow-hidden">
+          <div className="grid grid-cols-8 w-full h-full border-[3px] border-[#241609] rounded-md overflow-hidden">
             {Array.from({ length: 64 }).map((_, i) => {
               const rr = Math.floor(i / 8), cc = i % 8;
               const dark = (rr + cc) % 2 === 1;
               return (
                 <div
                   key={i}
-                  className={`shadow-[inset_0_0_0_2px_rgba(47,29,16,0.9)] ${dark ? 'bg-[#7b4a26]' : 'bg-[#f5e6c8]'}`}
+                  className={`shadow-[inset_0_0_0_3px_rgba(36,22,9,1)] ${dark ? 'bg-[#7b4a26]' : 'bg-[#f5e6c8]'}`}
                 />
               );
             })}

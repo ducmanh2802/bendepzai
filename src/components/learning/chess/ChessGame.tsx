@@ -376,7 +376,7 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 ))}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="grid grid-cols-8 rounded-lg overflow-hidden border-2 border-[#2f1d10]">
+                <div className="grid grid-cols-8 rounded-lg overflow-hidden border-[3px] border-[#241609]">
                   {board.map((row, r) =>
                     row.map((p, c) => {
                       const dark = (r + c) % 2 === 1;
@@ -390,7 +390,7 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <button
                           key={`${r}-${c}`}
                           onClick={() => onSquareClick(r, c)}
-                          className={`relative aspect-square flex items-center justify-center p-1 transition-all cursor-pointer shadow-[inset_0_0_0_2px_rgba(47,29,16,0.9)] ${
+                          className={`relative aspect-square flex items-center justify-center p-1 transition-all cursor-pointer shadow-[inset_0_0_0_3px_rgba(36,22,9,1)] ${
                             dark ? 'bg-[#7b4a26]' : 'bg-[#f5e6c8]'
                           } ${sel ? 'z-10' : ''}`}
                         >

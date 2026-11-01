@@ -70,6 +70,7 @@ describe('T34 — bộ cờ vua trông như bộ cờ gỗ ngoài đời', () =>
       const b = new THREE.Box3().setFromObject(board.squareMeshes[0][1]);
       const w = a.max.x - a.min.x;
       expect(w).toBeLessThan(1); // còn khe giữa hai ô ⇒ có đường kẻ
+      expect(1 - w).toBeGreaterThanOrEqual(0.1); // khe ≥ 10% ô: nhìn nghiêng vẫn thấy
       expect(w).toBeGreaterThan(0.85); // nhưng vẫn liền thành mặt bàn, không phải ô rời
       expect(Math.abs((b.max.x + b.min.x) / 2 - (a.max.x + a.min.x) / 2)).toBeCloseTo(1, 6);
       const inlay = board.boardGroup.children.find((o) => o.name === 'board_inlay');
@@ -77,6 +78,22 @@ describe('T34 — bộ cờ vua trông như bộ cờ gỗ ngoài đời', () =>
       const ib = new THREE.Box3().setFromObject(inlay!);
       expect(ib.max.x - ib.min.x).toBeCloseTo(8, 6);
       expect(ib.max.y).toBeLessThan(a.max.y); // nằm dưới mặt ô, không che bàn
+    });
+
+    it('lưới kẻ ô phủ kín mặt bàn, nằm sát dưới đỉnh ô để nhìn nghiêng vẫn rõ nét', () => {
+      const board = buildChessBoard3D();
+      const grid = board.boardGroup.children.find((o) => o.name === 'board_grid_lines');
+      expect(grid).toBeDefined();
+      const gb = new THREE.Box3().setFromObject(grid!);
+      expect(gb.max.x - gb.min.x).toBeCloseTo(8, 6);
+      expect(gb.max.z - gb.min.z).toBeCloseTo(8, 6);
+      const tileTop = new THREE.Box3().setFromObject(board.squareMeshes[0][0]).max.y;
+      // Sát dưới mặt lát: cao hơn sẽ che quân, thấp hơn nhiều sẽ bị phối cảnh làm mờ.
+      expect(gb.max.y).toBeLessThan(tileTop);
+      expect(tileTop - gb.max.y).toBeLessThanOrEqual(0.002);
+      // Lưới phải trong suốt ở phần ô (không che vân gỗ), chỉ đặc ở nét kẻ
+      const mat = (grid as THREE.Mesh).material as THREE.MeshBasicMaterial;
+      expect(mat.transparent).toBe(true);
     });
 
     it('ô góc a1 tối, h1 sáng và hai ô kề nhau luôn khác tông', () => {
@@ -141,7 +158,7 @@ describe('T34 — bộ cờ vua trông như bộ cờ gỗ ngoài đời', () =>
     });
 
     it('ô cờ 2D hai tông tương phản mạnh và có đường kẻ giữa các ô', () => {
-      const LINE = 'shadow-[inset_0_0_0_2px_rgba(47,29,16,0.9)]';
+      const LINE = 'shadow-[inset_0_0_0_3px_rgba(36,22,9,1)]';
       const game2d = read('src/components/learning/chess/ChessGame.tsx');
       expect(game2d).toContain('bg-[#f5e6c8]');
       expect(game2d).toContain('bg-[#7b4a26]');
@@ -152,7 +169,11 @@ describe('T34 — bộ cờ vua trông như bộ cờ gỗ ngoài đời', () =>
       expect(demo).toContain('bg-[#7b4a26]');
       const screen = read('src/components/learning/chess/ChessScreen.tsx');
       expect(screen).toContain('bg-[#f5e6c8]');
-      expect(screen).toContain('gap-[2px] p-[2px] rounded-lg bg-[#2f1d10]');
+      expect(screen).toContain('gap-[3px] p-[3px] rounded-lg bg-[#241609]');
+      // Đường kẻ phải đặc (không trong suốt) và không còn dùng nét 2px mờ đợt trước
+      for (const src of [game2d, demo, screen]) {
+        expect(src).not.toContain('inset_0_0_0_2px');
+      }
     });
   });
 });
