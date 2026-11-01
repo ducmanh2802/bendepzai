@@ -57,6 +57,17 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   Binh Nhập Cung, Mã Hậu Pháo, Song Xe Tảo Cung).
 
 ### Changed
+- **Bộ cờ vua đổi sang cờ gỗ thật (đợt T34, theo yêu cầu "giống bộ cờ ngoài đời"):** bàn 3D
+  bỏ toàn bộ kim loại vàng — ô cờ hai tông phong/gụ có vân gỗ tiện, viền óc chó 4 thanh,
+  khắc a–h / 1–8; quân Staunton tiện lại bằng `ExtrudeGeometry` + bevel, mọi `metalness` về
+  0, đai trang trí tối một bậc theo rãnh tiện thay cho vòng vàng; bàn 2D khung `#3f2817` /
+  nền `#5b3a21` kèm dải nhãn hạng 8→1 và cột a→h; thẻ "Quân cờ", panel chi tiết và demo
+  "Nước đi mẫu" thay ký tự Unicode ♜♞♝♛♚♟ bằng `ChessPieceSvg` — sửa luôn lỗi tương phản
+  quân trắng Unicode gần như vô hình trên ô kem. Đo lại sau đợt: `npm run verify` **EXIT=0**,
+  **80 file / 1143 test** (+9 test `tests/t34-chess-real-set.test.ts`), main chunk
+  `index-CDvYH0Li.js` **534 kB PASS** (trần 600), `three-vendor` **572.6 kB** (từ 545.4, do
+  `ExtrudeGeometry`), `ChessScreen` **52.3 kB** (từ 43.5). Bằng chứng nhìn thấy: screenshot
+  bàn 3D (top/iso/POV), bàn 2D có khung gỗ và ô chọn, thẻ quân, tab Minh họa.
 - Engine cờ tướng viết lại: negamax + alpha-beta kèm **node budget** để không bao giờ
   chặn UI thread của bé, evaluation tách khỏi move generation, quân cờ mang `id`.
 - `qa/run-one.mjs`: không còn phụ thuộc đường dẫn Chromium hardcode trên Windows —
@@ -345,6 +356,15 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
     `memory-card`, `karaoke-read-all` và `answer-option` + `data-correct` cho `spelling_duel`.
 
 ### Tests
+- `tests/t34-chess-real-set.test.ts` — 9 test cho bộ cờ vua gỗ: chiều cao quân tăng dần
+  tốt < xe < mã < tượng < hậu (và hậu < 0.88 vua) đo bằng `Box3` thật, footprint mọi quân
+  < 0.8 ô; không còn hex vàng (`0xfde047`/`0xf59e0b`/`0xd97706`/`0xb45309`) và không còn
+  `goldMat` trong `pieceGeometries.ts` + `ChessPieceSvg.tsx`, mọi `metalness` bằng 0;
+  phím bàn 3D in a–h thường; **guard hình học**: không mesh nào footprint ≥ 8×8 đơn vị
+  nằm cao hơn mặt ô (chống lặp lại lỗi viền đặc che kín bàn cờ); hợp đồng bàn 2D
+  (`border-[#3f2817]`, dải 8→1 và a→h, ô `#efd6ae`/`#9c6a40`, hết `ring-yellow-400`);
+  tab Quân cờ và Nước đi mẫu không còn ký tự Unicode quân cờ, bắt buộc vẽ bằng
+  `ChessPieceSvg`.
 - `tests/t24-speech-math-operators.test.ts` — 18 test cho lớp phát âm phép tính: cộng/trừ/
   bằng và `= ?` → "bằng mấy", U+2212, chuỗi `12 + 3 + 2 = ?`, mệnh đề có kết quả
   (`"6 + 4 = 11."`), `= ...` → "bằng bao nhiêu", **chỗ chấm đứng trước** dấu phép

@@ -226,7 +226,7 @@ Cột **Gate** chỉ cổng nào chặn nếu vi phạm: `V` = `npm run verify` 
 
 | ID | Nhóm | Yêu cầu | Ngưỡng chấp nhận | Đo bằng | Gate |
 |---|---|---|---|---|---|
-| NFR-P01 | Hiệu năng | Main chunk ≤ 600 kB | hiện 533.6 kB (mục tiêu ≤ 450 kB); vendor lớn `three-vendor` 545.4 / `firebase-vendor` 537.9 nằm ngoài entry, chỉ tải khi cần | `npm run check:budget`, `tests/bundle-budget.test.ts` | V, C |
+| NFR-P01 | Hiệu năng | Main chunk ≤ 600 kB | hiện 534 kB (mục tiêu ≤ 450 kB); vendor lớn `three-vendor` 572.6 / `firebase-vendor` 537.9 nằm ngoài entry, chỉ tải khi cần | `npm run check:budget`, `tests/bundle-budget.test.ts` | V, C |
 | NFR-P02 | Hiệu năng | Game component là `lazy` — mở game không nạp toàn bộ app | mỗi id trong `GAME_REGISTRY` là `lazy(...)` | `tests/t23-mcp-servers.test.ts`, `tests/t02c-startup-split.test.ts` | V |
 | NFR-P03 | Hiệu năng | Nước cờ không khoá UI | node budget có giới hạn, test timing | `tests/cotuong-engine.test.ts` | V |
 | NFR-P04 | Hiệu năng | Không bộ đếm thời gian/chu kỳ nào gọi `Math.random` trong dữ liệu đề | grep 0 kết quả ở `src/data/games/*.ts` | `AGENTS.md` §2, `tests/games-content.test.ts` | V |
@@ -248,7 +248,7 @@ Cột **Gate** chỉ cổng nào chặn nếu vi phạm: `V` = `npm run verify` 
 | NFR-M01 | Bảo trì | Một cổng duy nhất: `npm run verify` = typecheck + test + build + budget | exit 0 | [package.json](file:///D:/trithuc/kho-bau-tri-thuc/package.json) scripts | V, C |
 | NFR-M02 | Bảo trì | Mọi ngưỡng nghiệp vụ nằm trong `src/config/policy.ts`, có rationale + test | 17 export policy, 693 dòng | `src/config/policy.ts` | V |
 | NFR-M03 | Bảo trì | UI không quyết định correctness/score/mastery/readiness | engine là chỗ chấm duy nhất | FR-L03, FR-E05, `AGENTS.md` §0 principle 1 | V |
-| NFR-M04 | Bảo trì | Tên test `tests/t<NN>-<chủ đề>.test.ts`; hành vi mới ⇒ test mới | 79 file / 1134 test | `AGENTS.md` §2 | V, H |
+| NFR-M04 | Bảo trì | Tên test `tests/t<NN>-<chủ đề>.test.ts`; hành vi mới ⇒ test mới | 80 file / 1143 test | `AGENTS.md` §2 | V, H |
 | NFR-M05 | Bảo trì | Không thêm dependency nếu chưa hỏi; runtime deps = 8 | `package.json` không đổi ngoài kế hoạch (`firebase`, `three`, `@types/three` vào repo cùng merge từ lane khác — đã ghi nợ vì `@types/three` lẽ ra thuộc `devDependencies`) | `AGENTS.md` §1.4 | H, C |
 | NFR-M06 | Bảo trì | MCP layer zero-dependency, stdio tự viết | 0 import ngoài `node:*` trong `mcp/**` | `tests/t23-mcp-servers.test.ts` | V |
 
@@ -365,7 +365,7 @@ Chi tiết từng dòng: xem [`RTM.md`](RTM.md).
 
 | Hạng | Kết quả 2026-10-31 (sau vòng sửa bug T26/T27) |
 |---|---|
-| `npm run verify` | **EXIT=0** — typecheck sạch · 79 file / 1134 test pass · build OK · main chunk 534 kB → PASS |
+| `npm run verify` | **EXIT=0** — typecheck sạch · 80 file / 1143 test pass · build OK · main chunk 534 kB → PASS |
 | Probe QA | cần chạy lại trên `dist/` sau mỗi thay đổi UI (xem `docs/SDLC.md` §5) |
 | FR chưa đạt / cần nguồn | FR-N04 (Kid's Box units = 0), BG-01 (vẫn chưa đo được: sync là tuỳ chọn nên không có số liệu server), FR-Y09 mới chỉ đạt một phần (chưa test với project Firebase thật) |
 | Nợ ghi nhận | mục tiêu chunk 450 kB chưa đạt (đang 534 kB); audit riêng cho track Kid's Box trước khi dùng với trẻ; `@types/three` sai chỗ; `npm install` báo 4 lỗ hổng severity cao |

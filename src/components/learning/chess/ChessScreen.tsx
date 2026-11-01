@@ -3,21 +3,25 @@ import { ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 import { sound } from '../../../services/sound';
 import { ChessGame } from './ChessGame';
 import { ChessMoveDemo } from './ChessMoveDemo';
+import { ChessPieceSvg } from './ChessPieceSvg';
+import type { PieceType } from './chessEngine';
 
 interface PieceInfo {
   name: string;
-  symbol: string;
+  type: PieceType;
   moves: string;
   description: string;
 }
 
+// Vẽ quân bằng ChessPieceSvg thay ký tự Unicode: bé nhìn thấy đúng hình quân cờ gỗ
+// như trong bàn đấu, và hình không bị lỗi font trên máy cấu hình thấp.
 const PIECES: PieceInfo[] = [
-  { name: 'Xe', symbol: '♜', moves: 'Hàng / cột', description: 'Đi thẳng bất kỳ số ô theo hàng hoặc cột.' },
-  { name: 'Mã', symbol: '♞', moves: 'Hình chữ L', description: '2 ô một hướng rồi 1 ô vuông góc.' },
-  { name: 'Tượng', symbol: '♝', moves: 'Đường chéo', description: 'Đi chéo bất kỳ số ô.' },
-  { name: 'Hậu', symbol: '♛', moves: 'Mọi hướng', description: 'Kết hợp Xe và Tượng.' },
-  { name: 'Vua', symbol: '♚', moves: '1 ô', description: 'Di chuyển 1 ô theo mọi hướng.' },
-  { name: 'Tốt', symbol: '♟', moves: 'Tiến 1 ô', description: 'Đi thẳng 1 ô; bắt chéo 1 ô.' },
+  { name: 'Xe', type: 'r', moves: 'Hàng / cột', description: 'Đi thẳng bất kỳ số ô theo hàng hoặc cột.' },
+  { name: 'Mã', type: 'n', moves: 'Hình chữ L', description: '2 ô một hướng rồi 1 ô vuông góc.' },
+  { name: 'Tượng', type: 'b', moves: 'Đường chéo', description: 'Đi chéo bất kỳ số ô.' },
+  { name: 'Hậu', type: 'q', moves: 'Mọi hướng', description: 'Kết hợp Xe và Tượng.' },
+  { name: 'Vua', type: 'k', moves: '1 ô', description: 'Di chuyển 1 ô theo mọi hướng.' },
+  { name: 'Tốt', type: 'p', moves: 'Tiến 1 ô', description: 'Đi thẳng 1 ô; bắt chéo 1 ô.' },
 ];
 
 interface QuizItem {
@@ -65,7 +69,9 @@ export const ChessScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           <ArrowLeft className="w-4 h-4" /> Quay lại
         </button>
         <h1 className="text-xl sm:text-2xl font-black font-display text-slate-900 flex items-center gap-2">
-          <span>♟</span>
+          <span className="w-7 h-7 inline-flex">
+            <ChessPieceSvg type="p" color="w" className="w-full h-full" />
+          </span>
           <span>Cờ Vua 3D & Bài Học</span>
         </h1>
       </div>
@@ -102,9 +108,11 @@ export const ChessScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <button
               key={p.name}
               onClick={() => { sound.playClick(); setSelected(p); }}
-              className={`p-4 rounded-2xl border-2 text-center ${selected?.name === p.name ? 'border-amber-500 bg-amber-50' : 'border-slate-200 bg-white'}`}
+              className={`p-4 rounded-2xl border-2 text-center ${selected?.name === p.name ? 'border-[#8b5a2b] bg-[#f7ecd6]' : 'border-slate-200 bg-white'}`}
             >
-              <div className="text-4xl">{p.symbol}</div>
+              <div className="mx-auto w-14 h-14">
+                <ChessPieceSvg type={p.type} color="w" className="w-full h-full" />
+              </div>
               <div className="font-bold mt-1">{p.name}</div>
               <div className="text-xs text-slate-500">{p.moves}</div>
             </button>
@@ -112,7 +120,9 @@ export const ChessScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           {selected && (
             <div className="col-span-full p-4 rounded-2xl bg-white border-2 border-slate-200">
               <div className="flex items-center gap-3">
-                <span className="text-5xl">{selected.symbol}</span>
+                <span className="w-16 h-16 shrink-0 inline-flex">
+                  <ChessPieceSvg type={selected.type} color="w" className="w-full h-full" />
+                </span>
                 <div>
                   <h3 className="font-black text-lg">{selected.name}</h3>
                   <p className="text-sm text-slate-600">{selected.description}</p>
@@ -145,13 +155,17 @@ export const ChessScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               const sameRow = r === 3 && c !== 3;
               const sameCol = c === 3 && r !== 3;
               return (
-                <div key={i} className={`aspect-square rounded flex items-center justify-center text-lg ${isRook ? 'bg-amber-500 text-white' : sameRow || sameCol ? 'bg-emerald-200' : 'bg-slate-100'}`}>
-                  {isRook ? '♜' : ''}
+                <div key={i} className={`aspect-square rounded flex items-center justify-center ${isRook ? 'bg-[#5b3a21]' : sameRow || sameCol ? 'bg-emerald-200' : 'bg-slate-100'}`}>
+                  {isRook && (
+                    <span className="w-[80%] h-[80%] inline-flex">
+                      <ChessPieceSvg type="r" color="w" className="w-full h-full" />
+                    </span>
+                  )}
                 </div>
               );
             })}
           </div>
-          <p className="text-sm text-slate-600">Xe ở ô giữa (vàng) có thể đi tới các ô xanh cùng hàng/cột.</p>
+          <p className="text-sm text-slate-600">Xe ở ô giữa (nâu) có thể đi tới các ô xanh cùng hàng/cột.</p>
 
           <h3 className="font-black text-lg mt-4">Gợi ý nước đi tiếp theo</h3>
           <p className="text-sm text-slate-600">

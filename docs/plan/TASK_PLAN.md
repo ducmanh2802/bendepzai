@@ -133,6 +133,12 @@ nên nút `data-testid="game-pause"` không bao giờ render và `isPaused` khô
 muốn có nút tạm dừng cho trò đếm giờ phải nối `isPaused` xuống `useGameStage`/context rồi mới
 bật prop, nếu không sẽ thêm nút bấm không làm gì (xấu hơn hiện trạng).
 
+**Hệ quả chưa đóng của đợt T34:** `three-vendor` tăng 545.4 → **572.6 kB** vì quân Staunton
+dùng `ExtrudeGeometry` + bevel (chunk nằm sau `React.lazy` nên entry không đổi, nhưng đây là
+chunk WebGL lớn nhất từ trước tới nay); `src/components/learning/chess/ChessTutorial.tsx` **không
+được import ở đâu cả** và còn chuỗi tiếng Việt lỗi (' Mã', 'Phủ', 'L-shaped (2+1)', 'Vua phát')
+— để nguyên vì ngoài phạm vi yêu cầu, cần người quyết định xoá hay viết lại.
+
 ---
 
 ## III. Tương lai — Epic và task
@@ -222,7 +228,7 @@ bật prop, nếu không sẽ thêm nút bấm không làm gì (xấu hơn hiệ
 |---|---|---|
 | K-01 | **T03B — component Mascot Gấu Bút Chì (SVG) + avatar mặc đồ**: task P42 duy nhất còn nợ, prompt giữ lại ở `docs/opencode/queue/05_T03B_linh_vat_minh_hoa.md`; T03A/T04/T06 đang dùng emoji thay thế | `npm run verify` + screenshot 390 px | 
 | K-02 | `AGENTS.md` §0 slot "Công cụ MCP" đã có — thêm slot "Bộ tài liệu specs" | docs |
-| K-03 | Số liệu kiểm kê trong specs (31 game / 475 câu / 79 file test / 1134 test / 534 kB / 8 deps — đo 2026-11-01 sau vòng sửa bug T26/T27, audit UI T28, làm mượt luồng học T29, độ dày quân cờ T30, vòng soát bug T31, T32 và T33) cần refresh mỗi lần `verify` | `kbt-docs → project_state` |
+| K-03 | Số liệu kiểm kê trong specs (31 game / 475 câu / 80 file test / 1143 test / 534 kB / 8 deps — đo 2026-11-01 sau vòng sửa bug T26/T27, audit UI T28, làm mượt luồng học T29, độ dày quân cờ T30, vòng soát bug T31, T32, T33 và đợt bộ cờ vua gỗ T34) cần refresh mỗi lần `verify` | `kbt-docs → project_state` |
 | K-04 | `qa/p38-browser-probe.cjs` (`.cjs` duy nhất) — chuyển `.mjs` cho đồng bộ | QA |
 
 ---

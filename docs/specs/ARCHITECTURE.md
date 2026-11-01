@@ -184,7 +184,7 @@ Hai đường, và cả hai đều do người lớn khởi động:
 | Chunk | Nội dung | Lý do |
 |---|---|---|
 | `react-vendor` | `react`, `react-dom` | nhân framework tách khỏi entry để entry không phình theo nội dung |
-| `three-vendor` | `node_modules/three` | bàn cờ vua 3D WebGL **nạp lười**; 545.4 kB không được nằm trên đường tải tiên phong (ADR-17) |
+| `three-vendor` | `node_modules/three` | bàn cờ vua 3D WebGL **nạp lười**; 572.6 kB không được nằm trên đường tải tiên phong (ADR-17) |
 | `firebase-vendor` | `firebase`/`@firebase` | 537.9 kB, chỉ dùng cho cloud-sync tuỳ chọn; tách để entry không phải mang SDK |
 | `math-bank` | `src/data/math/` + `mathCurriculum` | ngân sách sống sót sau khi kho Toán phình |
 | `english-bank` | `src/data/english/` + `englishCurriculum` | tương tự cho kho Anh |
@@ -196,7 +196,7 @@ Hai đường, và cả hai đều do người lớn khởi động:
   không thể lệch nhau.
 - Trò chơi nạp lười qua `src/components/games/registry.ts` (`GAME_REGISTRY`, đủ **31** lời gọi `lazy(...)`); 31 trò = 31 chunk nhỏ, không trò nào nằm trong entry.
 - Cờ vua 3D cũng nạp lười: [src/App.tsx:18](file:///D:/trithuc/kho-bau-tri-thuc/src/App.tsx#L18) `lazy(() => import('./components/learning/chess/ChessScreen'))`
-  ⇒ `three-vendor` (545.4 kB) và `ChessScreen` (43.5 kB) chỉ tải khi bé mở bàn cờ; chưa từng mở thì không trả giá.
+  ⇒ `three-vendor` (572.6 kB) và `ChessScreen` (52.3 kB) chỉ tải khi bé mở bàn cờ; chưa từng mở thì không trả giá.
 - Ảnh: emoji + SVG + CSS, không thư viện ảnh. Font tự chứa (không CDN — FR-Y06).
 
 ---
@@ -397,7 +397,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
   (`Chess3DCanvas.tsx`, 652 dòng) vì cần picking bằng tia và hình khối thật, **với điều kiện**
   ở ADR-17: nằm sau `React.lazy` và trong chunk `three-vendor` riêng.
 - **Hệ quả:** thiết bị yếu vẫn mở cờ tướng mượt; cờ vua 3D là trải nghiệm nặng hơn có chủ
-  đích, trả giá 545.4 kB chỉ khi bé mở màn đó. **Nợ:** chưa có fallback 2D khi
+  đích, trả giá 572.6 kB chỉ khi bé mở màn đó. **Nợ:** chưa có fallback 2D khi
   `requestAnimationFrame`/WebGL; nếu máy không tạo được context (tablet cũ, chế độ tiết kiệm
   pin) `Chess3DCanvas` gọi `onUnsupported` để `ChessGame` tự chuyển sang bàn 2D (T31).
 
@@ -457,7 +457,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 
 ---
 
-## 12. Kiểm kê kiến trúc (đo 2026-11-01, sau vòng sửa bug T26/T27, audit UI T28, làm mượt luồng học T29, độ dày quân cờ T30 và vòng soát bug T31 + T32)
+## 12. Kiểm kê kiến trúc (đo 2026-11-01, sau vòng sửa bug T26/T27, audit UI T28, làm mượt luồng học T29, độ dày quân cờ T30, vòng soát bug T31 + T32, T33 và đợt bộ cờ vua gỗ T34)
 
 | Hạng | Số | Nguồn |
 |---|---|---|
@@ -465,18 +465,18 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 | Service module | 39 | `ls src/services/*.ts \| wc -l` |
 | File dữ liệu | 104 | `find src/data -name '*.ts' \| wc -l` |
 | Module type | 8 | `ls src/types/*.ts \| wc -l` |
-| Hook | 4 | `ls src/hooks/*.ts \| wc -l` |
+| Hook | 5 | `ls src/hooks/*.ts \| wc -l` |
 | Màn hình (`ActiveScreen`) | 17 | `src/types/index.ts:254` |
 | Trò chơi (đủ 4 nơi) | 31 | `GAMES_CATALOG` = `GAME_REGISTRY` = `LAUNCHABLE_GAME_IDS` = `GAME_TITLES` |
 | Export policy | 17 (693 dòng) | `src/config/policy.ts` |
 | Key `localStorage` | 17 | `STORAGE_KEYS` (16) + key cục bộ IOE (1) |
 | Dependency runtime | 8 | `package.json` → `dependencies` |
-| Test file / test | 79 / 1134 | `npx vitest run` (77 `.ts` + 2 `.tsx`) |
+| Test file / test | 80 / 1143 | `npx vitest run` (78 `.ts` + 2 `.tsx`) |
 | Probe QA | 28 (27 `.mjs` + 1 `.cjs`) | `ls qa/*.mjs qa/*.cjs` (trừ `lib.mjs`, `run-one.mjs`) |
 | Workflow CI | 4 | `.github/workflows/` |
 | MCP server / tool | 5 / 27 | `mcp/` |
 | Main chunk | 534 kB | `npm run check:budget` |
-| Vendor chunk lớn nhất | `three-vendor` 545.4 kB · `firebase-vendor` 537.9 kB · `react-vendor` 213.6 kB | `npm run check:budget` |
+| Vendor chunk lớn nhất | `three-vendor` 572.6 kB · `firebase-vendor` 537.9 kB · `react-vendor` 213.6 kB | `npm run check:budget` |
 | `App.tsx` / `storage.ts` / `learningOS.ts` / `competitionEngine.ts` / `readingEngine.ts` / `cloudSync.ts` / `firebase.ts` | 436 / 2426 / 842 / 747 / 647 / 224 / 85 dòng | `wc -l` |
 
 ---

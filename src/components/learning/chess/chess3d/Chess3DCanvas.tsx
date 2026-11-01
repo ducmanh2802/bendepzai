@@ -50,6 +50,31 @@ interface PieceAnimation {
   onComplete?: () => void;
 }
 
+// Bán kính bao của mặt bàn (8x8 ô + viền) tính theo đơn vị ô = 1.0.
+const BOARD_RADIUS = 5.6;
+
+const PRESET_DIRECTION: Record<CameraPreset, THREE.Vector3> = {
+  iso: new THREE.Vector3(0, 0.72, 0.72).normalize(),
+  pov: new THREE.Vector3(0, 0.5, 1).normalize(),
+  top: new THREE.Vector3(0, 1, 0.002).normalize(),
+};
+
+const PRESET_TARGET: Record<CameraPreset, THREE.Vector3> = {
+  iso: new THREE.Vector3(0, 0, 0),
+  pov: new THREE.Vector3(0, 0.5, 0),
+  top: new THREE.Vector3(0, 0, 0),
+};
+
+/**
+ * Khoảng cách để cả bàn nằm trong khung hình. Trước đây preset để máy quay cố
+ * định nên trên khung dọc (mobile) hàng quân gần nhất bị cắt mất khỏi mép dưới.
+ */
+function fitDistance(camera: THREE.PerspectiveCamera): number {
+  const vFov = (camera.fov * Math.PI) / 180;
+  const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
+  return BOARD_RADIUS / Math.sin(Math.min(vFov, hFov) / 2);
+}
+
 export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
   board,
   selected,
@@ -110,17 +135,11 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
 
       sound.playClick?.();
       const flipSign = isFlipped ? -1 : 1;
-
-      if (preset === 'iso') {
-        camera.position.set(0, 8.0, 8.0 * flipSign);
-        controls.target.set(0, 0, 0);
-      } else if (preset === 'pov') {
-        camera.position.set(0, 5.2, 6.2 * flipSign);
-        controls.target.set(0, 0.4, 0);
-      } else if (preset === 'top') {
-        camera.position.set(0, 11.5, 0.01 * flipSign);
-        controls.target.set(0, 0, 0);
-      }
+      const dir = PRESET_DIRECTION[preset].clone();
+      dir.z *= flipSign;
+      const target = PRESET_TARGET[preset];
+      camera.position.copy(target).addScaledVector(dir, fitDistance(camera));
+      controls.target.copy(target);
       controls.update();
     },
     [isFlipped]
@@ -137,8 +156,8 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
     const offset = camera.position.clone().sub(controls.target);
     offset.multiplyScalar(factor);
 
-    // Clamp distance between 4 and 16
-    if (offset.length() >= 3.8 && offset.length() <= 16.0) {
+    // Clamp distance between 3.8 and 26
+    if (offset.length() >= 3.8 && offset.length() <= 26) {
       camera.position.copy(controls.target).add(offset);
       controls.update();
     }
@@ -191,7 +210,7 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
 
     // 2. Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    camera.position.set(0, 8.0, 8.0);
+    camera.position.copy(PRESET_DIRECTION.iso).multiplyScalar(fitDistance(camera));
     cameraRef.current = camera;
 
     // 3. Renderer
@@ -227,7 +246,7 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
     controls.dampingFactor = 0.08;
     controls.maxPolarAngle = Math.PI / 2 - 0.06; // Keep camera above table surface
     controls.minDistance = 3.8;
-    controls.maxDistance = 16.0;
+    controls.maxDistance = 26; // khung dọc trên mobile cần xa hơn mới hết bàn cờ
     controls.target.set(0, 0, 0);
     controls.update();
 
@@ -311,8 +330,8 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
           const t = anim.progress;
           const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
           anim.mesh.position.lerpVectors(anim.fromPos, anim.toPos, ease);
-          // High elegant jumping arc
-          const arcHeight = Math.sin(t * Math.PI) * 0.52;
+          // Nhấc quân vừa phải như tay bé cầm cờ thật
+          const arcHeight = Math.sin(t * Math.PI) * 0.3;
           anim.mesh.position.y = anim.fromPos.y + arcHeight;
         }
       }
@@ -331,6 +350,15 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+
+      // Khung hình hẹp hơn (xoay máy, bật fullscreen dọc) → kéo máy ra xa đủ để
+      // cả bàn hiện lại. Chỉ kéo ra, không bao giờ kéo vào vì bé đang zoom tay.
+      const need = fitDistance(camera);
+      const offset = camera.position.clone().sub(controls.target);
+      if (offset.length() < need) {
+        camera.position.copy(controls.target).add(offset.setLength(need));
+        controls.update();
+      }
     };
 
     const resizeObserver = new ResizeObserver(handleResize);
@@ -389,7 +417,7 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
 
         // Elevated floating stance for selected piece
         const isSelected = selected && selected[0] === r && selected[1] === c;
-        const currentY = tileY + (isSelected ? 0.45 : 0);
+        const currentY = tileY + (isSelected ? 0.15 : 0);
 
         // Check if animating from previous position
         if (lastMove && r === lastMove.to[0] && c === lastMove.to[1]) {

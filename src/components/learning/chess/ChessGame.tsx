@@ -245,7 +245,9 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         </button>
 
         <h1 className="text-xl sm:text-2xl font-black font-display text-slate-900 flex items-center gap-2">
-          <span>♟</span>
+          <span className="w-7 h-7 inline-flex">
+            <ChessPieceSvg type="p" color="w" className="w-full h-full" />
+          </span>
           <span>Đấu Cờ Vua 3D</span>
         </h1>
 
@@ -359,42 +361,76 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             onUnsupported={() => setViewMode('2d')}
           />
         ) : (
-          /* 2D Fallback Board */
-          <div className="w-full max-w-[500px] rounded-3xl overflow-hidden shadow-2xl border-4 border-amber-400 bg-amber-950 p-3">
-            <div className="grid grid-cols-8 rounded-2xl overflow-hidden border-2 border-amber-900">
-              {board.map((row, r) =>
-                row.map((p, c) => {
-                  const dark = (r + c) % 2 === 1;
-                  const sel = selected && selected[0] === r && selected[1] === c;
-                  const target = isLegalTarget(r, c);
-                  const isLast =
-                    lastMove &&
-                    ((lastMove.from[0] === r && lastMove.from[1] === c) ||
-                      (lastMove.to[0] === r && lastMove.to[1] === c));
-                    return (
-                    <button
-                      key={`${r}-${c}`}
-                      onClick={() => onSquareClick(r, c)}
-                      className={`aspect-square flex items-center justify-center p-1 transition-all cursor-pointer relative ${
-                        dark ? 'bg-[#b58863]' : 'bg-[#f0d9b5]'
-                      } ${sel ? 'ring-4 ring-yellow-400 z-10' : ''} ${
-                        isLast ? 'bg-[#f6f669]' : ''
-                      }`}
+          /* 2D Fallback Board — khung gỗ óc chó, ô cờ hai tông phong/gụ */
+          <div className="w-full max-w-[520px] rounded-[28px] shadow-2xl border-[6px] border-[#3f2817] bg-[#5b3a21] p-2.5 sm:p-3">
+            <div className="flex gap-1">
+              {/* Dải hàng 8..1 khắc chìm trên viền gỗ */}
+              <div className="flex flex-col w-4 sm:w-5">
+                {['8', '7', '6', '5', '4', '3', '2', '1'].map((rk, i) => (
+                  <span
+                    key={rk}
+                    className="flex-1 flex items-center justify-center text-[10px] sm:text-xs font-black text-[#f6ead2]"
+                  >
+                    {rk}
+                  </span>
+                ))}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="grid grid-cols-8 rounded-lg overflow-hidden border-2 border-[#2f1d10]">
+                  {board.map((row, r) =>
+                    row.map((p, c) => {
+                      const dark = (r + c) % 2 === 1;
+                      const sel = selected && selected[0] === r && selected[1] === c;
+                      const target = isLegalTarget(r, c);
+                      const isLast =
+                        lastMove &&
+                        ((lastMove.from[0] === r && lastMove.from[1] === c) ||
+                          (lastMove.to[0] === r && lastMove.to[1] === c));
+                      return (
+                        <button
+                          key={`${r}-${c}`}
+                          onClick={() => onSquareClick(r, c)}
+                          className={`relative aspect-square flex items-center justify-center p-1 transition-all cursor-pointer ${
+                            dark ? 'bg-[#9c6a40]' : 'bg-[#efd6ae]'
+                          } ${sel ? 'z-10' : ''}`}
+                        >
+                          {isLast && (
+                            <span className="absolute inset-0 bg-[#7fb069]/45 pointer-events-none" />
+                          )}
+                          {sel && (
+                            <span className="absolute inset-0 ring-4 ring-inset ring-sky-500 pointer-events-none" />
+                          )}
+                          {p ? (
+                            <div className="relative z-[1] w-full h-full flex items-center justify-center">
+                              <ChessPieceSvg
+                                type={p.type}
+                                color={p.color}
+                                className="w-[88%] h-[88%] drop-shadow-sm select-none"
+                              />
+                            </div>
+                          ) : target ? (
+                            <span className="relative z-[1] w-4 h-4 rounded-full bg-emerald-600/80 shadow-xs" />
+                          ) : null}
+                          {target && p && (
+                            <span className="absolute inset-0 z-[2] border-4 border-rose-500/80 rounded-sm pointer-events-none" />
+                          )}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+                {/* Dải cột a..h */}
+                <div className="grid grid-cols-8 mt-1">
+                  {['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map((fl) => (
+                    <span
+                      key={fl}
+                      className="text-center text-[10px] sm:text-xs font-black text-[#f6ead2]"
                     >
-                      {p ? (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <ChessPieceSvg type={p.type} color={p.color} className="w-[88%] h-[88%] drop-shadow-sm select-none" />
-                        </div>
-                      ) : target ? (
-                        <span className="w-4 h-4 rounded-full bg-emerald-600/80 shadow-xs" />
-                      ) : null}
-                      {target && p && (
-                        <span className="absolute inset-0 border-4 border-rose-500/80 rounded-sm pointer-events-none" />
-                      )}
-                    </button>
-                  );
-                })
-              )}
+                      {fl}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -403,7 +439,7 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         <div className="mt-3 flex items-center gap-3 px-5 py-2 rounded-full bg-white border-2 border-slate-200 shadow-xs text-xs sm:text-sm font-black">
           <span
             className={`w-3.5 h-3.5 rounded-full ${
-              turn === 'w' ? 'bg-amber-400 ring-4 ring-amber-100' : 'bg-slate-800'
+              turn === 'w' ? 'bg-[#efd6ae] ring-4 ring-[#f7ecd6]' : 'bg-[#5b3a21]'
             }`}
           />
           <span>

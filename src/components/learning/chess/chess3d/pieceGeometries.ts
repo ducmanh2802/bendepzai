@@ -1,357 +1,371 @@
 import * as THREE from 'three';
 import type { Color, PieceType } from '../chessEngine';
 
-// Materials cache
-let whiteMat: THREE.MeshStandardMaterial | null = null;
-let blackMat: THREE.MeshStandardMaterial | null = null;
-let goldMat: THREE.MeshStandardMaterial | null = null;
-let feltMat: THREE.MeshStandardMaterial | null = null;
+// Bộ Staunton gỗ thật — không có chi tiết kim loại màu vàng.
+let lightWoodMat: THREE.MeshStandardMaterial | null = null; // phong/ngà (boxwood)
+let darkWoodMat: THREE.MeshStandardMaterial | null = null; // gụ/óc chó (rosewood)
+let lightCarveMat: THREE.MeshStandardMaterial | null = null; // rãnh khắc trên quân sáng
+let darkCarveMat: THREE.MeshStandardMaterial | null = null; // rãnh khắc trên quân tối
+let feltMat: THREE.MeshStandardMaterial | null = null; // nỉ đệm đáy
 
 export function getPieceMaterials() {
-  if (!whiteMat) {
-    // Polished Carrara marble / warm royal porcelain
-    whiteMat = new THREE.MeshStandardMaterial({
-      color: 0xfcfaf2,
-      roughness: 0.18,
-      metalness: 0.05,
-    });
-  }
-  if (!blackMat) {
-    // Polished African ebony / dark walnut with deep satin luster
-    blackMat = new THREE.MeshStandardMaterial({
-      color: 0x1c1a1e,
-      roughness: 0.22,
-      metalness: 0.12,
-    });
-  }
-  if (!goldMat) {
-    // Shimmering metallic gold
-    goldMat = new THREE.MeshStandardMaterial({
-      color: 0xf59e0b,
-      roughness: 0.18,
-      metalness: 0.85,
-    });
-  }
-  if (!feltMat) {
-    // Deep tournament green velvet base pad
-    feltMat = new THREE.MeshStandardMaterial({
-      color: 0x14532d,
-      roughness: 0.9,
+  if (!lightWoodMat) {
+    lightWoodMat = new THREE.MeshStandardMaterial({
+      color: 0xf0dcb4,
+      roughness: 0.42,
       metalness: 0.0,
     });
   }
-  return { whiteMat, blackMat, goldMat, feltMat };
+  if (!darkWoodMat) {
+    darkWoodMat = new THREE.MeshStandardMaterial({
+      color: 0x54331d,
+      roughness: 0.38,
+      metalness: 0.0,
+    });
+  }
+  if (!lightCarveMat) {
+    lightCarveMat = new THREE.MeshStandardMaterial({
+      color: 0xbfa06d,
+      roughness: 0.55,
+      metalness: 0.0,
+    });
+  }
+  if (!darkCarveMat) {
+    darkCarveMat = new THREE.MeshStandardMaterial({
+      color: 0x2c190c,
+      roughness: 0.5,
+      metalness: 0.0,
+    });
+  }
+  if (!feltMat) {
+    feltMat = new THREE.MeshStandardMaterial({
+      color: 0x6d1f2a, // nỉ đỏ đô như bộ cờ thi đấu có dán đáy
+      roughness: 0.95,
+      metalness: 0.0,
+    });
+  }
+  return { lightWoodMat, darkWoodMat, lightCarveMat, darkCarveMat, feltMat };
 }
 
 /**
- * Helper to build smooth lathe geometry from profile points
+ * Kích thước quân thật của bộ vua 3.35" đặt trên bàn ô 2.25" (0.444 đơn vị mỗi
+ * inch, ô cờ = 1.0). Trước khi có bảng này mọi quân cao gần bằng nhau và đế
+ * rộng tới 0.68 ô nên đứng sát nhau như đồ chơi, không như bộ cờ ngoài đời.
+ * Đầu mã vươn cao hơn chiều cao khai báo, nên giữ n < b để thứ hạng vẫn đúng.
  */
-function createLathe(points: THREE.Vector2[], segments = 32): THREE.BufferGeometry {
-  const geom = new THREE.LatheGeometry(points, segments);
+export const PIECE_SPECS: Record<PieceType, { height: number; baseDiameter: number }> = {
+  p: { height: 0.67, baseDiameter: 0.58 },
+  r: { height: 0.84, baseDiameter: 0.62 },
+  n: { height: 0.86, baseDiameter: 0.62 },
+  b: { height: 1.0, baseDiameter: 0.64 },
+  q: { height: 1.15, baseDiameter: 0.69 },
+  k: { height: 1.49, baseDiameter: 0.73 },
+};
+
+/** Điểm biên dạng: [bán kính theo tỉ lệ đế, cao độ theo tỉ lệ thân quân]. */
+type ProfilePoint = [radius: number, height: number];
+
+function latheFromProfile(
+  profile: ProfilePoint[],
+  baseR: number,
+  height: number,
+  segments = 40
+): THREE.BufferGeometry {
+  const pts = profile.map(
+    ([r, y]) => new THREE.Vector2(Math.max(0, r * baseR), y * height)
+  );
+  const geom = new THREE.LatheGeometry(pts, segments);
   geom.computeVertexNormals();
   return geom;
 }
 
-/**
- * Creates a composite 3D piece mesh group with authentic luxury Staunton contours
- */
+/** Vòm tròn nối tiếp từ điểm cuối biên dạng (dùng cho đầu tốt, mũ tượng…). */
+function dome(
+  fromR: number,
+  fromY: number,
+  ry: number,
+  steps = 10
+): ProfilePoint[] {
+  const out: ProfilePoint[] = [];
+  for (let i = 1; i <= steps; i++) {
+    const a = (i / steps) * (Math.PI / 2);
+    out.push([Math.cos(a) * fromR, fromY + Math.sin(a) * ry]);
+  }
+  return out;
+}
+
+const BASE_PROFILE: ProfilePoint[] = [
+  [0, 0],
+  [1, 0],
+  [1, 0.09],
+  [0.9, 0.14],
+  [0.72, 0.2],
+];
+
+function stem(waistR: number, waistY: number, collarR: number, collarY: number): ProfilePoint[] {
+  return [
+    [waistR, waistY],
+    [collarR, collarY - 0.03],
+    [collarR * 0.92, collarY],
+    [waistR * 1.05, collarY + 0.03],
+  ];
+}
+
+/** Khối đầu mã dựng từ biên dạng 2D ép ra — nhìn nghiêng ra rõ hình ngựa. */
+const KNIGHT_HEAD_PROFILE: [number, number][] = [
+  [0.42, 0.0], // gáy dưới, sát bệ
+  [0.5, 0.16], // lưng cổ phồng ra sau
+  [0.46, 0.36],
+  [0.34, 0.56],
+  [0.22, 0.76],
+  [0.14, 0.9], // sau tai
+  [0.06, 1.02], // đỉnh tai
+  [-0.04, 0.86], // giữa hai tai và trán
+  [-0.3, 0.76], // sống mũi dốc xuống
+  [-0.54, 0.56], // mõm trên
+  [-0.6, 0.42], // đầu mũi nhô hẳn ra ngoài ức
+  [-0.44, 0.34], // lỗ mũi
+  [-0.26, 0.4], // mép
+  [-0.16, 0.26], // khe hàm dưới
+  [-0.22, 0.14], // yết hầu
+  [-0.32, 0.06], // ức
+  [-0.26, 0.0],
+];
+
+function createKnightHead(baseR: number, height: number, mat: THREE.Material): THREE.Mesh {
+  const shape = new THREE.Shape();
+  const spreadX = baseR * 1.3;
+  const startY = height * 0.34;
+  const headH = height * 0.66;
+  shape.moveTo(KNIGHT_HEAD_PROFILE[0][0] * spreadX, startY + KNIGHT_HEAD_PROFILE[0][1] * headH);
+  for (const [x, y] of KNIGHT_HEAD_PROFILE.slice(1)) {
+    shape.lineTo(x * spreadX, startY + y * headH);
+  }
+  shape.closePath();
+
+  const geom = new THREE.ExtrudeGeometry(shape, {
+    // Đủ dày để nhìn từ sau vẫn ra khối cổ ngựa; bản mỏng 1.05R trông như tấm ván.
+    depth: baseR * 1.5,
+    bevelEnabled: true,
+    bevelThickness: baseR * 0.26,
+    bevelSize: baseR * 0.26,
+    bevelSegments: 4,
+    curveSegments: 6,
+  });
+  geom.translate(0, 0, -baseR * 0.75);
+
+  // Hẹp dần lên đỉnh: đầu ngựa thật nhỏ hơn gốc cổ, nếu không mặt sau là một
+  // tấm phẳng đứng (lỗi nhìn thấy trong ảnh QA close-a).
+  const pos = geom.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const t = THREE.MathUtils.clamp((pos.getY(i) - startY) / headH, 0, 1);
+    pos.setZ(i, pos.getZ(i) * (1 - 0.42 * t));
+  }
+  pos.needsUpdate = true;
+  geom.computeVertexNormals();
+
+  const mesh = new THREE.Mesh(geom, mat);
+  // Mũi ngựa quay về phía bàn đối diện (−z), giống hai hàng quân quay mặt vào nhau.
+  mesh.rotation.y = -Math.PI / 2;
+  return mesh;
+}
+
+/** Tạo một quân composite theo tỉ lệ bộ cờ gỗ Staunton. */
 export function createPieceMesh(type: PieceType, color: Color): THREE.Group {
-  const { whiteMat, blackMat, goldMat, feltMat } = getPieceMaterials();
-  const mat = color === 'w' ? whiteMat : blackMat;
+  const { lightWoodMat, darkWoodMat, lightCarveMat, darkCarveMat, feltMat } = getPieceMaterials();
+  const wood = color === 'w' ? lightWoodMat : darkWoodMat;
+  const carve = color === 'w' ? lightCarveMat : darkCarveMat;
+  const { height: H, baseDiameter: D } = PIECE_SPECS[type];
+  const R = D / 2;
+
   const group = new THREE.Group();
   group.name = `piece_${color}_${type}`;
 
-  // 1. Velvet felt pad beneath piece base
-  const feltGeom = new THREE.CylinderGeometry(0.35, 0.35, 0.015, 32);
-  const felt = new THREE.Mesh(feltGeom, feltMat);
-  felt.position.y = 0.008;
+  // Đệm nỉ dưới đáy — chi tiết chỉ thấy khi xoay bàn thấp, nhưng là dấu hiệu
+  // của bộ cờ thật (quân nhựa rẻ tiền không có).
+  const felt = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.96, R * 0.96, H * 0.02, 28), feltMat);
+  felt.position.y = H * 0.01;
   group.add(felt);
 
-  // 2. Base Pedestal Ring (metallic gold accent ring for luxury feel)
-  const goldRingGeom = new THREE.TorusGeometry(0.32, 0.018, 16, 32);
-  const goldRing = new THREE.Mesh(goldRingGeom, goldMat);
-  goldRing.rotation.x = Math.PI / 2;
-  goldRing.position.y = 0.06;
-  group.add(goldRing);
+  if (type !== 'p') {
+    // Vòng đế tối màu mô phỏng rãnh tiện, thay cho vòng kim loại vàng bản cũ.
+    const baseRing = new THREE.Mesh(
+      new THREE.TorusGeometry(R * 0.86, D * 0.022, 10, 32),
+      carve
+    );
+    baseRing.rotation.x = Math.PI / 2;
+    baseRing.position.y = H * 0.075;
+    group.add(baseRing);
+  }
 
   switch (type) {
     case 'p': {
-      // PAWN (Clean, slender, graceful lathe profile with ivory head)
-      const p: THREE.Vector2[] = [];
-      p.push(new THREE.Vector2(0, 0.01));
-      p.push(new THREE.Vector2(0.34, 0.01));
-      p.push(new THREE.Vector2(0.34, 0.04));
-      p.push(new THREE.Vector2(0.30, 0.08));
-      p.push(new THREE.Vector2(0.24, 0.13));
-      p.push(new THREE.Vector2(0.18, 0.20));
-      // Slender concave stem
-      p.push(new THREE.Vector2(0.12, 0.32));
-      p.push(new THREE.Vector2(0.11, 0.44));
-      p.push(new THREE.Vector2(0.13, 0.54));
-      // Collar
-      p.push(new THREE.Vector2(0.17, 0.58));
-      p.push(new THREE.Vector2(0.15, 0.61));
-      p.push(new THREE.Vector2(0.11, 0.63));
-      // Spherical Pearl head
-      for (let a = -Math.PI / 2; a <= Math.PI / 2; a += Math.PI / 12) {
-        const r = 0.17;
-        p.push(new THREE.Vector2(Math.max(0, Math.cos(a) * r), 0.80 + Math.sin(a) * r));
-      }
-      p.push(new THREE.Vector2(0, 0.97));
-
-      const pawnGeom = createLathe(p);
-      const pawnMesh = new THREE.Mesh(pawnGeom, mat);
-      group.add(pawnMesh);
-
-      // Gold bead neck ring
-      const neckRingGeom = new THREE.TorusGeometry(0.14, 0.018, 14, 28);
-      const neckRing = new THREE.Mesh(neckRingGeom, goldMat);
-      neckRing.rotation.x = Math.PI / 2;
-      neckRing.position.y = 0.60;
-      group.add(neckRing);
+      const body = new THREE.Mesh(
+        latheFromProfile(
+          [...BASE_PROFILE, ...stem(0.34, 0.42, 0.5, 0.6), ...dome(0.357, 0.63, 0.15, 8)],
+          R,
+          H
+        ),
+        wood
+      );
+      group.add(body);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(R * 0.42, 24, 18), wood);
+      head.position.y = H * 0.79;
+      head.scale.y = 1.05;
+      group.add(head);
       break;
     }
 
     case 'r': {
-      // ROOK (Sleek tapered castle tower with 4 clean beveled crenels)
-      const p: THREE.Vector2[] = [];
-      p.push(new THREE.Vector2(0, 0.01));
-      p.push(new THREE.Vector2(0.35, 0.01));
-      p.push(new THREE.Vector2(0.35, 0.05));
-      p.push(new THREE.Vector2(0.31, 0.09));
-      p.push(new THREE.Vector2(0.25, 0.14));
-      p.push(new THREE.Vector2(0.23, 0.20));
-      // Tower shaft with subtle inward taper
-      p.push(new THREE.Vector2(0.22, 0.35));
-      p.push(new THREE.Vector2(0.20, 0.58));
-      p.push(new THREE.Vector2(0.21, 0.72));
-      // Capital ring
-      p.push(new THREE.Vector2(0.26, 0.77));
-      p.push(new THREE.Vector2(0.25, 0.80));
-      // Parapet bowl
-      p.push(new THREE.Vector2(0.29, 0.88));
-      p.push(new THREE.Vector2(0.27, 0.93));
-      p.push(new THREE.Vector2(0.20, 0.93));
-      p.push(new THREE.Vector2(0.18, 0.86));
-      p.push(new THREE.Vector2(0, 0.86));
-
-      const rookGeom = createLathe(p);
-      const rookMesh = new THREE.Mesh(rookGeom, mat);
-      group.add(rookMesh);
-
-      // Gold capital ring
-      const capRingGeom = new THREE.TorusGeometry(0.24, 0.02, 16, 32);
-      const capRing = new THREE.Mesh(capRingGeom, goldMat);
-      capRing.rotation.x = Math.PI / 2;
-      capRing.position.y = 0.78;
-      group.add(capRing);
-
-      // 4 Clean Castle Battlements
+      const body = new THREE.Mesh(
+        latheFromProfile(
+          [
+            ...BASE_PROFILE,
+            [0.62, 0.28],
+            [0.56, 0.5],
+            [0.6, 0.66],
+            [0.74, 0.72],
+            [0.7, 0.76],
+            [0.78, 0.84],
+            [0.72, 0.86],
+            [0.56, 0.86],
+            [0.54, 0.78],
+            [0, 0.78],
+          ],
+          R,
+          H
+        ),
+        wood
+      );
+      group.add(body);
+      // 4 lỗ châu thành: khối hộp đặt TIẾP TUYẾN trên miệng tháp. Bản đầu quay
+      // trục dài theo bán kính nên nhìn như cánh quạt (ảnh QA close-a).
+      const crenelH = H * 0.18;
       for (let i = 0; i < 4; i++) {
-        const angle = (i * Math.PI) / 2 + Math.PI / 4;
-        const bGeom = new THREE.BoxGeometry(0.11, 0.12, 0.08);
-        const bMesh = new THREE.Mesh(bGeom, mat);
-        bMesh.position.set(Math.cos(angle) * 0.22, 0.99, Math.sin(angle) * 0.22);
-        bMesh.rotation.y = -angle;
-        group.add(bMesh);
+        const a = (i * Math.PI) / 2 + Math.PI / 4;
+        const crenel = new THREE.Mesh(
+          new THREE.BoxGeometry(R * 0.44, crenelH, R * 0.3),
+          wood
+        );
+        crenel.position.set(Math.cos(a) * R * 0.64, H * 0.86 + crenelH / 2, Math.sin(a) * R * 0.64);
+        crenel.rotation.y = Math.PI / 2 - a;
+        group.add(crenel);
       }
       break;
     }
 
     case 'n': {
-      // KNIGHT (Graceful equestrian silhouette atop matching lathe plinth)
-      const p: THREE.Vector2[] = [];
-      p.push(new THREE.Vector2(0, 0.01));
-      p.push(new THREE.Vector2(0.35, 0.01));
-      p.push(new THREE.Vector2(0.35, 0.05));
-      p.push(new THREE.Vector2(0.31, 0.09));
-      p.push(new THREE.Vector2(0.25, 0.14));
-      p.push(new THREE.Vector2(0.21, 0.22));
-      p.push(new THREE.Vector2(0.20, 0.32));
-      p.push(new THREE.Vector2(0.22, 0.35));
-      p.push(new THREE.Vector2(0, 0.35));
-
-      const plinthGeom = createLathe(p);
-      const plinth = new THREE.Mesh(plinthGeom, mat);
+      const plinth = new THREE.Mesh(
+        latheFromProfile([...BASE_PROFILE, ...stem(0.5, 0.28, 0.62, 0.36)], R, H),
+        wood
+      );
       group.add(plinth);
-
-      // Sculpted horse body (slender, curved neck and breastplate)
-      const neckGeom = new THREE.CylinderGeometry(0.15, 0.19, 0.45, 24);
-      const neck = new THREE.Mesh(neckGeom, mat);
-      neck.position.set(0, 0.52, -0.03);
-      neck.rotation.x = 0.22;
-      group.add(neck);
-
-      // Head & snout
-      const headGeom = new THREE.BoxGeometry(0.18, 0.22, 0.30);
-      const head = new THREE.Mesh(headGeom, mat);
-      head.position.set(0, 0.78, 0.10);
-      head.rotation.x = -0.28;
-      group.add(head);
-
-      // Ears (2 pointed alert ears)
-      const earGeom = new THREE.ConeGeometry(0.04, 0.14, 12);
-      const leftEar = new THREE.Mesh(earGeom, mat);
-      leftEar.position.set(-0.065, 0.96, -0.02);
-      leftEar.rotation.z = -0.15;
-      group.add(leftEar);
-
-      const rightEar = new THREE.Mesh(earGeom, mat);
-      rightEar.position.set(0.065, 0.96, -0.02);
-      rightEar.rotation.z = 0.15;
-      group.add(rightEar);
-
-      // Golden mane crest line
-      const maneGeom = new THREE.BoxGeometry(0.05, 0.38, 0.12);
-      const mane = new THREE.Mesh(maneGeom, goldMat);
-      mane.position.set(0, 0.65, -0.16);
-      mane.rotation.x = 0.24;
-      group.add(mane);
-
-      if (color === 'b') {
-        group.rotation.y = Math.PI;
-      }
+      group.add(createKnightHead(R, H, wood));
       break;
     }
 
     case 'b': {
-      // BISHOP (Streamlined mitre with gold collar & finial ball)
-      const p: THREE.Vector2[] = [];
-      p.push(new THREE.Vector2(0, 0.01));
-      p.push(new THREE.Vector2(0.35, 0.01));
-      p.push(new THREE.Vector2(0.35, 0.05));
-      p.push(new THREE.Vector2(0.30, 0.09));
-      p.push(new THREE.Vector2(0.24, 0.14));
-      p.push(new THREE.Vector2(0.18, 0.22));
-      // Slender waist
-      p.push(new THREE.Vector2(0.13, 0.36));
-      p.push(new THREE.Vector2(0.12, 0.52));
-      p.push(new THREE.Vector2(0.14, 0.66));
-      // Collar
-      p.push(new THREE.Vector2(0.19, 0.72));
-      p.push(new THREE.Vector2(0.17, 0.76));
-      p.push(new THREE.Vector2(0.13, 0.78));
-      // Mitre teardrop oval
-      for (let a = -Math.PI / 2; a <= Math.PI / 2; a += Math.PI / 14) {
-        const rx = 0.18;
-        const ry = 0.28;
-        p.push(new THREE.Vector2(Math.max(0, Math.cos(a) * rx), 1.06 + Math.sin(a) * ry));
-      }
-      p.push(new THREE.Vector2(0, 1.34));
-
-      const bishopGeom = createLathe(p);
-      const bishopMesh = new THREE.Mesh(bishopGeom, mat);
-      group.add(bishopMesh);
-
-      // Gold collar ring
-      const collarRingGeom = new THREE.TorusGeometry(0.16, 0.022, 16, 28);
-      const collarRing = new THREE.Mesh(collarRingGeom, goldMat);
-      collarRing.rotation.x = Math.PI / 2;
-      collarRing.position.y = 0.74;
-      group.add(collarRing);
-
-      // Golden finial ball
-      const finialGeom = new THREE.SphereGeometry(0.065, 20, 20);
-      const finial = new THREE.Mesh(finialGeom, goldMat);
-      finial.position.y = 1.38;
+      const body = new THREE.Mesh(
+        latheFromProfile(
+          [
+            ...BASE_PROFILE,
+            ...stem(0.34, 0.4, 0.5, 0.52),
+            [0.44, 0.58],
+            [0.62, 0.72],
+            [0.6, 0.82],
+            ...dome(0.6, 0.82, 0.14),
+          ],
+          R,
+          H
+        ),
+        wood
+      );
+      group.add(body);
+      const finial = new THREE.Mesh(new THREE.SphereGeometry(R * 0.18, 18, 14), wood);
+      finial.position.y = H * 0.99;
       group.add(finial);
+      // Rãnh chéo trên mũ giám mục — dấu hiệu nhận dạng của tượng.
+      const slit = new THREE.Mesh(new THREE.BoxGeometry(R * 0.1, R * 0.62, R * 1.15), carve);
+      slit.position.set(R * 0.18, H * 0.8, 0);
+      slit.rotation.z = -0.5;
+      group.add(slit);
       break;
     }
 
     case 'q': {
-      // QUEEN (Hourglass waist, royal fluted coronet with gold jewel)
-      const p: THREE.Vector2[] = [];
-      p.push(new THREE.Vector2(0, 0.01));
-      p.push(new THREE.Vector2(0.36, 0.01));
-      p.push(new THREE.Vector2(0.36, 0.05));
-      p.push(new THREE.Vector2(0.31, 0.09));
-      p.push(new THREE.Vector2(0.25, 0.14));
-      p.push(new THREE.Vector2(0.19, 0.22));
-      // Royal gown waist
-      p.push(new THREE.Vector2(0.14, 0.40));
-      p.push(new THREE.Vector2(0.13, 0.60));
-      p.push(new THREE.Vector2(0.16, 0.78));
-      // Golden sash collar
-      p.push(new THREE.Vector2(0.22, 0.85));
-      p.push(new THREE.Vector2(0.20, 0.89));
-      p.push(new THREE.Vector2(0.15, 0.91));
-      // Flared imperial coronet
-      p.push(new THREE.Vector2(0.24, 1.08));
-      p.push(new THREE.Vector2(0.26, 1.22));
-      p.push(new THREE.Vector2(0.22, 1.25));
-      p.push(new THREE.Vector2(0.14, 1.20));
-      p.push(new THREE.Vector2(0, 1.20));
-
-      const queenGeom = createLathe(p);
-      const queenMesh = new THREE.Mesh(queenGeom, mat);
-      group.add(queenMesh);
-
-      // Gold waist sash
-      const sashRingGeom = new THREE.TorusGeometry(0.19, 0.024, 16, 32);
-      const sashRing = new THREE.Mesh(sashRingGeom, goldMat);
-      sashRing.rotation.x = Math.PI / 2;
-      sashRing.position.y = 0.87;
-      group.add(sashRing);
-
-      // Queen's top gold jewel
-      const jewelGeom = new THREE.SphereGeometry(0.08, 22, 22);
-      const jewel = new THREE.Mesh(jewelGeom, goldMat);
-      jewel.position.y = 1.30;
-      group.add(jewel);
+      const body = new THREE.Mesh(
+        latheFromProfile(
+          [
+            ...BASE_PROFILE,
+            [0.44, 0.3],
+            [0.36, 0.52],
+            [0.44, 0.66],
+            [0.6, 0.72],
+            [0.52, 0.76],
+            [0.66, 0.86],
+            [0.72, 0.94],
+            [0.62, 0.95],
+            [0.4, 0.9],
+            [0.34, 0.82],
+            [0, 0.82],
+          ],
+          R,
+          H
+        ),
+        wood
+      );
+      group.add(body);
+      // 8 viên bi trên miệng miện hoàng hậu, cùng màu gỗ.
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2;
+        const ball = new THREE.Mesh(new THREE.SphereGeometry(R * 0.15, 16, 12), wood);
+        ball.position.set(Math.cos(a) * R * 0.68, H * 0.95, Math.sin(a) * R * 0.68);
+        group.add(ball);
+      }
+      const crown = new THREE.Mesh(new THREE.SphereGeometry(R * 0.17, 18, 14), wood);
+      crown.position.y = H * 1.0;
+      group.add(crown);
       break;
     }
 
     case 'k': {
-      // KING (Imperial stature, double gold collar, royal crown dome and cross)
-      const p: THREE.Vector2[] = [];
-      p.push(new THREE.Vector2(0, 0.01));
-      p.push(new THREE.Vector2(0.37, 0.01));
-      p.push(new THREE.Vector2(0.37, 0.05));
-      p.push(new THREE.Vector2(0.32, 0.09));
-      p.push(new THREE.Vector2(0.26, 0.15));
-      p.push(new THREE.Vector2(0.20, 0.24));
-      // Imperial robe waist
-      p.push(new THREE.Vector2(0.15, 0.44));
-      p.push(new THREE.Vector2(0.14, 0.68));
-      p.push(new THREE.Vector2(0.17, 0.88));
-      // Lower collar
-      p.push(new THREE.Vector2(0.24, 0.95));
-      p.push(new THREE.Vector2(0.21, 0.99));
-      // Upper crown collar
-      p.push(new THREE.Vector2(0.25, 1.06));
-      p.push(new THREE.Vector2(0.22, 1.10));
-      // Crown dome
-      p.push(new THREE.Vector2(0.26, 1.24));
-      p.push(new THREE.Vector2(0.22, 1.36));
-      p.push(new THREE.Vector2(0.15, 1.40));
-      p.push(new THREE.Vector2(0, 1.40));
-
-      const kingGeom = createLathe(p);
-      const kingMesh = new THREE.Mesh(kingGeom, mat);
-      group.add(kingMesh);
-
-      // Gold collar ring
-      const kingRingGeom = new THREE.TorusGeometry(0.22, 0.024, 16, 32);
-      const kingRing = new THREE.Mesh(kingRingGeom, goldMat);
-      kingRing.rotation.x = Math.PI / 2;
-      kingRing.position.y = 0.97;
-      group.add(kingRing);
-
-      // Royal Gold Cross (clean, beveled, elegant)
-      const crossVertGeom = new THREE.BoxGeometry(0.055, 0.22, 0.055);
-      const crossVert = new THREE.Mesh(crossVertGeom, goldMat);
-      crossVert.position.y = 1.50;
-      group.add(crossVert);
-
-      const crossHorizGeom = new THREE.BoxGeometry(0.16, 0.055, 0.055);
-      const crossHoriz = new THREE.Mesh(crossHorizGeom, goldMat);
-      crossHoriz.position.y = 1.53;
-      group.add(crossHoriz);
+      const body = new THREE.Mesh(
+        latheFromProfile(
+          [
+            ...BASE_PROFILE,
+            [0.46, 0.28],
+            [0.38, 0.5],
+            [0.44, 0.62],
+            [0.6, 0.66],
+            [0.54, 0.7],
+            [0.58, 0.76],
+            [0.5, 0.79],
+            [0.54, 0.86],
+            [0.46, 0.92],
+            [0.3, 0.94],
+            [0.16, 0.92],
+            [0, 0.93],
+          ],
+          R,
+          H
+        ),
+        wood
+      );
+      group.add(body);
+      // Thập tự trên mũ vua — tiện bằng gỗ cùng màu, không mạ vàng.
+      const crossV = new THREE.Mesh(new THREE.BoxGeometry(R * 0.16, H * 0.16, R * 0.16), wood);
+      crossV.position.y = H * 0.96;
+      group.add(crossV);
+      const crossH = new THREE.Mesh(new THREE.BoxGeometry(R * 0.46, R * 0.16, R * 0.16), wood);
+      crossH.position.y = H * 0.99;
+      group.add(crossH);
       break;
     }
   }
 
-  // Enable cast & receive shadows cleanly on all sub-meshes
+  // Quân đen quay mặt về phía quân trắng, đúng thế hai hàng đối diện nhau.
+  if (color === 'b') group.rotation.y = Math.PI;
+
   group.traverse((child) => {
     if (child instanceof THREE.Mesh) {
       child.castShadow = true;
