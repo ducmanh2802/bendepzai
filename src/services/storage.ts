@@ -22,8 +22,8 @@ import {
   SessionProfileKind,
   SkillMastery,
   SubjectType,
+  Topic,
 } from '../types';
-import { getAllSkills, getTopicsBySubject } from '../data/curriculum';
 import { GAMES_CATALOG } from '../data/gamesCatalog';
 import { SHOP_MAP } from '../data/shopCatalog';
 import { ACHIEVEMENT_CATALOG } from '../data/achievementCatalog';
@@ -395,7 +395,26 @@ export interface TierRewardReceipt {
   isNewBest: boolean;
 }
 
+/**
+ * T39 — Ngân hàng đề của bốn môn (riêng tiếng Việt + cuộc sống đã ~350 KiB mã
+ * nguồn) trước đây bị `storage.ts` import tĩnh, nên nó nằm trong chunk khởi
+ * động và chặn lần vẽ đầu tiên dù bé chỉ mở màn Home. StorageService giữ nguyên
+ * API đồng bộ bằng cách nhận catalogue qua `attachCurriculum()`; `data/curriculum.ts`
+ * tự đăng ký khi nó được nạp (màn môn học/Bản đồ/Thử thách đều import nó).
+ * Khi chưa có catalogue, các hàm dùng nó cư xử như "chưa có dữ liệu" — không ném lỗi.
+ */
+export interface CurriculumCatalogue {
+  getAllSkills(): { skillId: string; skillName: string; subject: SubjectType }[];
+  getTopicsBySubject(subject: SubjectType): Topic[];
+}
+
+let curriculumCatalogue: CurriculumCatalogue | null = null;
+
 export class StorageService {
+  public static attachCurriculum(catalogue: CurriculumCatalogue): void {
+    curriculumCatalogue = catalogue;
+  }
+
   // ==========================================================
   // Learning OS persistence (versioned, migratable, recoverable)
   // ==========================================================
@@ -432,7 +451,7 @@ export class StorageService {
     const store = StorageService.getLearningOSStore();
     if (store.processedEvidenceIds.includes(evidence.id)) return false;
 
-    const skillMeta = getAllSkills().find((s) => s.skillId === evidence.skillId);
+    const skillMeta = curriculumCatalogue?.getAllSkills().find((s) => s.skillId === evidence.skillId);
     const previous =
       store.knowledgeStates[evidence.skillId] ??
       LearningOS.createInitialKnowledgeState(
@@ -1101,7 +1120,7 @@ public static getParentSettings(): ParentSettings {
     }
 
     // Ensure all curriculum skills have mastery records
-    const allSkills = getAllSkills();
+    const allSkills = curriculumCatalogue ? curriculumCatalogue.getAllSkills() : [];
     for (const s of allSkills) {
       if (!analytics.skillMastery[s.skillId]) {
         analytics.skillMastery[s.skillId] = {
@@ -1661,7 +1680,7 @@ public static getParentSettings(): ParentSettings {
     if (profile.chestState[topicId]) return 0; // Already claimed
 
     // Verify all lessons in this topic are completed
-    const topics = getTopicsBySubject(subject);
+    const topics = curriculumCatalogue ? curriculumCatalogue.getTopicsBySubject(subject) : [];
     const topic = topics.find((t) => t.id === topicId);
     if (!topic) return 0;
 

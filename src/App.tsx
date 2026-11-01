@@ -3,8 +3,6 @@ import { ActiveScreen, ChildProfile, SubjectType } from './types';
 import { StorageService } from './services/storage';
 import { Header } from './components/common/Header';
 import { HomeScreen } from './components/home/HomeScreen';
-import { CotuongScreen } from './components/learning/cotuong/CotuongScreen';
-import { EnglishIoeScreen } from './components/learning/englishIoe/EnglishIoeScreen';
 import { NAVIGATION } from './config/navigation';
 
 /**
@@ -14,9 +12,19 @@ import { NAVIGATION } from './config/navigation';
  * Everything a child reaches later (world map, subject screens, review,
  * mini-games, the competition hub, reading fluency, parent mode, shops)
  * is loaded on demand so first render does not pay for the whole app.
+ *
+ * T39 — Cờ Tướng and IOE were the last two static screen imports, so
+ * `cotuongEngine` + `CotuongBoard3D` + the IOE bank sat in the entry chunk even
+ * though a child opens them once per session. They now split like the rest.
  */
 const ChessScreen = lazy(() =>
   import('./components/learning/chess/ChessScreen').then((m) => ({ default: m.ChessScreen }))
+);
+const CotuongScreen = lazy(() =>
+  import('./components/learning/cotuong/CotuongScreen').then((m) => ({ default: m.CotuongScreen }))
+);
+const EnglishIoeScreen = lazy(() =>
+  import('./components/learning/englishIoe/EnglishIoeScreen').then((m) => ({ default: m.EnglishIoeScreen }))
 );
 const WorldMapScreen = lazy(() =>
   import('./components/world/WorldMapScreen').then((m) => ({ default: m.WorldMapScreen }))
@@ -105,6 +113,12 @@ export default function App() {
       document.documentElement.removeAttribute('data-theme');
     }
   }, [profile]); // re-run when profile changes (parent settings may have changed)
+
+  // T39 — bốn ngân hàng đề (~350 KiB nguồn) không cần cho lần vẽ đầu tiên. Nạp
+  // ngay sau khi mount để dashboard ba mẹ vẫn seed đủ danh sách kỹ năng.
+  useEffect(() => {
+    void import('./data/curriculum');
+  }, []);
 
   // Parent modal state
   const [isParentModalOpen, setIsParentModalOpen] = useState(false);
@@ -338,11 +352,15 @@ export default function App() {
         )}
 
         {currentScreen === 'cotuong' && (
-          <CotuongScreen onBack={() => setCurrentScreen('home')} />
+          <Suspense fallback={<ScreenFallback label="Vương Quốc Cờ Tướng" />}>
+            <CotuongScreen onBack={() => setCurrentScreen('home')} />
+          </Suspense>
         )}
 
         {currentScreen === 'english_ioe' && (
-          <EnglishIoeScreen onBack={() => setCurrentScreen('home')} />
+          <Suspense fallback={<ScreenFallback label="Luyện Tiếng Anh IOE" />}>
+            <EnglishIoeScreen onBack={() => setCurrentScreen('home')} />
+          </Suspense>
         )}
       </main>
 

@@ -109,8 +109,8 @@ Cột **Gate** chỉ cổng nào chặn nếu vi phạm: `V` = `npm run verify` 
 | FR-L07 | NBA hiển thị trên màn chính như thẻ hướng dẫn, không phải popup chặn bé | Card tồn tại và bấm được → mở đúng hoạt động | [src/components/learning/NextBestActionCard.tsx](file:///D:/trithuc/kho-bau-tri-thuc/src/components/learning/NextBestActionCard.tsx) | Q |
 | FR-L08 | Ôn tập hàng ngày dựng từ đường cong ôn, không lặp lại câu bé vừa làm đúng gần đây | `dailyReview` trả danh sách khác rỗng khi có kỹ năng đến hạn | [src/services/adaptive.ts](file:///D:/trithuc/kho-bau-tri-thuc/src/services/adaptive.ts), `tests/learning-engine.test.ts`, [src/components/review/DailyReviewScreen.tsx](file:///D:/trithuc/kho-bau-tri-thuc/src/components/review/DailyReviewScreen.tsx) | V |
 | FR-L09 | Độ khó tự thích ứng theo chuỗi đúng/sai trong phiên, có ngưỡng trong policy | Đổi policy → đổi hành vi, test khoá ngưỡng | [src/services/adaptiveDifficulty.ts](file:///D:/trithuc/kho-bau-tri-thuc/src/services/adaptiveDifficulty.ts), `ADAPTIVE_DIFFICULTY_POLICY` [src/config/policy.ts:464](file:///D:/trithuc/kho-bau-tri-thuc/src/config/policy.ts#L464), `tests/adaptive-difficulty.test.ts` | V |
-| FR-L10 | Phát hiện mệt trong phiên và giảm áp lực, không gán nhãn tiêu cực | Cờ `isFatigued` dựng từ `createDefaultFatigue`, không có từ "chậm/kém/yếu" trên UI bé | `SessionFatigueState` [src/types/learningOS.ts:179](file:///D:/trithuc/kho-bau-tri-thuc/src/types/learningOS.ts#L179), `createDefaultFatigue` [src/services/storage.ts:147](file:///D:/trithuc/kho-bau-tri-thuc/src/services/storage.ts#L147), `tests/fatigue-reset.test.ts` | V |
-| FR-L11 | `sessionComposer` dựng phiên theo profile (QUICK/STANDARD/DEEP/EXTENDED) | 4 kind hợp lệ, mỗi kind sinh số câu đúng ngân sách | `SESSION_PROFILE_KINDS` [src/services/storage.ts:143](file:///D:/trithuc/kho-bau-tri-thuc/src/services/storage.ts#L143), [src/services/sessionComposer.ts](file:///D:/trithuc/kho-bau-tri-thuc/src/services/sessionComposer.ts), `tests/session-composer.test.ts` | V |
+| FR-L10 | Phát hiện mệt trong phiên và giảm áp lực, không gán nhãn tiêu cực | Cờ `isFatigued` dựng từ `createDefaultFatigue`, không có từ "chậm/kém/yếu" trên UI bé | `SessionFatigueState` [src/types/learningOS.ts:179](file:///D:/trithuc/kho-bau-tri-thuc/src/types/learningOS.ts#L179), `createDefaultFatigue` [src/services/storage.ts:149](file:///D:/trithuc/kho-bau-tri-thuc/src/services/storage.ts#L149), `tests/fatigue-reset.test.ts` | V |
+| FR-L11 | `sessionComposer` dựng phiên theo profile (QUICK/STANDARD/DEEP/EXTENDED) | 4 kind hợp lệ, mỗi kind sinh số câu đúng ngân sách | `SESSION_PROFILE_KINDS` [src/services/storage.ts:145](file:///D:/trithuc/kho-bau-tri-thuc/src/services/storage.ts#L145), [src/services/sessionComposer.ts](file:///D:/trithuc/kho-bau-tri-thuc/src/services/sessionComposer.ts), `tests/session-composer.test.ts` | V |
 | FR-L12 | Hoàn thành bài được ghi nhận một lần; vào lại bài đã hoàn thành không cộng XP lần hai | Làm lại cùng bài → XP không đổi | [src/services/learningOS.ts](file:///D:/trithuc/kho-bau-tri-thuc/src/services/learningOS.ts), `tests/lesson-completion.test.ts` | V |
 
 ### 4.3 FR-G — Trò chơi
@@ -207,7 +207,7 @@ Cột **Gate** chỉ cổng nào chặn nếu vi phạm: `V` = `npm run verify` 
 | FR-Y06 | Không phụ thuộc mạng cho tài nguyên trình bày: 0 file audio bên ngoài, 0 font CDN làm sập layout | build chạy được offline | `src/index.css`, `qa/p41-font-visual.mjs` | Q |
 | FR-Y07 | Analytics chỉ là đếm sử dụng chung, **không** gửi tên bé, nội dung bài, hay điểm số | `@vercel/analytics` dùng mặc định; không `track()` payload cá nhân | `package.json`, [src/App.tsx](file:///D:/trithuc/kho-bau-tri-thuc/src/App.tsx) | V |
 | FR-Y08 | Đăng nhập là **tuỳ chọn**: không đăng nhập vẫn dùng trọn vẹn app; `AccountModal` không bao giờ tạo tài khoản giả | `CloudSyncService.getState()` trả `status: 'offline'`, `user: null` khi chưa đăng nhập; không có đường nào ghi cloud | [src/services/firebase.ts](file:///D:/trithuc/kho-bau-tri-thuc/src/services/firebase.ts), [src/components/auth/AccountModal.tsx](file:///D:/trithuc/kho-bau-tri-thuc/src/components/auth/AccountModal.tsx), `tests/firebase-auth-sync.test.ts:86` | V |
-| FR-Y09 | Cloud mirror opt-in: sau khi đăng nhập Google, tiến độ được đẩy lên Firestore `users/{uid}` và kéo về **hợp nhất** (sao/XP/chuỗi/vé lấy `Math.max`, bài đã học lấy `Set` union) — không máy nào ghi đè làm mất tiến độ máy khác | debounce 2 s sau mỗi thay đổi `localStorage`, chỉ chạy khi `state.user != null`; rules chặn đọc/ghi chéo tài khoản | [src/services/cloudSync.ts:114](file:///D:/trithuc/kho-bau-tri-thuc/src/services/cloudSync.ts#L114), [src/services/cloudSync.ts:37](file:///D:/trithuc/kho-bau-tri-thuc/src/services/cloudSync.ts#L37), `firestore.rules`, `tests/firebase-auth-sync.test.ts` | V, Q |
+| FR-Y09 | Cloud mirror opt-in: sau khi đăng nhập Google, tiến độ được đẩy lên Firestore `users/{uid}` và kéo về **hợp nhất** (sao/XP/chuỗi/vé lấy `Math.max`, bài đã học lấy `Set` union) — không máy nào ghi đè làm mất tiến độ máy khác | debounce 2 s sau mỗi thay đổi `localStorage`, chỉ chạy khi `state.user != null`; rules chặn đọc/ghi chéo tài khoản | [src/services/cloudSync.ts:162](file:///D:/trithuc/kho-bau-tri-thuc/src/services/cloudSync.ts#L162), [src/services/cloudSync.ts:73](file:///D:/trithuc/kho-bau-tri-thuc/src/services/cloudSync.ts#L73), `firestore.rules`, `tests/firebase-auth-sync.test.ts` | V, Q |
 
 ### 4.10 FR-C — Cờ (tướng + vua)
 
@@ -218,7 +218,7 @@ Cột **Gate** chỉ cổng nào chặn nếu vi phạm: `V` = `npm run verify` 
 | FR-C03 | Engine negamax + alpha-beta có **node budget** để không chặn UI thread | ngân sách node chặn; đo thời gian mỗi nước | [src/components/learning/cotuong/cotuongEngine.ts](file:///D:/trithuc/kho-bau-tri-thuc/src/components/learning/cotuong/cotuongEngine.ts), `tests/cotuong-engine.test.ts` | V |
 | FR-C04 | Luật bị khoá bằng test: cản chân Mã, mắt Tượng, Pháo cần đúng một screen, tốt ngang sau hà, hai Tướng không đối mặt, không tự bỏ chiếu, `applyMove` cập nhật bàn | mỗi điều khoản ≥ 1 case test | `tests/cotuong-engine.test.ts`, [docs/cotuong.md](file:///D:/trithuc/kho-bau-tri-thuc/docs/cotuong.md) | V |
 | FR-C05 | Màn cờ có hướng dẫn và thế cờ demo cho bé lớp 1, không áp lực điểm | `ChessTutorial.tsx` + `ChessMoveDemo.tsx` tồn tại; nút Gợi ý/Hoàn tác ở `ChessGame.tsx:288`–`:303` | `src/components/learning/chess/`, [docs/cotuong.md](file:///D:/trithuc/kho-bau-tri-thuc/docs/cotuong.md) | Q |
-| FR-C06 | Bàn **cờ vua** 3D bằng WebGL (three.js): quân là mesh ghép có đổ bóng, bàn 64 ô + hitbox, đánh dấu nước hợp lệ/chiếu bằng marker, chọn quân bằng `Raycaster`; có **Gợi ý** (`hintMove`) và **Hoàn tác** (`handleUndo` — lấy lại cả nước bé và nước máy đáp lại), 3 mức độ; **nạp lười** và ở chunk `three-vendor` riêng để entry không phình; máy không tạo được WebGL context (tablet cũ, tiết kiệm pin) thì tự chuyển sang bàn 2D thay vì màn trống (T31) | `pieceGeometries` sinh mesh đủ 12 quân trắng/đen có `castShadow`; `boardBuilder` đủ 64 ô + highlight; ChessScreen đứng sau `React.lazy`; `check:budget` vẫn PASS | [src/components/learning/chess/chess3d/Chess3DCanvas.tsx](file:///D:/trithuc/kho-bau-tri-thuc/src/components/learning/chess/chess3d/Chess3DCanvas.tsx), [src/App.tsx:18](file:///D:/trithuc/kho-bau-tri-thuc/src/App.tsx#L18), `tests/chess-3d.test.ts` | V, Q |
+| FR-C06 | Bàn **cờ vua** 3D bằng WebGL (three.js): quân là mesh ghép có đổ bóng, bàn 64 ô + hitbox, đánh dấu nước hợp lệ/chiếu bằng marker, chọn quân bằng `Raycaster`; có **Gợi ý** (`hintMove`) và **Hoàn tác** (`handleUndo` — lấy lại cả nước bé và nước máy đáp lại), 3 mức độ; **nạp lười** và ở chunk `three-vendor` riêng để entry không phình; máy không tạo được WebGL context (tablet cũ, tiết kiệm pin) thì tự chuyển sang bàn 2D thay vì màn trống (T31) | `pieceGeometries` sinh mesh đủ 12 quân trắng/đen có `castShadow`; `boardBuilder` đủ 64 ô + highlight; ChessScreen đứng sau `React.lazy`; `check:budget` vẫn PASS | [src/components/learning/chess/chess3d/Chess3DCanvas.tsx](file:///D:/trithuc/kho-bau-tri-thuc/src/components/learning/chess/chess3d/Chess3DCanvas.tsx), [src/App.tsx:20](file:///D:/trithuc/kho-bau-tri-thuc/src/App.tsx#L20), `tests/chess-3d.test.ts` | V, Q |
 
 ---
 
@@ -226,7 +226,7 @@ Cột **Gate** chỉ cổng nào chặn nếu vi phạm: `V` = `npm run verify` 
 
 | ID | Nhóm | Yêu cầu | Ngưỡng chấp nhận | Đo bằng | Gate |
 |---|---|---|---|---|---|
-| NFR-P01 | Hiệu năng | Main chunk ≤ 600 kB | hiện 534 kB (mục tiêu ≤ 450 kB); vendor lớn `three-vendor` 572.6 / `firebase-vendor` 537.9 nằm ngoài entry, chỉ tải khi cần | `npm run check:budget`, `tests/bundle-budget.test.ts` | V, C |
+| NFR-P01 | Hiệu năng | Main chunk ≤ 600 kB | hiện 199.2 kB (**đạt mục tiêu ≤ 450 kB** từ T39); đồ thị chặn lần vẽ đầu 413.6 kB; vendor lớn `three-vendor` 572.6 / `firebase-vendor` 723 nằm ngoài entry, chỉ tải khi cần | `npm run check:budget`, `tests/bundle-budget.test.ts`, `tests/t39-first-load-graph.test.ts` | V, C |
 | NFR-P02 | Hiệu năng | Game component là `lazy` — mở game không nạp toàn bộ app | mỗi id trong `GAME_REGISTRY` là `lazy(...)` | `tests/t23-mcp-servers.test.ts`, `tests/t02c-startup-split.test.ts` | V |
 | NFR-P03 | Hiệu năng | Nước cờ không khoá UI | node budget có giới hạn, test timing | `tests/cotuong-engine.test.ts` | V |
 | NFR-P04 | Hiệu năng | Không bộ đếm thời gian/chu kỳ nào gọi `Math.random` trong dữ liệu đề | grep 0 kết quả ở `src/data/games/*.ts` | `AGENTS.md` §2, `tests/games-content.test.ts` | V |
@@ -248,7 +248,7 @@ Cột **Gate** chỉ cổng nào chặn nếu vi phạm: `V` = `npm run verify` 
 | NFR-M01 | Bảo trì | Một cổng duy nhất: `npm run verify` = typecheck + test + build + budget | exit 0 | [package.json](file:///D:/trithuc/kho-bau-tri-thuc/package.json) scripts | V, C |
 | NFR-M02 | Bảo trì | Mọi ngưỡng nghiệp vụ nằm trong `src/config/policy.ts`, có rationale + test | 17 export policy, 693 dòng | `src/config/policy.ts` | V |
 | NFR-M03 | Bảo trì | UI không quyết định correctness/score/mastery/readiness | engine là chỗ chấm duy nhất | FR-L03, FR-E05, `AGENTS.md` §0 principle 1 | V |
-| NFR-M04 | Bảo trì | Tên test `tests/t<NN>-<chủ đề>.test.ts`; hành vi mới ⇒ test mới | 82 file / 1164 test | `AGENTS.md` §2 | V, H |
+| NFR-M04 | Bảo trì | Tên test `tests/t<NN>-<chủ đề>.test.ts`; hành vi mới ⇒ test mới | 83 file / 1173 test | `AGENTS.md` §2 | V, H |
 | NFR-M05 | Bảo trì | Không thêm dependency nếu chưa hỏi; runtime deps = 8 | `package.json` không đổi ngoài kế hoạch (`firebase`, `three`, `@types/three` vào repo cùng merge từ lane khác — đã ghi nợ vì `@types/three` lẽ ra thuộc `devDependencies`) | `AGENTS.md` §1.4 | H, C |
 | NFR-M06 | Bảo trì | MCP layer zero-dependency, stdio tự viết | 0 import ngoài `node:*` trong `mcp/**` | `tests/t23-mcp-servers.test.ts` | V |
 
@@ -257,15 +257,17 @@ Cột **Gate** chỉ cổng nào chặn nếu vi phạm: `V` = `npm run verify` 
 ## 6. Yêu cầu dữ liệu
 
 **Phiên bản schema hiện hành:** `STORAGE_SCHEMA_VERSION = 'P42-v3'`
-([src/services/storage.ts:99](file:///D:/trithuc/kho-bau-tri-thuc/src/services/storage.ts#L99)).
+([src/services/storage.ts:101](file:///D:/trithuc/kho-bau-tri-thuc/src/services/storage.ts#L101)).
 **Lịch sử:** `P28-v1 → P29-v2 → P30-v1 → P41-v1 → P42-v1 → P42-v2 → P42-v3`
-(`SCHEMA_HISTORY` [src/services/storage.ts:141](file:///D:/trithuc/kho-bau-tri-thuc/src/services/storage.ts#L141)).
+(`SCHEMA_HISTORY` [src/services/storage.ts:143](file:///D:/trithuc/kho-bau-tri-thuc/src/services/storage.ts#L143)).
 
-**Kiểm kê key (đo 2026-10-29):** grep `kho_bau_` trong `src/` trả **19 chuỗi**, chia thành:
-- **17 key `localStorage`** — 16 khai báo tập trung trong `STORAGE_KEYS`
-  ([src/services/storage.ts:60](file:///D:/trithuc/kho-bau-tri-thuc/src/services/storage.ts#L60)) và **1 key khai báo cục bộ**
+**Kiểm kê key (đo 2026-11-01, sau T39):** grep `kho_bau_` trong `src/` trả **21 chuỗi**, chia thành:
+- **19 key `localStorage`** — **17 khai báo tập trung** trong `STORAGE_KEYS`
+  ([src/services/storage.ts:60](file:///D:/trithuc/kho-bau-tri-thuc/src/services/storage.ts#L60)) và **2 key khai báo cục bộ**:
   `kho_bau_ioe_store` ở [src/components/learning/englishIoe/EnglishIoeScreen.tsx:6](file:///D:/trithuc/kho-bau-tri-thuc/src/components/learning/englishIoe/EnglishIoeScreen.tsx#L6)
-  (nợ kỹ thuật: key nằm ngoài registry — ghi ở `ARCHITECTURE.md` §7).
+  và `kho_bau_cloud_session_hint` ở [src/services/cloudSync.ts:10](file:///D:/trithuc/kho-bau-tri-thuc/src/services/cloudSync.ts#L10)
+  (nợ kỹ thuật: key nằm ngoài registry — ghi ở `ARCHITECTURE.md` §7). Chuỗi thứ hai **chỉ là
+  cờ boolean `'1'` báo thiết bị này từng đăng nhập, không chứa dữ liệu hay bài làm của bé** (ADR-16).
 - 2 chuỗi **không phải** key: `kho_bau_storage_change` (tên CustomEvent) và
   `kho_bau_tri_thuc_report_` (tiền tố tên file báo cáo). Đếm gộp hai chuỗi này vào kiểm kê là sai số.
 
@@ -288,6 +290,8 @@ Cột **Gate** chỉ cổng nào chặn nếu vi phạm: `V` = `npm run verify` 
 | DC-15 | `kho_bau_english_mastery_store`, `kho_bau_kidbox_store` | track tiếng Anh, Kid's Box | key riêng, không lẫn Learning OS (FR-N06) |
 | DC-17 | `kho_bau_ioe_store` | tiến độ luyện IOE | **đang nằm ngoài `STORAGE_KEYS` và đọc/ghi `localStorage` trực tiếp** ở [EnglishIoeScreen.tsx:6](file:///D:/trithuc/kho-bau-tri-thuc/src/components/learning/englishIoe/EnglishIoeScreen.tsx#L6) — nợ kỹ thuật, xem `ARCHITECTURE.md` §13.1 |
 | DC-16 | `kho_bau_review_days` | nhật ký ngày ôn/streak | input của `streakEngine` |
+| DC-18 | `kho_bau_cotuong_puzzles` | id thế cờ tướng bé đã giải (mảng chuỗi, thêm từ T26) | **đang nằm trong `STORAGE_KEYS` nhưng chưa từng có dòng DC** — lỗ hổng kiểm kê, sửa ở đợt này |
+| DC-19 | `kho_bau_cloud_session_hint` | cờ `'1'`: thiết bị này từng đăng nhập Google (T39) | **không** phải bài làm/dữ liệu học của bé; chỉ để quyết định có nạp SDK Firebase hay không; xoá khi đăng xuất |
 
 **Quy tắc di trú:** bump `STORAGE_SCHEMA_VERSION` **bắt buộc** thêm hàm migrate tương ứng — test
 `tests/t14c-storage.test.ts` chặn; migration chỉ được *backfill*, cấm tính lại mastery lịch sử.
@@ -355,7 +359,7 @@ Chi tiết từng dòng: xem [`RTM.md`](RTM.md).
 |---|---|---|---|
 | A-01 | Thiết bị đích có `SpeechSynthesis` tiếng Việt | bé không nghe được → phải dựa vào chữ | `qa/audio.mjs` + thiết bị thật |
 | A-02 | Thiết bị đích có `localStorage ≥ 5 MB` | mất tiến độ khi store đầy | test sanitizer + giới hạn bản ghi |
-| A-03 | Trẻ không có tài khoản; phụ huynh là chủ dữ liệu. Cloud mirror (FR-Y09) mặc định **tắt** và chỉ bật khi người lớn tự đăng nhập | nếu một UI nào đó bật sync mặc định hoặc bắt đăng nhập, toàn bộ NFR-C01 và lời hứa offline (NFR-R01) sụp đổ | `tests/firebase-auth-sync.test.ts:86`, [src/services/cloudSync.ts:37](file:///D:/trithuc/kho-bau-tri-thuc/src/services/cloudSync.ts#L37), ADR-16 trong `ARCHITECTURE.md` |
+| A-03 | Trẻ không có tài khoản; phụ huynh là chủ dữ liệu. Cloud mirror (FR-Y09) mặc định **tắt** và chỉ bật khi người lớn tự đăng nhập | nếu một UI nào đó bật sync mặc định hoặc bắt đăng nhập, toàn bộ NFR-C01 và lời hứa offline (NFR-R01) sụp đổ | `tests/firebase-auth-sync.test.ts:86`, [src/services/cloudSync.ts:73](file:///D:/trithuc/kho-bau-tri-thuc/src/services/cloudSync.ts#L73), ADR-16 trong `ARCHITECTURE.md` |
 | A-04 | Kid's Box chưa có nguồn nội dung đã xác minh | đơn vị 0 unit (FR-N04) — tính năng chỉ hoàn chỉnh khi có nguồn | `KIDBOX_REQUIRED_ARTIFACTS` = 7 |
 | A-05 | Repo dùng npm; `bun.lock` là tài liệu cũ | CI cài đặt sai nếu dùng lock file khác | `package-lock.json` + `npm ci` |
 
@@ -363,12 +367,12 @@ Chi tiết từng dòng: xem [`RTM.md`](RTM.md).
 
 ## 11. Trạng thái chấp nhận (tóm tắt)
 
-| Hạng | Kết quả 2026-10-31 (sau vòng sửa bug T26/T27) |
+| Hạng | Kết quả 2026-11-01 (sau T39 tách đồ thị tải; nền các vòng sửa bug T26/T27) |
 |---|---|
-| `npm run verify` | **EXIT=0** — typecheck sạch · 82 file / 1164 test pass · build OK · main chunk 534.3 kB → PASS |
+| `npm run verify` | **EXIT=0** — typecheck sạch · 83 file / 1173 test pass · build OK · main chunk 199.2 kB → PASS, đạt mục tiêu 450 kB (đo 2026-11-01 sau T39) |
 | Probe QA | cần chạy lại trên `dist/` sau mỗi thay đổi UI (xem `docs/SDLC.md` §5) |
 | FR chưa đạt / cần nguồn | FR-N04 (Kid's Box units = 0), BG-01 (vẫn chưa đo được: sync là tuỳ chọn nên không có số liệu server), FR-Y09 mới chỉ đạt một phần (chưa test với project Firebase thật) |
-| Nợ ghi nhận | mục tiêu chunk 450 kB chưa đạt (đang 534 kB); audit riêng cho track Kid's Box trước khi dùng với trẻ; `@types/three` sai chỗ; `npm install` báo 4 lỗ hổng severity cao |
+| Nợ ghi nhận | mục tiêu chunk 450 kB **đã đạt** (199.2 kB sau T39) nhưng bốn ngân hàng đề vẫn được nạp hết sau khi mount thay vì theo từng môn bé mở; audit riêng cho track Kid's Box trước khi dùng với trẻ; `@types/three` sai chỗ; `npm install` báo 4 lỗ hổng severity cao |
 
 *Sửa tài liệu này khi sửa code. Một FR không còn chứng cứ phải bị xoá hoặc gắn "KHÔNG CÒN ĐÚNG",
 không được để treo.*

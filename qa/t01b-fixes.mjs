@@ -239,11 +239,17 @@ export default async function run(page, ui) {
 
   // ---- 10. WorldMap dem game dong ----
   await navGo('world_map');
-  await page.waitForTimeout(600);
+  // T36 Việt hoá chuỗi này thành "N trò chơi trí tuệ bổ ích"; probe khớp nguyên
+  // văn nên đỏ từ 81784a9 — cập nhật theo chuỗi hiện tại của WorldMapScreen.
+  // T39 — màn Bản đồ là chunk lazy kéo theo ngân hàng đề (không còn nằm trong
+  // chunk khởi động), nên đợi đúng nội dung cần đo thay vì ngủ nhịp cố định.
+  await page
+    .waitForFunction(() => /trò chơi trí tuệ/i.test(document.body.innerText), null, { timeout: 20000 })
+    .catch(() => {});
   const mapText = await page.evaluate(() => document.body.innerText);
-  const mCount = (mapText.match(/(\d+)\s*Mini-Game/) || [])[1];
+  const mCount = (mapText.match(/(\d+)\s*trò chơi trí tuệ/i) || [])[1];
   out.worldMapCount = mCount || null;
-  check('worldmap-no-hardcoded-10', !/10\+\s*Mini-Game/.test(mapText));
+  check('worldmap-no-hardcoded-10', !/10\+\s*trò chơi/i.test(mapText));
   check('worldmap-count-dynamic', !!mCount && Number(mCount) >= 18, `(count=${mCount})`);
 
   return { ok: errors.length === 0, errors, out };

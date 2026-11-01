@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Cloud, RefreshCw, LogOut, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react';
 import { KidButton } from '../ui';
@@ -27,6 +27,12 @@ export const AccountModal: React.FC<AccountModalProps> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successNotice, setSuccessNotice] = useState<string | null>(null);
   const [copiedDomain, setCopiedDomain] = useState(false);
+
+  // Người lớn mở màn hình tài khoản = chủ động dùng cloud sync → đây là lúc
+  // app chịu tải SDK Firebase. Đặt trước các `return null` để không đổi thứ tự hook.
+  useEffect(() => {
+    if (isOpen) CloudSyncService.start();
+  }, [isOpen]);
 
   const currentHostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const firebaseConsoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/authentication/settings`;

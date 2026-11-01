@@ -48,6 +48,9 @@ describe('P29 — content quality gate (§15)', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  // O(n²) trên toàn bộ ngân hàng đề: chạy một mình hết ~4 s nhưng khi 8 worker
+  // tranh nhau CPU thì vượt trần 20 s mặc định của vitest và đỏ vì timing, không
+  // phải vì nội dung trùng — nên cấp riêng ngân sách thời gian cho test này.
   it('never has two semantically duplicated prompts', () => {
     for (let i = 0; i < COMPETITION_QUESTIONS.length; i += 1) {
       for (let j = i + 1; j < COMPETITION_QUESTIONS.length; j += 1) {
@@ -61,7 +64,7 @@ describe('P29 — content quality gate (§15)', () => {
         expect(similarity).toBeLessThan(CONTENT_POLICY.DUPLICATE_PROMPT_SIMILARITY);
       }
     }
-  });
+  }, 120_000);
 
   it('keeps Vietnamese diacritics when detecting duplicates (T02C: má ≠ mà, ăn ≠ ân)', () => {
     // Tone-different words are different questions and must never match.

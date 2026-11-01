@@ -3,6 +3,7 @@ import { MATH_TOPICS } from './mathCurriculum';
 import { ENGLISH_TOPICS } from './englishCurriculum';
 import { LIFE_TOPICS } from './lifeCurriculum';
 import { getKidBoxSkillCatalogue } from './kidBoxTaxonomy';
+import { StorageService } from '../services/storage';
 import { Lesson, Question, SubjectType, Topic } from '../types';
 
 export const ALL_TOPICS: Record<SubjectType, Topic[]> = {
@@ -77,3 +78,12 @@ export function getAllSkills(): { skillId: string; skillName: string; subject: S
 
   return Array.from(map.values());
 }
+
+/**
+ * T39 — `services/storage.ts` cần danh sách kỹ năng/topic nhưng không được import
+ * nó tĩnh (sẽ kéo cả bốn ngân hàng đề vào chunk khởi động). Ai nạp curriculum —
+ * màn Môn học, Bản đồ, Thử thách tuần, hay cú prefetch sau first paint của App —
+ * đều gắn catalogue vào storage ngay tại đây. Circular import được tránh vì
+ * storage không còn import lại module này.
+ */
+StorageService.attachCurriculum({ getAllSkills, getTopicsBySubject });

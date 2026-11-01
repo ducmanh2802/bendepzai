@@ -15,7 +15,6 @@ import {
 } from '../types/learningOS';
 import { SessionProfileKind, SubjectType } from '../types';
 import { localDateKey } from './dateUtils';
-import { getAllSkills } from '../data/curriculum';
 import { COMPETITION_SKILLS } from '../data/competitionTaxonomy';
 import { ADAPTIVE_DIFFICULTY_POLICY, SPEED_POLICY } from '../config/policy';
 

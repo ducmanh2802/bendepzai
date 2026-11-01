@@ -60,8 +60,8 @@
 | FR-L07 | `src/components/learning/NextBestActionCard.tsx` | `tests/personas-and-learning-os.test.ts` | `qa/golden-path.mjs` | V,3 | ĐẠT |
 | FR-L08 | `src/services/adaptive.ts`, `src/components/review/DailyReviewScreen.tsx` | `tests/learning-engine.test.ts`, `tests/date-utils.test.ts` | `qa/golden-path.mjs` | V,3 | ĐẠT |
 | FR-L09 | `src/services/adaptiveDifficulty.ts`, `src/config/policy.ts:464` | `tests/adaptive-difficulty.test.ts` | — | V,1 | ĐẠT |
-| FR-L10 | `src/types/learningOS.ts:179`, `src/services/storage.ts:147` | `tests/fatigue-reset.test.ts` | — | V,1 | ĐẠT |
-| FR-L11 | `src/services/sessionComposer.ts`, `src/services/storage.ts:143` | `tests/session-composer.test.ts` | `qa/lesson-types.mjs` | V,1 | ĐẠT |
+| FR-L10 | `src/types/learningOS.ts:179`, `src/services/storage.ts:149` | `tests/fatigue-reset.test.ts` | — | V,1 | ĐẠT |
+| FR-L11 | `src/services/sessionComposer.ts`, `src/services/storage.ts:145` | `tests/session-composer.test.ts` | `qa/lesson-types.mjs` | V,1 | ĐẠT |
 | FR-L12 | `src/services/learningOS.ts` | `tests/lesson-completion.test.ts` | `qa/golden-path.mjs` | V,3 | ĐẠT |
 
 ### 2.3 FR-G — Trò chơi
@@ -157,8 +157,8 @@
 | FR-Y05 | `src/components/system/UpdateBanner.tsx` | `tests/pwa.test.ts` | `qa/offline-pwa.mjs` | V,3 | ĐẠT |
 | FR-Y06 | `src/index.css`, `public/fonts` | `tests/p41-font-encoding.test.ts` | `qa/p41-font-visual.mjs` | V,3 | ĐẠT |
 | FR-Y07 | `src/App.tsx` (@vercel/analytics mặc định) | `tests/firebase-auth-sync.test.ts` | `qa/t02-smoke.mjs` (network) | V,1 | ĐẠT |
-| FR-Y08 | `src/services/firebase.ts:50`, `src/components/auth/AccountModal.tsx` | `tests/firebase-auth-sync.test.ts:86` (offline khi chưa đăng nhập) | `qa/golden-path.mjs` | V,1 | ĐẠT |
-| FR-Y09 | `src/services/cloudSync.ts:37`, `:114`, `firestore.rules` | `tests/firebase-auth-sync.test.ts` (mock) | — | V,1 | ĐẠT MỘT PHẦN — chưa test với project Firebase thật, chưa có UI xoá dữ liệu cloud |
+| FR-Y08 | `src/services/firebase.ts:82`, `src/components/auth/AccountModal.tsx` | `tests/firebase-auth-sync.test.ts:86` (offline khi chưa đăng nhập) | `qa/golden-path.mjs` | V,1 | ĐẠT |
+| FR-Y09 | `src/services/cloudSync.ts:73`, `:162`, `firestore.rules` | `tests/firebase-auth-sync.test.ts` (mock) | — | V,1 | ĐẠT MỘT PHẦN — chưa test với project Firebase thật, chưa có UI xoá dữ liệu cloud |
 
 ### 2.10 FR-C — Cờ tướng
 
@@ -169,7 +169,7 @@
 | FR-C03 | `src/components/learning/cotuong/cotuongEngine.ts` | `tests/cotuong-engine.test.ts` | — | V,1 | ĐẠT |
 | FR-C04 | `src/components/learning/cotuong/cotuongEngine.ts` | `tests/cotuong-engine.test.ts` (mã, tượng, pháo, tốt, tướng đối mặt, tự bỏ chiếu, `applyMove`) | — | V,1 | ĐẠT |
 | FR-C05 | `src/components/learning/chess/ChessTutorial.tsx`, `ChessMoveDemo.tsx` | — | `qa/golden-path.mjs` | V,3 | ĐẠT (probe-only) |
-| FR-C06 | `src/components/learning/chess/chess3d/Chess3DCanvas.tsx`, `pieceGeometries.ts`, `boardBuilder.ts`, `src/App.tsx:18` (lazy) | `tests/chess-3d.test.ts` (mesh 12 quân có shadow, 64 ô + hitbox, marker, đi nước mở đầu với engine) | `qa/games.mjs` | V,1,2 | ĐẠT |
+| FR-C06 | `src/components/learning/chess/chess3d/Chess3DCanvas.tsx`, `pieceGeometries.ts`, `boardBuilder.ts`, `src/App.tsx:20` (lazy) | `tests/chess-3d.test.ts` (mesh 12 quân có shadow, 64 ô + hitbox, marker, đi nước mở đầu với engine) | `qa/games.mjs` | V,1,2 | ĐẠT |
 
 ---
 
@@ -177,7 +177,7 @@
 
 | ID | Nguồn | Test | Probe | Gate | Trạng thái |
 |---|---|---|---|---|---|
-| NFR-P01 | `scripts/check-bundle-budget.mjs` (`MAIN_CHUNK_BUDGET_BYTES`) | `tests/bundle-budget.test.ts` | — | V,2 | ĐẠT — 534 kB / 600 kB (mục tiêu 450 **chưa đạt**); `three-vendor` 572.6 + `firebase-vendor` 537.9 ở ngoài entry, có gate riêng bằng ADR-17 |
+| NFR-P01 | `scripts/check-bundle-budget.mjs` (`MAIN_CHUNK_BUDGET_BYTES`) + trần boot graph 500 kB (`tests/t39-first-load-graph.test.ts`) | `tests/bundle-budget.test.ts`, `tests/t39-first-load-graph.test.ts` | — (bằng chứng trình duyệt chạy bằng script tạm ngoài `qa/`, giữ catalog 28 probe) | V,2 | ĐẠT — entry 199.2 kB / 600 kB và **dưới mục tiêu 450 kB từ T39**; boot graph 413.5 kB; `three-vendor` 572.6 + `firebase-vendor` 723.0 ở ngoài entry, có gate riêng bằng ADR-17 |
 | NFR-P02 | `src/components/games/registry.ts` | `tests/t02c-startup-split.test.ts` | `qa/t02-smoke.mjs` | V,2 | ĐẠT |
 | NFR-P03 | `src/components/learning/cotuong/cotuongEngine.ts` (node budget) | `tests/cotuong-engine.test.ts` | — | V,1 | ĐẠT |
 | NFR-P04 | `src/config/policy.ts:297` | `tests/game-content.test.ts` | — | V,1 | ĐẠT |
@@ -187,10 +187,10 @@
 | NFR-A04 | `src/index.css:414` (`@media (prefers-reduced-motion: reduce)`) | — | `qa/responsive-a11y.mjs` | V,3 | ĐẠT (probe-only) |
 | NFR-A05 | `docs/P31_PERFORMANCE_ACCESSIBILITY.md` | — | `qa/responsive-a11y.mjs` | V,3 | ĐẠT (probe-only) |
 | NFR-R01 | `public/sw.js`, `src/services/pwa.ts` | `tests/pwa.test.ts` | `qa/offline-pwa.mjs` | V,2,3 | ĐẠT |
-| NFR-R02 | `src/services/storage.ts:108`, `:141` | `tests/exam-fidelity.test.ts`, `tests/t18a-motivation.test.ts`, `tests/reading-fluency.test.ts` | — | V,1 | ĐẠT |
-| NFR-R03 | `src/services/storage.ts:217` (`readJSONObject`) | `tests/decision-engine-storage.test.ts`, `tests/kidbox-learning-os.test.ts` | — | V,1 | ĐẠT |
+| NFR-R02 | `src/services/storage.ts:110`, `:143` | `tests/exam-fidelity.test.ts`, `tests/t18a-motivation.test.ts`, `tests/reading-fluency.test.ts` | — | V,1 | ĐẠT |
+| NFR-R03 | `src/services/storage.ts:219` (`readJSONObject`) | `tests/decision-engine-storage.test.ts`, `tests/kidbox-learning-os.test.ts` | — | V,1 | ĐẠT |
 | NFR-R04 | `src/services/storage.ts`, `src/services/learningOS.ts` | `tests/lesson-completion.test.ts`, `tests/game-rewards.test.ts`, `tests/personas-and-learning-os.test.ts` | `qa/games.mjs` | V,1,3 | ĐẠT |
-| NFR-C01 | `src/services/storage.ts` (nguồn thật), `src/services/cloudSync.ts:37` (chỉ sync khi đã đăng nhập), `firestore.rules` | `tests/firebase-auth-sync.test.ts` | `qa/offline-pwa.mjs` | V,1 | ĐẠT (mặc định) — phần cloud mirror mới đạt một phần, xem FR-Y09 |
+| NFR-C01 | `src/services/storage.ts` (nguồn thật), `src/services/cloudSync.ts:73` (chỉ sync khi đã đăng nhập), `firestore.rules` | `tests/firebase-auth-sync.test.ts` | `qa/offline-pwa.mjs` | V,1 | ĐẠT (mặc định) — phần cloud mirror mới đạt một phần, xem FR-Y09 |
 | NFR-C02 | `.gitignore` (`progress/`) | `tests/t23-mcp-servers.test.ts` | — | V,1,H | ĐẠT |
 | NFR-C03 | `mcp/sample-export.json` (`isDemoData`), `src/services/demoSeed.ts` | `tests/t23-mcp-servers.test.ts`, `tests/parent-and-demo.test.ts` | `qa/golden-path.mjs` | V,1 | ĐẠT |
 | NFR-C04 | `src/data/contentSafety.ts` | `tests/content-quality.test.ts`, `tests/praise-engine.test.ts` | `qa/p41-curriculum-quality.mjs` | V,1,3 | ĐẠT |
@@ -199,7 +199,7 @@
 | NFR-M01 | `package.json` (`verify`, `verify:quick`) | — | — | V,H,1,2 | ĐẠT |
 | NFR-M02 | `src/config/policy.ts` (17 export, có rationale) | test theo từng policy block | — | V,1 | ĐẠT |
 | NFR-M03 | ADR-03; `src/services/answerCheck.ts` | `tests/answerCheck.test.ts`, `tests/competition-engine.test.ts` | `qa/question-types.mjs` | V,1 | ĐẠT |
-| NFR-M04 | `tests/` naming | 82 file / 1164 test | — | V,H,1 | ĐẠT |
+| NFR-M04 | `tests/` naming | 83 file / 1173 test | — | V,H,1 | ĐẠT |
 | NFR-M05 | `package.json` (8 runtime deps; `@types/three` sai chỗ — nợ #8 ARCHITECTURE §13) | `tests/t23-mcp-servers.test.ts` | — | V,H,1 | ĐẠT |
 | NFR-M06 | `mcp/lib/server.mjs` | `tests/t23-mcp-servers.test.ts` | — | V,1 | ĐẠT |
 
@@ -209,7 +209,7 @@
 
 | ID | Key / đối tượng | Nơi khai báo | Pipeline đọc/ghi | Test |
 |---|---|---|---|---|
-| DC-01 | nguyên tắc mọi store | `src/services/storage.ts:217`, `:236` | `readJSONObject` → migrate → sanitize → default | `tests/decision-engine-storage.test.ts` |
+| DC-01 | nguyên tắc mọi store | `src/services/storage.ts:219`, `:238` | `readJSONObject` → migrate → sanitize → default | `tests/decision-engine-storage.test.ts` |
 | DC-02 | `kho_bau_child_profile` | `src/services/storage.ts:61` | StorageService | `tests/t07-subject-path.test.ts` |
 | DC-03 | `kho_bau_game_progress` | `:71`, `GAME_PROGRESS_SCHEMA_VERSION:102` | StorageService | `tests/game-rewards.test.ts`, `tests/t08-games-hub.test.ts` |
 | DC-04 | `kho_bau_learning_os_store` | `:67` | `createEmptyLearningOSStore:157` | `tests/t18a-motivation.test.ts`, `tests/fatigue-reset.test.ts` |
@@ -276,7 +276,7 @@
 
 ## 7. Ma trận ngược: test không phục vụ yêu cầu nào?
 
-82 file test đều nằm trong ít nhất một dòng §2 hoặc §3 ở trên (mới: `tests/t38-webgl-fallback.test.ts` → FR-C06/NFR-U01/NFR-M04; `tests/t34-chess-real-set.test.ts` → FR-C06; `tests/t33-feedback-timers.test.ts` → FR-G04/NFR-U01/NFR-M04; `tests/t32-game-stage-reset.test.ts` → FR-G04/NFR-U01/NFR-M04; `tests/chess-3d.test.ts` → FR-C06; `tests/t31-bug-hunt-fixes.test.ts` → FR-C06/NFR-U01/NFR-M04; `tests/firebase-cloud-sync.test.ts` đổi tên thành `tests/firebase-auth-sync.test.ts` → FR-Y08/Y09/NFR-C01; `tests/t24-speech-math-operators.test.ts` → FR-Y02; `tests/t25-difficulty-ladder.test.ts` → FR-G04/G05; `tests/t26-cotuong-puzzles.test.ts` → FR-C06; `tests/t27-lesson-engagement.test.ts` → FR-M01/FR-S08; `tests/t28-ui-polish.test.ts` → NFR-U01/NFR-M04; `tests/t29-lesson-smooth.test.ts` → FR-L02/NFR-M04; `tests/t30-cotuong-piece-depth.test.ts` → FR-C02), **ngoại trừ** các file sau —
+83 file test đều nằm trong ít nhất một dòng §2 hoặc §3 ở trên (mới: `tests/t39-first-load-graph.test.ts` → NFR-P01/NFR-C01/NFR-M04 + ADR-18; `tests/t38-webgl-fallback.test.ts` → FR-C06/NFR-U01/NFR-M04; `tests/t34-chess-real-set.test.ts` → FR-C06; `tests/t33-feedback-timers.test.ts` → FR-G04/NFR-U01/NFR-M04; `tests/t32-game-stage-reset.test.ts` → FR-G04/NFR-U01/NFR-M04; `tests/chess-3d.test.ts` → FR-C06; `tests/t31-bug-hunt-fixes.test.ts` → FR-C06/NFR-U01/NFR-M04; `tests/firebase-cloud-sync.test.ts` đổi tên thành `tests/firebase-auth-sync.test.ts` → FR-Y08/Y09/NFR-C01; `tests/t24-speech-math-operators.test.ts` → FR-Y02; `tests/t25-difficulty-ladder.test.ts` → FR-G04/G05; `tests/t26-cotuong-puzzles.test.ts` → FR-C06; `tests/t27-lesson-engagement.test.ts` → FR-M01/FR-S08; `tests/t28-ui-polish.test.ts` → NFR-U01/NFR-M04; `tests/t29-lesson-smooth.test.ts` → FR-L02/NFR-M04; `tests/t30-cotuong-piece-depth.test.ts` → FR-C02), **ngoại trừ** các file sau —
 chúng bảo vệ *chất lượng nền* chứ không bảo vệ một FR riêng lẻ:
 
 | File | Vai trò thật |
@@ -297,10 +297,10 @@ chưa được ghi vào SRS (phải thêm FR hoặc xoá test).
 |---|---|---|
 | FR | 88 | **86 ĐẠT** · 1 ĐẠT MỘT PHẦN (FR-Y09 — cloud mirror mới có test mock) · 2 CHƯA ĐẠT (FR-N04, FR-P08 — cùng một nguyên nhân: thiếu nguồn giáo trình) |
 | FR có bằng chứng tự động (`tests/`) | 82/88 | 7 FR chỉ có probe (`FR-Y01`, `FR-M08`, `FR-C05`, `FR-S01`, `NFR-A04/A05`…) |
-| NFR | 25 | 24 ĐẠT · 1 đạt một phần (NFR-P01: dưới ngân sách cứng, trên mục tiêu 450 kB) |
-| DC | 17 | 17 có nguồn + test · **1 lỗ hổng thiết kế** (DC-17 key ngoài registry) |
-| Probe | 25 | 25/25 có chủ đích |
-| Test file | 75 | 75/75 có ánh xạ (`firebase-auth-sync` đổi tên từ `firebase-cloud-sync`; `chess-3d`, `t26-cotuong-puzzles`, `t27-lesson-engagement`, `t28-ui-polish`, `t29-lesson-smooth` thêm mới) |
+| NFR | 25 | 24 ĐẠT · 1 đạt một phần (NFR-P01: entry 199.2 kB **đã** dưới mục tiêu 450 kB từ T39, nhưng `check:budget` vẫn chưa đo boot graph ⇒ giữ mức "một phần" cho tới khi trần boot graph vào `verify`) |
+| DC | 19 | 19 có nguồn (`STORAGE_KEYS` 17 + 2 key cục bộ) · **2 lỗ hổng thiết kế**: DC-17 `kho_bau_ioe_store` và DC-19 `kho_bau_cloud_session_hint` nằm ngoài registry |
+| Probe | 28 | 28/28 có chủ đích (27 `.mjs` + 1 `.cjs`, trừ `lib.mjs`/`run-one.mjs`) |
+| Test file | 83 | 83/83 có ánh xạ (`firebase-auth-sync` đổi tên từ `firebase-cloud-sync`; `chess-3d`, `t26-cotuong-puzzles`, `t27-lesson-engagement`, `t28-ui-polish`, `t29-lesson-smooth`, `t39-first-load-graph` thêm mới) |
 | Yêu cầu **không đo được** | 1 | BG-01 (cần telemetry thật — bị chặn bởi ADR-01, không phải lỗi code) |
 
 ## 9. Cách cập nhật tài liệu này
@@ -309,5 +309,5 @@ chưa được ghi vào SRS (phải thêm FR hoặc xoá test).
 2. Xoá tính năng trong code ⇒ xoá dòng RTM và dòng SRS (giữ lại lịch sử ở `CHANGELOG.md`).
 3. Một dòng RTM chỉ chuyển sang ĐẠT khi output lệnh thật được dán vào PR/Issue —
    không dựa vào số liệu MCP (`AGENTS.md` §1.7, docs/SDLC.md §10).
-4. Số liệu kiểm kê (31 game / 475 câu / 1111 test / 533.8 kB…) chỉ được sửa khi vừa đo lại
+4. Số liệu kiểm kê (31 game / 475 câu / 1173 test / entry 199.2 kB + boot graph 413.5 kB…) chỉ được sửa khi vừa đo lại
    bằng `npx vitest run`, `npm run check:budget` hoặc `ls`.

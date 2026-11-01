@@ -57,6 +57,32 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   Binh Nhập Cung, Mã Hậu Pháo, Song Xe Tảo Cung).
 
 ### Changed
+- **Cắt lần tải đầu (đợt T39 — perf):** người dùng yêu cầu "tiếp tục tối ưu bundle xuống 450 kB".
+  Đo trước khi sửa: `npm run check:budget` chỉ nhìn chunk entry nên T38 vẫn PASS ở **534.3 kB**,
+  trong khi `dist/index.html` tham chiếu **tĩnh** cả `firebase-vendor` 537.9 kB, `english-bank`
+  186.0 kB, `math-bank` 124.1 kB và toàn bộ ngân hàng đề nằm trong entry ⇒ payload thật chặn lần
+  vẽ đầu là **1527.4 kB**. Ba cạnh phụ thuộc tĩnh bị cắt (không chuyển dữ liệu sang chunk khác chỉ
+  để đẹp số đo):
+  1. `src/App.tsx` — `CotuongScreen` và `EnglishIoeScreen` (hai màn tĩnh cuối cùng) sang
+     `React.lazy` + `Suspense fallback={<ScreenFallback label="…" />}`, khớp kiểu các màn khác.
+  2. `src/services/storage.ts` → `src/data/curriculum.ts` — thay `import` tĩnh bằng cơ chế
+     **tự đăng ký**: `data/curriculum.ts` gọi `StorageService.attachCurriculum({ getAllSkills,
+     getTopicsBySubject })` ở cuối file; API đồng bộ của storage giữ nguyên, chưa có catalogue thì
+     cư xử như "chưa có dữ liệu" thay vì ném. `App.tsx` prefetch catalogue ngay sau khi mount nên
+     dashboard ba mẹ vẫn seed đủ kỹ năng.
+  3. `src/services/firebase.ts` — bỏ khởi tạo ở tầng module; `loadFirebaseSdk()` dynamic-import
+     `firebase/app|auth|firestore`, cache promise và **reset promise khi lỗi** (lần bấm sau được
+     thử lại), kiểu chỉ dùng `import type`. `src/services/cloudSync.ts` thêm hint
+     `kho_bau_cloud_session_hint` (boolean `'1'`, **không chứa dữ liệu hay bài làm của bé**) và
+     `start()` idempotent: thiết bị chưa từng đăng nhập không nối `onAuthChange` ⇒ không tải
+     `firebase-vendor`; `AccountModal` gọi `CloudSyncService.start()` khi người lớn mở màn.
+  Số đo sau khi sửa (`npm run verify` **EXIT=0**): entry `index-DQjDqEw-.js` **199.2 kB** →
+  `PASS (meets 450 kB goal)`; **boot graph 413.5 kB** = index 199.2 + `react-vendor` 213.6 +
+  `rolldown-runtime` 0.7 (từ 1527.4 kB); Home vẽ sau **163 ms** (lần đo lại trên dist mới; **125 ms** ở lần đo đầu) khi CPU throttle 4×.
+  `firebase-vendor` đổi số đo 537.9 → **723.0 kB** khi biên chuyển từ tĩnh sang động (số đo thật
+  của `npm run check:budget`, nguyên nhân chính xác chưa khảo sát) nhưng nó **không còn** nằm trên
+  đường tải tiên phong nên người chưa đăng nhập không tải nữa. Quyết định ghi thành **ADR-18** trong
+  `docs/specs/ARCHITECTURE.md`.
 - **Kẻ đậm đường ô cờ vua (đợt T37):** ảnh chụp bàn 3D cho thấy rãnh 0.07 của đợt T35 gần như
   biến mất khi nhìn nghiêng, nên đường kẻ được vẽ thẳng lên mặt bàn thay vì chỉ dựa vào khe gỗ.
   `src/components/learning/chess/chess3d/boardBuilder.ts`: mặt lát `0.93 → 0.9` trên pitch 1.0
@@ -178,6 +204,19 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   `git show "99edd29:<đường-dẫn>"` (xem `docs/MASTER_ROADMAP.md` §"Cấu trúc docs/ sau khi gỡ prompt").
 
 ### Fixed
+- **Test chống trùng đề đỏ vì timing, không vì nội dung (đợt T39):** `tests/content-quality.test.ts`
+  mục *"never has two semantically duplicated prompts"* chạy một mình hết **4.17 s** (`npx vitest run
+  tests/content-quality.test.ts` → 16 test pass) nhưng khi 8 worker tranh CPU thì vượt trần 20 s mặc
+  định và ném `Test timed out in 20000ms` ⇒ `npm run verify` **EXIT=1** ở lần chạy đầu của đợt này. Cấp ngân sách
+  thời gian riêng `it(..., 120_000)` cho đúng test O(n²) này (không đổi assertion, không nới trần
+  toàn suite); chạy lại `npm run verify` **EXIT=0**, 83 file / 1173 test.
+- **Probe `qa/t01b-fixes.mjs` đỏ từ ba đợt trước vì chuỗi cũ (đợt T39):** mục 10 khớp nguyên văn
+  `"Mini-Game"` trong khi đợt T36 (commit `81784a9` — "Việt hoá các chuỗi còn sót") đã đổi nhãn của
+  `WorldMapScreen` thành `` `${GAMES_CATALOG.length} trò chơi trí tuệ bổ ích` ``; `git log -S"Mini-Game" -- src/`
+  xác nhận không còn chuỗi đó trong `src/` nữa. Cập nhật regex sang `trò chơi trí tuệ` và thay
+  `waitForTimeout(600)` cố định bằng `waitForFunction` — màn Bản đồ giờ là chunk lazy nên nhịp chờ
+  cứng dễ đỏ vì timing. Probe PASS với `worldMapCount: "31"`. **Đây là lỗi để lọt từ T36**, không phải
+  hồi quy do T39: bài học là **đổi chuỗi hiển thị thì phải grep `qa/` lẫn `tests/` trong cùng đợt sửa**.
 - **Bàn cờ vua 3D không còn để bé gặp màn trắng (EP-G3, đợt T38):** `Chess3DCanvas` đã có thăm dò
   WebGL nhưng còn ba lỗ hổng — (1) mỗi lần mở màn cờ tạo **hai** canvas thăm dò và không nhả
   context nào, mà trình duyệt chỉ giữ ~16 context sống, nên vào/ra vài lần là
@@ -401,6 +440,17 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
     `memory-card`, `karaoke-read-all` và `answer-option` + `data-correct` cho `spelling_duel`.
 
 ### Tests
+- `tests/t39-first-load-graph.test.ts` — **9 test** cho lần tải đầu (đợt T39): entry đạt mục tiêu
+  450 kB; `dist/index.html` **không** còn tham chiếu tĩnh `firebase-vendor`/`three-vendor`/
+  `math-bank`/`english-bank`; tổng boot graph ≤ 500 kB; `src/services/firebase.ts` không còn một
+  `import` runtime nào từ `firebase/*` (chỉ `import type`); hợp đồng nguồn của hint
+  `kho_bau_cloud_session_hint` + `CloudSyncService.start()` + lời gọi trong `AccountModal`;
+  **hành vi thật** của `loadFirebaseSdk()` với `vi.mock('firebase/app'|'firebase/auth'|'firebase/firestore')`:
+  thiết bị mới → `sdkCalls.app === 0` (không chạm SDK), thiết bị có hint + `window` giả → app/auth/firestore
+  khởi tạo **đúng một lần** và chỉ đăng ký **1** listener `kho_bau_storage_change`; `await
+  import('src/data/curriculum')` làm `StorageService.getAnalytics().skillMastery` đi từ 0 key →
+  >10 key có `skillName` và `attempts === 0` (chứng minh tự đăng ký catalogue hàn lại đường seed
+  dashboard ba mẹ); hợp đồng `lazy`/`Suspense`/prefetch trong `App.tsx`.
 - `tests/t38-webgl-fallback.test.ts` — **9 test** cho đường lùi WebGL: `probeWebGL` chạy được
   trong node nên test được bằng canvas giả (không WebGL; `webgl2` hỏng nhưng `webgl` được — phải
   là **cùng một canvas**; GPU SwiftShader/llvmpipe/Basic Render → `software`; luôn gọi

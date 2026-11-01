@@ -1,7 +1,30 @@
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db, onAuthChange, type CloudUser } from './firebase';
+import { loadFirebaseSdk, onAuthChange, type CloudUser } from './firebase';
 import { StorageService } from './storage';
 import type { ChildProfile } from '../types';
+
+/**
+ * T39 — "Thiết bị này từng đăng nhập" là một cờ boolean thuần tuý, không chứa
+ * dữ liệu bài làm của bé. Nhờ nó, app chỉ nạp SDK Firebase (538 KiB) cho người
+ * dùng cloud sync thật; bé học offline hoàn toàn không tải chunk đó.
+ */
+const CLOUD_SESSION_HINT = 'kho_bau_cloud_session_hint';
+
+function readSessionHint(): boolean {
+  try {
+    return localStorage.getItem(CLOUD_SESSION_HINT) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function writeSessionHint(signedIn: boolean): void {
+  try {
+    if (signedIn) localStorage.setItem(CLOUD_SESSION_HINT, '1');
+    else localStorage.removeItem(CLOUD_SESSION_HINT);
+  } catch {
+    // localStorage bị chặn (private mode): sync chỉ không tự bật, không hỏng gì khác.
+  }
+}
 
 export type CloudSyncStatus = 'offline' | 'idle' | 'syncing' | 'synced' | 'error';
 
@@ -35,21 +58,35 @@ class CloudSyncManager {
 
   private listeners = new Set<SyncListener>();
   private syncDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+  private authStarted = false;
 
   constructor() {
-    // Listen to Firebase Auth state
+    // Listen to local storage changes to trigger debounced auto-sync
     if (typeof window !== 'undefined') {
-      onAuthChange((user) => {
-        this.handleAuthChanged(user);
-      });
-
-      // Listen to local storage changes to trigger debounced auto-sync
       window.addEventListener('kho_bau_storage_change', () => {
         if (this.state.user) {
           this.scheduleAutoSync();
         }
       });
+
+      // Listen to Firebase Auth state — nhưng chỉ khi máy này đã từng đăng nhập.
+      if (readSessionHint()) {
+        this.start();
+      }
     }
+  }
+
+  /**
+   * Nạp SDK và theo dõi trạng thái đăng nhập. Idempotent: AccountModal gọi lúc
+   * mở màn hình, constructor gọi lúc resume — không lần nào tải Firebase thừa.
+   */
+  public start(): void {
+    if (this.authStarted || typeof window === 'undefined') return;
+    this.authStarted = true;
+    onAuthChange((user) => {
+      writeSessionHint(!!user);
+      void this.handleAuthChanged(user);
+    });
   }
 
   public getState(): CloudSyncState {
@@ -123,8 +160,9 @@ class CloudSyncManager {
    * Pulls existing cloud document, merges with local state, and pushes back to cloud
    */
   private async pullAndMergeCloudData(uid: string): Promise<void> {
-    const userDocRef = doc(db, 'users', uid);
-    const snap = await getDoc(userDocRef);
+    const sdk = await loadFirebaseSdk();
+    const userDocRef = sdk.doc(sdk.db, 'users', uid);
+    const snap = await sdk.getDoc(userDocRef);
 
     const localProfile = StorageService.getChildProfile();
     const localAnalytics = StorageService.getAnalytics();
@@ -162,7 +200,7 @@ class CloudSyncManager {
       StorageService.saveChildProfile(mergedProfile);
 
       // Push merged back to cloud
-      await setDoc(
+      await sdk.setDoc(
         userDocRef,
         sanitizeForFirestore({
           profile: mergedProfile,
@@ -173,7 +211,7 @@ class CloudSyncManager {
       );
     } else {
       // First cloud save for this account
-      await setDoc(
+      await sdk.setDoc(
         userDocRef,
         sanitizeForFirestore({
           profile: localProfile,
@@ -201,11 +239,12 @@ class CloudSyncManager {
 
     try {
       const uid = user.uid;
-      const userDocRef = doc(db, 'users', uid);
+      const sdk = await loadFirebaseSdk();
+      const userDocRef = sdk.doc(sdk.db, 'users', uid);
       const profile = StorageService.getChildProfile();
       const analytics = StorageService.getAnalytics();
 
-      await setDoc(
+      await sdk.setDoc(
         userDocRef,
         sanitizeForFirestore({
           profile,

@@ -130,8 +130,8 @@ mặc định, GPU/3D nặng ngoài màn cờ vua.
 **Lợi ích:** bé tự học được; phụ huynh có bằng chứng thay vì cảm tính; giáo viên nhận
 được file chẩn đoán; người bảo trì không sợ "sửa nội dung là sập app".
 
-**Chi phí vận hành thực tế (đo 2026-11-01):** `npm run verify` gồm typecheck + 1164 test
-trong 80 file (riêng suite test ~20 s) + build + budget; probe QA cần Chromium của
+**Chi phí vận hành thực tế (đo 2026-11-01):** `npm run verify` gồm typecheck + 1173 test
+trong 83 file (riêng suite test ~20 s) + build + budget; probe QA cần Chromium của
 Playwright và `dist/`. Không có chi phí server **cho người dùng chưa bật sync**; từ khi có
 `firebase ^13.1.0`, chi phí Firestore thuộc project Firebase của người vận hành và chưa được
 đo (chưa có số liệu dùng thật, chưa thống kê hạn mức free tier).
@@ -159,14 +159,15 @@ Một bản được gọi là "phát hành được" khi:
 | Bậc độ khó mỗi trò | 6, số câu `[5, 6, 6, 7, 8, 8]` | `defaultRoundsPerTier()` trong `src/data/gameLevels.ts` |
 | Chủ đề / bài / câu nội dung học (đếm **runtime**, import array trong test tạm) | Tiếng Việt 15/58/612 · Toán 13/26/260 · Tiếng Anh 24/40/434 · Em & Cuộc sống 14/26/264 → **tổng 66 chủ đề, 150 bài, 1570 câu** | `*_TOPICS` trong `src/data/*Curriculum.ts` (đếm tĩnh bằng grep bỏ sót câu sinh qua factory) |
 | Luyện đọc | 36 đoạn · 192 câu hỏi | `READING_PASSAGES`, `READING_QUESTIONS` trong `src/data/readingContent.ts` |
-| Unit test | 82 file / 1164 test, xanh | `npx vitest run` (80 `.ts` + 2 `.tsx`) |
+| Unit test | 83 file / 1173 test, xanh | `npx vitest run` (81 `.ts` + 2 `.tsx`) |
 | Probe trình duyệt | 28 probe (27 `.mjs` + 1 `.cjs`, không tính `lib.mjs`, `run-one.mjs`) | `ls qa/*.mjs` |
-| Main chunk | 534 kB (ngân sách 600, mục tiêu 450) | `npm run check:budget` |
-| Chunk vendor lớn | `three-vendor` 572.6 kB · `firebase-vendor` 537.9 kB · `react-vendor` 213.6 kB — tất cả ngoài entry | `npm run check:budget` |
+| Main chunk | 199.2 kB (ngân sách 600, mục tiêu 450 — **đã đạt** từ T39) | `npm run check:budget` |
+| Đồ thị chặn lần vẽ đầu | 413.5 kB = `index` 199.2 + `react-vendor` 213.6 + runtime 0.7 — T38 còn 1527.4 kB vì `firebase-vendor` + `math-bank` + `english-bank` bị nạp sẵn | `grep -o 'assets/.*\\.js' dist/index.html` + `stat` từng file |
+| Chunk vendor lớn | `three-vendor` 572.6 kB · `firebase-vendor` 723 kB · `react-vendor` 213.6 kB — tất cả ngoài entry, chỉ tải khi bé/người lớn mở đúng màn (T39) | `npm run check:budget` |
 | Kho câu thi | **475 câu** (256 trắc nghiệm · 55 nối · 46 điền · 42 xếp thứ tự · 39 đúng/sai · 24 phân loại · 13 kéo-thả), phủ đủ 26/26 kỹ năng taxonomy; đề thi phân môn: Toán 165 · Tiếng Anh 162 · Tiếng Việt 148 | `COMPETITION_QUESTIONS` (gồm `EXAM_FORMAT_QUESTIONS` 29 · `EXPANSION_QUESTIONS` 54 · `P36_QUESTIONS` 271 · `TOURNAMENT_QUESTIONS` 72), bank version 6 |
 | Blueprint đề thi | 16 preset: 6 mini-test · 2 full-mock · 2 speed-trial · 6 tournament; số câu 6→30 | `EXAM_BLUEPRINTS` trong `src/data/competitionBlueprints.ts` |
 | Kid's Box (track Anh văn) | **0 unit đã map**, 7 nhóm tài liệu `CONTENT_SOURCE_REQUIRED` | `KIDBOX_MAPPED_UNITS`, `KIDBOX_REQUIRED_ARTIFACTS` — app không bịa tên unit |
-| Keys lưu trữ | **17 key** `localStorage` (16 trong `STORAGE_KEYS` + `kho_bau_ioe_store` khai báo cục bộ), schema `P42-v3`, 7 phiên bản lịch sử, 6 hàm migration | `src/services/storage.ts`, `grep -o "kho_bau_[a-z0-9_]*" src/` |
+| Keys lưu trữ | **19 key** `localStorage` (17 trong `STORAGE_KEYS` + `kho_bau_ioe_store` và `kho_bau_cloud_session_hint` khai báo cục bộ — hint chỉ là cờ `'1'`, không chứa dữ liệu bé), schema `P42-v3`, 7 phiên bản lịch sử, 6 hàm migration | `src/services/storage.ts`, `grep -o "kho_bau_[a-z0-9_]*" src/` |
 | Chính sách tập trung | `src/config/policy.ts` 693 dòng, 17 khối policy xuất khẩu (`export const`) | Read |
 | Dependency runtime | 8: react, react-dom, lucide-react, @vercel/analytics, tslib, **three, @types/three, firebase** (3 mục in đậm vào repo cùng merge 2026-10-30; `@types/three` lẽ ra thuộc `devDependencies` — nợ #8 ARCHITECTURE §13) | `package.json` |
 | Tài liệu Markdown | **107 file** — `docs/` 100 (gốc 48 · `opencode/` 45 = 4 README/rules + 2 queue + 39 reports · `specs/` 5 · `plan/` 2) + 7 ngoài `docs/` (README, CHANGELOG, CONTRIBUTING, AGENTS, mcp/README, .github/pull_request_template, .ai/CURRENT). Đo 2026-10-30 sau khi gỡ **68 prompt** đã dùng xong (67 `.md` + `docs/opencode/UI.txt`); trước đó 174 `.md` | `find . -name '*.md' -not -path './node_modules/*' -not -path './.git/*' \| wc -l` |
