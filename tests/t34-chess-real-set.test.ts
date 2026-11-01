@@ -64,6 +64,42 @@ describe('T34 — bộ cờ vua trông như bộ cờ gỗ ngoài đời', () =>
       expect(src).not.toContain("['A', 'B'");
     });
 
+    it('64 ô có rãnh kẻ: mặt lát hẹp hơn pitch và tấm lát tối chỉ lộ trong khe', () => {
+      const board = buildChessBoard3D();
+      const a = new THREE.Box3().setFromObject(board.squareMeshes[0][0]);
+      const b = new THREE.Box3().setFromObject(board.squareMeshes[0][1]);
+      const w = a.max.x - a.min.x;
+      expect(w).toBeLessThan(1); // còn khe giữa hai ô ⇒ có đường kẻ
+      expect(w).toBeGreaterThan(0.85); // nhưng vẫn liền thành mặt bàn, không phải ô rời
+      expect(Math.abs((b.max.x + b.min.x) / 2 - (a.max.x + a.min.x) / 2)).toBeCloseTo(1, 6);
+      const inlay = board.boardGroup.children.find((o) => o.name === 'board_inlay');
+      expect(inlay).toBeDefined();
+      const ib = new THREE.Box3().setFromObject(inlay!);
+      expect(ib.max.x - ib.min.x).toBeCloseTo(8, 6);
+      expect(ib.max.y).toBeLessThan(a.max.y); // nằm dưới mặt ô, không che bàn
+    });
+
+    it('ô góc a1 tối, h1 sáng và hai ô kề nhau luôn khác tông', () => {
+      // Bàn thật đặt "trắng ở tay phải": ô góc bên phải người chơi phải là ô sáng.
+      const board = buildChessBoard3D();
+      const lum = (r: number, c: number) => {
+        const m = board.squareMeshes[r][c].material as THREE.MeshStandardMaterial;
+        return m.color.r * 0.299 + m.color.g * 0.587 + m.color.b * 0.114;
+      };
+      expect(lum(7, 0)).toBeLessThan(lum(7, 7)); // a1 tối, h1 sáng
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          // ô sáng khi (r + c) chẵn ⇒ mọi cặp kề nhau phải đổi tông
+          const light = (x: number, y: number) => lum(x, y) > 0.6;
+          expect(light(r, c)).toBe((r + c) % 2 === 0);
+          if (c < 7) expect(light(r, c)).not.toBe(light(r, c + 1));
+          if (r < 7) expect(light(r, c)).not.toBe(light(r + 1, c));
+        }
+      }
+      // Tương phản đủ mạnh để bé phân biệt khi nhìn nghiêng
+      expect(Math.abs(lum(0, 0) - lum(0, 1))).toBeGreaterThan(0.2);
+    });
+
     it('viền chỉ ôm bốn cạnh, không có tấm gỗ nào phủ kín mặt bàn', () => {
       const board = buildChessBoard3D();
       const tileTop = new THREE.Box3()
@@ -104,10 +140,19 @@ describe('T34 — bộ cờ vua trông như bộ cờ gỗ ngoài đời', () =>
       expect(demo).toContain('<ChessPieceSvg type={d.type}');
     });
 
-    it('ô cờ 2D hai tông phong/gụ giống mặt bàn 3D', () => {
+    it('ô cờ 2D hai tông tương phản mạnh và có đường kẻ giữa các ô', () => {
+      const LINE = 'shadow-[inset_0_0_0_2px_rgba(47,29,16,0.9)]';
       const game2d = read('src/components/learning/chess/ChessGame.tsx');
-      expect(game2d).toContain('bg-[#efd6ae]');
-      expect(game2d).toContain('bg-[#9c6a40]');
+      expect(game2d).toContain('bg-[#f5e6c8]');
+      expect(game2d).toContain('bg-[#7b4a26]');
+      expect(game2d).toContain(LINE);
+      expect(game2d).not.toContain('bg-[#efd6ae]');
+      const demo = read('src/components/learning/chess/ChessMoveDemo.tsx');
+      expect(demo).toContain(LINE);
+      expect(demo).toContain('bg-[#7b4a26]');
+      const screen = read('src/components/learning/chess/ChessScreen.tsx');
+      expect(screen).toContain('bg-[#f5e6c8]');
+      expect(screen).toContain('gap-[2px] p-[2px] rounded-lg bg-[#2f1d10]');
     });
   });
 });

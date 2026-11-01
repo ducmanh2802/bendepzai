@@ -42,7 +42,12 @@ export const ChessMoveDemo: React.FC = () => {
             {Array.from({ length: 64 }).map((_, i) => {
               const rr = Math.floor(i / 8), cc = i % 8;
               const dark = (rr + cc) % 2 === 1;
-              return <div key={i} className={dark ? 'bg-[#9c6a40]' : 'bg-[#efd6ae]'} />;
+              return (
+                <div
+                  key={i}
+                  className={`shadow-[inset_0_0_0_2px_rgba(47,29,16,0.9)] ${dark ? 'bg-[#7b4a26]' : 'bg-[#f5e6c8]'}`}
+                />
+              );
             })}
           </div>
           <div
@@ -53,7 +58,7 @@ export const ChessMoveDemo: React.FC = () => {
           </div>
           {/* ô xuất phát và ô đích */}
           <div className="absolute ring-4 ring-inset ring-sky-500" style={{ left: `${d.from[1] * 12.5}%`, top: `${d.from[0] * 12.5}%`, width: '12.5%', height: '12.5%' }} />
-          <div className="absolute bg-[#7fb069]/45" style={{ left: `${d.to[1] * 12.5}%`, top: `${d.to[0] * 12.5}%`, width: '12.5%', height: '12.5%' }} />
+          <div className="absolute bg-[#7fb069]/60 ring-2 ring-inset ring-[#4e8b4a]" style={{ left: `${d.to[1] * 12.5}%`, top: `${d.to[0] * 12.5}%`, width: '12.5%', height: '12.5%' }} />
         </div>
       </div>
       <div className="text-xs text-slate-500 text-center">Ô viền xanh = bắt đầu, ô phủ xanh lá = kết thúc. Demo tự động chuyển quân.</div>

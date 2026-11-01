@@ -130,7 +130,7 @@ mặc định, GPU/3D nặng ngoài màn cờ vua.
 **Lợi ích:** bé tự học được; phụ huynh có bằng chứng thay vì cảm tính; giáo viên nhận
 được file chẩn đoán; người bảo trì không sợ "sửa nội dung là sập app".
 
-**Chi phí vận hành thực tế (đo 2026-11-01):** `npm run verify` gồm typecheck + 1143 test
+**Chi phí vận hành thực tế (đo 2026-11-01):** `npm run verify` gồm typecheck + 1145 test
 trong 80 file (riêng suite test ~20 s) + build + budget; probe QA cần Chromium của
 Playwright và `dist/`. Không có chi phí server **cho người dùng chưa bật sync**; từ khi có
 `firebase ^13.1.0`, chi phí Firestore thuộc project Firebase của người vận hành và chưa được
@@ -159,7 +159,7 @@ Một bản được gọi là "phát hành được" khi:
 | Bậc độ khó mỗi trò | 6, số câu `[5, 6, 6, 7, 8, 8]` | `defaultRoundsPerTier()` trong `src/data/gameLevels.ts` |
 | Chủ đề / bài / câu nội dung học (đếm **runtime**, import array trong test tạm) | Tiếng Việt 15/58/612 · Toán 13/26/260 · Tiếng Anh 24/40/434 · Em & Cuộc sống 14/26/264 → **tổng 66 chủ đề, 150 bài, 1570 câu** | `*_TOPICS` trong `src/data/*Curriculum.ts` (đếm tĩnh bằng grep bỏ sót câu sinh qua factory) |
 | Luyện đọc | 36 đoạn · 192 câu hỏi | `READING_PASSAGES`, `READING_QUESTIONS` trong `src/data/readingContent.ts` |
-| Unit test | 80 file / 1143 test, xanh | `npx vitest run` (78 `.ts` + 2 `.tsx`) |
+| Unit test | 80 file / 1145 test, xanh | `npx vitest run` (78 `.ts` + 2 `.tsx`) |
 | Probe trình duyệt | 28 probe (27 `.mjs` + 1 `.cjs`, không tính `lib.mjs`, `run-one.mjs`) | `ls qa/*.mjs` |
 | Main chunk | 534 kB (ngân sách 600, mục tiêu 450) | `npm run check:budget` |
 | Chunk vendor lớn | `three-vendor` 572.6 kB · `firebase-vendor` 537.9 kB · `react-vendor` 213.6 kB — tất cả ngoài entry | `npm run check:budget` |

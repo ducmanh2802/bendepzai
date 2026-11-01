@@ -87,16 +87,18 @@ export function buildChessBoard3D(): BoardMeshRefs {
   const squareHitBoxes: THREE.Mesh[] = [];
   const squareMeshes: THREE.Mesh[][] = Array.from({ length: 8 }, () => []);
 
-  // Vật liệu: bàn cờ gỗ thật — ô sáng gỗ phong, ô tối gỗ óc chó, viền óc chó đậm.
+  // Vật liệu: bàn cờ gỗ thật — ô sáng gỗ phong, ô tối gụ đậm (tương phản đủ để bé
+  // lớp 1 nhận ra ô nào sáng ô nào tối khi nhìn nghiêng), viền óc chó.
   const lightTileMats = [0, 1, 2, 3].map((v) =>
-    woodMaterial('#efd6ae', '#c9a877', v, 0.5)
+    woodMaterial('#f5e6c8', '#c9a877', v, 0.5)
   );
   const darkTileMats = [0, 1, 2, 3].map((v) =>
-    woodMaterial('#9c6a40', '#6d4526', 10 + v, 0.5)
+    woodMaterial('#7b4a26', '#54301a', 10 + v, 0.5)
   );
 
   const woodFrameMat = woodMaterial('#6b4226', '#432714', 40, 0.45);
   const bezelMat = woodMaterial('#8a5a34', '#5d3a1f', 60, 0.4);
+  const inlayMat = new THREE.MeshStandardMaterial({ color: 0x2f1d10, roughness: 0.7, metalness: 0.0 });
 
   // 1. Wooden Base Table
   const tableBaseGeom = new THREE.BoxGeometry(10.2, 0.4, 10.2);
@@ -122,20 +124,28 @@ export function buildChessBoard3D(): BoardMeshRefs {
     boardGroup.add(bar);
   }
 
-  // 3. 64 Squares (8x8)
-  const tileSize = 1.0;
+  // 3. 64 Squares (8x8) — pitch 1.0 nhưng mặt lát nhỏ hơn một chút để rãnh tối
+  // bên dưới lộ ra thành đường kẻ, như bàn cờ ghép từ 64 miếng gỗ thật.
+  const pitch = 1.0;
+  const tileSize = 0.93;
   const tileHeight = 0.06;
   const tileGeom = new THREE.BoxGeometry(tileSize, tileHeight, tileSize);
 
+  const inlay = new THREE.Mesh(new THREE.BoxGeometry(8, 0.05, 8), inlayMat);
+  inlay.position.y = 0.027; // mặt trên 0.052, thấp hơn đỉnh ô 0.008 → lòng rãnh
+  inlay.receiveShadow = true;
+  inlay.name = 'board_inlay';
+  boardGroup.add(inlay);
+
   // Invisible hitbox plane for raycasting
-  const hitGeom = new THREE.PlaneGeometry(tileSize, tileSize);
+  const hitGeom = new THREE.PlaneGeometry(pitch, pitch);
   hitGeom.rotateX(-Math.PI / 2);
 
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
       const isDark = (r + c) % 2 === 1;
-      const x = (c - 3.5) * tileSize;
-      const z = (r - 3.5) * tileSize;
+      const x = (c - 3.5) * pitch;
+      const z = (r - 3.5) * pitch;
 
       // Visual tile — 4 biến thể vân gỗ để mặt bàn không lặp một hoa văn
       const tile = new THREE.Mesh(
@@ -168,7 +178,7 @@ export function buildChessBoard3D(): BoardMeshRefs {
 
   // Files along bottom (z = 4.45) & top (z = -4.45)
   files.forEach((char, c) => {
-    const x = (c - 3.5) * tileSize;
+    const x = (c - 3.5) * pitch;
     const tex = createCoordTexture(char);
     const labelMat = new THREE.MeshBasicMaterial({
       map: tex,
@@ -190,7 +200,7 @@ export function buildChessBoard3D(): BoardMeshRefs {
 
   // Ranks along left (x = -4.45) & right (x = 4.45)
   ranks.forEach((num, r) => {
-    const z = (r - 3.5) * tileSize;
+    const z = (r - 3.5) * pitch;
     const tex = createCoordTexture(num);
     const labelMat = new THREE.MeshBasicMaterial({
       map: tex,
@@ -294,12 +304,13 @@ export function createSelectedMarker(): THREE.Group {
  */
 export function createLastMoveMarker(): THREE.Group {
   const group = new THREE.Group();
-  const fillGeom = new THREE.PlaneGeometry(0.96, 0.96);
+  // Hẹp hơn mặt lát (0.93) để mảng xanh không tràn qua rãnh kẻ ô.
+  const fillGeom = new THREE.PlaneGeometry(0.9, 0.9);
   fillGeom.rotateX(-Math.PI / 2);
   const fillMat = new THREE.MeshBasicMaterial({
     color: 0x7fb069,
     transparent: true,
-    opacity: 0.4,
+    opacity: 0.55,
     side: THREE.DoubleSide,
   });
   const fill = new THREE.Mesh(fillGeom, fillMat);

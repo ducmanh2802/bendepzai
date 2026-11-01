@@ -148,16 +148,20 @@ export const ChessScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       {tab === 'illustrate' && (
         <div className="p-4 rounded-2xl bg-white border-2 border-slate-200 space-y-4">
           <h3 className="font-black text-lg">Minh họa: Xe (Rook) đi được những ô nào?</h3>
-          <div className="grid grid-cols-8 gap-1 max-w-xs mx-auto">
+          <div className="grid grid-cols-8 gap-[2px] p-[2px] rounded-lg bg-[#2f1d10] max-w-xs mx-auto">
             {Array.from({ length: 64 }).map((_, i) => {
               const r = Math.floor(i / 8), c = i % 8;
               const isRook = r === 3 && c === 3;
               const sameRow = r === 3 && c !== 3;
               const sameCol = c === 3 && r !== 3;
+              const dark = (r + c) % 2 === 1;
               return (
-                <div key={i} className={`aspect-square rounded flex items-center justify-center ${isRook ? 'bg-[#5b3a21]' : sameRow || sameCol ? 'bg-emerald-200' : 'bg-slate-100'}`}>
+                <div key={i} className={`relative aspect-square rounded-[2px] flex items-center justify-center ${isRook ? 'bg-[#5b3a21]' : dark ? 'bg-[#7b4a26]' : 'bg-[#f5e6c8]'}`}>
+                  {(sameRow || sameCol) && (
+                    <span className="absolute inset-[1px] rounded-[2px] bg-emerald-400/70 pointer-events-none" />
+                  )}
                   {isRook && (
-                    <span className="w-[80%] h-[80%] inline-flex">
+                    <span className="relative w-[80%] h-[80%] inline-flex">
                       <ChessPieceSvg type="r" color="w" className="w-full h-full" />
                     </span>
                   )}
@@ -165,7 +169,7 @@ export const ChessScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               );
             })}
           </div>
-          <p className="text-sm text-slate-600">Xe ở ô giữa (nâu) có thể đi tới các ô xanh cùng hàng/cột.</p>
+          <p className="text-sm text-slate-600">Xe ở ô giữa (nâu) có thể đi tới các ô phủ xanh lá cùng hàng/cột.</p>
 
           <h3 className="font-black text-lg mt-4">Gợi ý nước đi tiếp theo</h3>
           <p className="text-sm text-slate-600">

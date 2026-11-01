@@ -390,15 +390,15 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <button
                           key={`${r}-${c}`}
                           onClick={() => onSquareClick(r, c)}
-                          className={`relative aspect-square flex items-center justify-center p-1 transition-all cursor-pointer ${
-                            dark ? 'bg-[#9c6a40]' : 'bg-[#efd6ae]'
+                          className={`relative aspect-square flex items-center justify-center p-1 transition-all cursor-pointer shadow-[inset_0_0_0_2px_rgba(47,29,16,0.9)] ${
+                            dark ? 'bg-[#7b4a26]' : 'bg-[#f5e6c8]'
                           } ${sel ? 'z-10' : ''}`}
                         >
                           {isLast && (
-                            <span className="absolute inset-0 bg-[#7fb069]/45 pointer-events-none" />
+                            <span className="absolute inset-[1px] rounded-[2px] bg-[#7fb069]/55 ring-2 ring-inset ring-[#4e8b4a] pointer-events-none" />
                           )}
                           {sel && (
-                            <span className="absolute inset-0 ring-4 ring-inset ring-sky-500 pointer-events-none" />
+                            <span className="absolute inset-[1px] rounded-[2px] ring-4 ring-inset ring-sky-500 pointer-events-none" />
                           )}
                           {p ? (
                             <div className="relative z-[1] w-full h-full flex items-center justify-center">
@@ -439,7 +439,7 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         <div className="mt-3 flex items-center gap-3 px-5 py-2 rounded-full bg-white border-2 border-slate-200 shadow-xs text-xs sm:text-sm font-black">
           <span
             className={`w-3.5 h-3.5 rounded-full ${
-              turn === 'w' ? 'bg-[#efd6ae] ring-4 ring-[#f7ecd6]' : 'bg-[#5b3a21]'
+              turn === 'w' ? 'bg-[#f5e6c8] ring-4 ring-[#f7ecd6]' : 'bg-[#5b3a21]'
             }`}
           />
           <span>

@@ -57,6 +57,17 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   Binh Nhập Cung, Mã Hậu Pháo, Song Xe Tảo Cung).
 
 ### Changed
+- **Kẻ đường ô + tăng tương phản sáng/tối cho dễ theo dõi (đợt T35):** bàn 3D giờ ghép 64 mặt
+  lát 0.93 trên pitch 1.0 nên tấm lát tối `board_inlay` bên dưới lộ ra thành 14 đường rãnh
+  (ô vẫn liền mạch, hitbox giữ nguyên 1.0 nên bé bấm không khó hơn); ô sáng `#f5e6c8` / ô tối
+  `#7b4a26` (trước là `#efd6ae` / `#9c6a40`) để phân biệt hai tông khi nhìn nghiêng; bàn 2D,
+  demo "Nước đi mẫu" và lưới "Minh họa" mỗi ô có viền kẻ 2 px `rgba(47,29,16,0.9)` vẽ bằng
+  inset shadow nên không làm lệch các overlay đặt theo %, ô đánh dấu nước đi đậm hơn
+  (`/45 → /55–60` + viền xanh lá) và 3D bỏ mảng phủ tràn qua rãnh (`0.96 → 0.9`).
+  Đo lại sau đợt: `npm run verify` **EXIT=0**, **80 file / 1145 test** (+2 test `t34`: rãnh kẻ
+  và góc a1 tối / h1 sáng), main chunk `index-CoDA-Iqy.js` **534 kB PASS**, `three-vendor`
+  **572.6 kB** (không đổi), `ChessScreen` **52.8 kB**; `qa/games.mjs` `QA PASS` `catalogCount: 31`;
+  ảnh chụp 3D iso/top, 2D trước–sau nước đi, demo và minh họa.
 - **Bộ cờ vua đổi sang cờ gỗ thật (đợt T34, theo yêu cầu "giống bộ cờ ngoài đời"):** bàn 3D
   bỏ toàn bộ kim loại vàng — ô cờ hai tông phong/gụ có vân gỗ tiện, viền óc chó 4 thanh,
   khắc a–h / 1–8; quân Staunton tiện lại bằng `ExtrudeGeometry` + bevel, mọi `metalness` về
@@ -356,6 +367,12 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
     `memory-card`, `karaoke-read-all` và `answer-option` + `data-correct` cho `spelling_duel`.
 
 ### Tests
+- Hai test mới trong `tests/t34-chess-real-set.test.ts` cho đợt kẻ ô: (1) 64 mặt lát phải hẹp
+  hơn pitch (còn khe) nhưng > 0.85 (không rời thành ô rời), tâm hai ô kề nhau cách đúng 1.0,
+  và `board_inlay` phủ 8×8 nằm **dưới** mặt ô; (2) góc a1 tối – h1 sáng theo quy tắc bàn thật
+  "trắng ở tay phải", mọi cặp ô kề nhau đổi tông, tương phản giữa hai tông > 0.2. Test hợp
+  đồng 2D đổi sang cặp màu mới và bắt buộc có class kẻ đường ô ở `ChessGame` + `ChessMoveDemo`.
+  Đã kiểm test góc không vô nghĩa: đảo `isDark` sang `(r + c) % 2 === 0` thì test đỏ đúng 1.
 - `tests/t34-chess-real-set.test.ts` — 9 test cho bộ cờ vua gỗ: chiều cao quân tăng dần
   tốt < xe < mã < tượng < hậu (và hậu < 0.88 vua) đo bằng `Box3` thật, footprint mọi quân
   < 0.8 ô; không còn hex vàng (`0xfde047`/`0xf59e0b`/`0xd97706`/`0xb45309`) và không còn

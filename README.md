@@ -27,7 +27,7 @@ npm run dev          # http://localhost:3000
 | `npm run build` | build sản phẩm vào `dist/` |
 | `npm run preview` | xem thử `dist/` (port do Vite chọn) |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm test` | 80 file / 1143 unit test, **sau đó tự chạy audit tăng dần** (`posttest`) |
+| `npm test` | 80 file / 1145 unit test, **sau đó tự chạy audit tăng dần** (`posttest`) |
 | `npm run test:ci` | chỉ chạy test (dùng trong CI, không ghi file audit) |
 | `npm run verify:quick` | typecheck + test — cổng trước khi push |
 | `npm run verify` | **cổng đầy đủ**: typecheck + test + build + bundle budget |

@@ -14,9 +14,9 @@ của sản phẩm, từ nghiệp vụ tới từng test. Đọc theo thứ tự
 
 ## Quy ước chung của bộ tài liệu
 
-1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1143 test / 80 file,
-   533.8 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-11-01** — lần cuối ngay sau
-   T34 (bộ cờ vua giống cờ gỗ thật) và vòng soát bug T31 rồi T32 (bẫy focus popup bài học, header tràn nút "Ba Mẹ", thoại gấu lẫn chữ Hàn,
+1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1145 test / 80 file,
+   534 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-11-01** — lần cuối ngay sau
+   T35 (đường kẻ ô + tương phản sáng/tối) và T34 (bộ cờ vua giống cờ gỗ thật), vòng soát bug T31 rồi T32 (bẫy focus popup bài học, header tràn nút "Ba Mẹ", thoại gấu lẫn chữ Hàn,
    cờ vua 3D thiếu fallback WebGL), sau khi đã sửa vòng bug T26/T27 và audit UI T28; trên nền
    hai merge `origin/main`
    (cloud-sync + cờ vua WebGL, rồi `3727f04` auth/chess) và merge `fd3e7da` — bằng
