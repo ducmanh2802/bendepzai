@@ -199,7 +199,7 @@
 | NFR-M01 | `package.json` (`verify`, `verify:quick`) | — | — | V,H,1,2 | ĐẠT |
 | NFR-M02 | `src/config/policy.ts` (17 export, có rationale) | test theo từng policy block | — | V,1 | ĐẠT |
 | NFR-M03 | ADR-03; `src/services/answerCheck.ts` | `tests/answerCheck.test.ts`, `tests/competition-engine.test.ts` | `qa/question-types.mjs` | V,1 | ĐẠT |
-| NFR-M04 | `tests/` naming | 77 file / 1091 test | — | V,H,1 | ĐẠT |
+| NFR-M04 | `tests/` naming | 78 file / 1111 test | — | V,H,1 | ĐẠT |
 | NFR-M05 | `package.json` (8 runtime deps; `@types/three` sai chỗ — nợ #8 ARCHITECTURE §13) | `tests/t23-mcp-servers.test.ts` | — | V,H,1 | ĐẠT |
 | NFR-M06 | `mcp/lib/server.mjs` | `tests/t23-mcp-servers.test.ts` | — | V,1 | ĐẠT |
 
@@ -276,7 +276,7 @@
 
 ## 7. Ma trận ngược: test không phục vụ yêu cầu nào?
 
-77 file test đều nằm trong ít nhất một dòng §2 hoặc §3 ở trên (mới: `tests/chess-3d.test.ts` → FR-C06; `tests/t31-bug-hunt-fixes.test.ts` → FR-C06/NFR-U01/NFR-M04; `tests/firebase-cloud-sync.test.ts` đổi tên thành `tests/firebase-auth-sync.test.ts` → FR-Y08/Y09/NFR-C01; `tests/t24-speech-math-operators.test.ts` → FR-Y02; `tests/t25-difficulty-ladder.test.ts` → FR-G04/G05; `tests/t26-cotuong-puzzles.test.ts` → FR-C06; `tests/t27-lesson-engagement.test.ts` → FR-M01/FR-S08; `tests/t28-ui-polish.test.ts` → NFR-U01/NFR-M04; `tests/t29-lesson-smooth.test.ts` → FR-L02/NFR-M04; `tests/t30-cotuong-piece-depth.test.ts` → FR-C02), **ngoại trừ** các file sau —
+78 file test đều nằm trong ít nhất một dòng §2 hoặc §3 ở trên (mới: `tests/t32-game-stage-reset.test.ts` → FR-G04/NFR-U01/NFR-M04; `tests/chess-3d.test.ts` → FR-C06; `tests/t31-bug-hunt-fixes.test.ts` → FR-C06/NFR-U01/NFR-M04; `tests/firebase-cloud-sync.test.ts` đổi tên thành `tests/firebase-auth-sync.test.ts` → FR-Y08/Y09/NFR-C01; `tests/t24-speech-math-operators.test.ts` → FR-Y02; `tests/t25-difficulty-ladder.test.ts` → FR-G04/G05; `tests/t26-cotuong-puzzles.test.ts` → FR-C06; `tests/t27-lesson-engagement.test.ts` → FR-M01/FR-S08; `tests/t28-ui-polish.test.ts` → NFR-U01/NFR-M04; `tests/t29-lesson-smooth.test.ts` → FR-L02/NFR-M04; `tests/t30-cotuong-piece-depth.test.ts` → FR-C02), **ngoại trừ** các file sau —
 chúng bảo vệ *chất lượng nền* chứ không bảo vệ một FR riêng lẻ:
 
 | File | Vai trò thật |
@@ -309,5 +309,5 @@ chưa được ghi vào SRS (phải thêm FR hoặc xoá test).
 2. Xoá tính năng trong code ⇒ xoá dòng RTM và dòng SRS (giữ lại lịch sử ở `CHANGELOG.md`).
 3. Một dòng RTM chỉ chuyển sang ĐẠT khi output lệnh thật được dán vào PR/Issue —
    không dựa vào số liệu MCP (`AGENTS.md` §1.7, docs/SDLC.md §10).
-4. Số liệu kiểm kê (31 game / 475 câu / 1091 test / 533.5 kB…) chỉ được sửa khi vừa đo lại
+4. Số liệu kiểm kê (31 game / 475 câu / 1111 test / 533.8 kB…) chỉ được sửa khi vừa đo lại
    bằng `npx vitest run`, `npm run check:budget` hoặc `ls`.

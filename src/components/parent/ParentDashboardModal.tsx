@@ -276,9 +276,11 @@ const [activeTab, setActiveTab] = useState<
           </div>
           <button
             onClick={onClose}
+            aria-label="Đóng bảng điều khiển phụ huynh"
+            title="Đóng"
             className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full transition-all"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 

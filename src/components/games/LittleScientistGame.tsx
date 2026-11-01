@@ -94,7 +94,8 @@ const ScientistStage: React.FC<{ stage: GameStage; current: SciRound }> = ({ sta
 
   useEffect(() => {
     setPicked(null);
-  }, [current.id]);
+    // "Chơi lại" đổi nonce nhưng id vòng có thể trùng → reset theo cả hai.
+  }, [current.id, stage.nonce]);
 
   const done = picked !== null;
 
@@ -103,9 +104,7 @@ const ScientistStage: React.FC<{ stage: GameStage; current: SciRound }> = ({ sta
     if (bucket === current.item.bucket) {
       setPicked(bucket);
       sound.playCorrect();
-      window.setTimeout(() => {
-        sound.speak(current.item.why, 'vi-VN');
-      }, 350);
+      sound.speakLater(current.item.why, 'vi-VN', 350);
       reportCorrect(current.item.name);
       stage.submitCorrect();
     } else {

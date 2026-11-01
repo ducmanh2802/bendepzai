@@ -129,7 +129,8 @@ const CodingStage: React.FC<{ stage: GameStage; current: CodingRound }> = ({ sta
     setJudged(null);
     setAnimating(false);
     cancelAnimationFrame(rafRef.current);
-  }, [current.id]);
+    // "Chơi lại" đổi nonce nhưng id vòng có thể trùng → reset theo cả hai.
+  }, [current.id, stage.nonce]);
 
   useEffect(() => () => cancelAnimationFrame(rafRef.current), []);
 

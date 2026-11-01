@@ -67,7 +67,7 @@ export const LevelUpCelebrationModal: React.FC<LevelUpCelebrationModalProps> = (
       onClick={handleClose}
       role="dialog"
       aria-modal="true"
-      aria-label="Chúc mừng lên level"
+      aria-label="Chúc mừng bé lên cấp"
     >
       <div
         className="w-full max-w-md bg-white rounded-3xl p-8 shadow-2xl border-4 border-amber-200 animate-pop-in text-center relative overflow-hidden"
@@ -82,7 +82,7 @@ export const LevelUpCelebrationModal: React.FC<LevelUpCelebrationModalProps> = (
           <div className="inline-flex items-center gap-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-3 rounded-3xl shadow-xl">
             <span className="text-3xl">🎉</span>
             <div className="text-left">
-              <p className="text-xs font-black uppercase tracking-wider">Level Mới</p>
+              <p className="text-xs font-black uppercase tracking-wider">Cấp độ mới</p>
               <p className="text-2xl font-black font-display">{highestLevel}</p>
             </div>
           </div>
@@ -90,7 +90,7 @@ export const LevelUpCelebrationModal: React.FC<LevelUpCelebrationModalProps> = (
 
         {/* Title */}
         <h2 className="text-2xl md:text-3xl font-black font-display text-amber-950 mb-2 relative z-10">
-          Chúc Mừng {isNewTitle ? 'Bé Đã Lên Cấp!' : 'Nhận Thưởng Level!'}
+          Chúc Mừng {isNewTitle ? 'Bé Đã Lên Cấp!' : 'Bé Nhận Thêm Thưởng!'}
         </h2>
 
         {isNewTitle && (
@@ -145,7 +145,7 @@ export const LevelUpCelebrationModal: React.FC<LevelUpCelebrationModalProps> = (
           {newLevels.length > 1 && (
             <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200">
               <p className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-                Các Level Vừa Nhận Thưởng
+                Các Cấp Độ Vừa Nhận Thưởng
               </p>
               <div className="flex flex-wrap justify-center gap-2">
                 {newLevels.map((level) => (
@@ -157,7 +157,7 @@ export const LevelUpCelebrationModal: React.FC<LevelUpCelebrationModalProps> = (
                         : 'bg-amber-100 text-amber-800'
                     }`}
                   >
-                    Level {level} {level === highestLevel && '✨'}
+                    Cấp {level} {level === highestLevel && '✨'}
                   </span>
                 ))}
               </div>

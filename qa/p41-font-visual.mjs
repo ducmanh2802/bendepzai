@@ -15,7 +15,7 @@
  * no fabrication: every asserted fact is measured from the live DOM.
  */
 
-import { openFirstLesson } from './lib.mjs';
+import { openFirstLesson, dismissLevelUpCelebration } from './lib.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -283,9 +283,16 @@ export default async function run(page, ui) {
 
     // Lần nạp đầu sau khi lên level sẽ mở hộp mừng (quà level chỉ nhận 1 lần).
     // Phải đóng trước khi bấm tiếp, nếu không nó chặn mọi click (T31).
-    const levelUpClose = page.getByRole('button', { name: 'Tuyệt Vời!' });
-    if (await levelUpClose.count()) {
-      await levelUpClose.first().click(CLICK);
+    // T32: hộp mừng mount MUỘN hơn `[data-testid="nav-home"]`, nên đếm một lần rồi bỏ
+    // qua là hên xui — phải chờ nó hiện ra, và lặp lại vì quà nhiều cấp mở nhiều hộp.
+    for (let guard = 0; guard < 3; guard++) {
+      const opened = await page
+        .locator('[role="dialog"][aria-label^="Chúc mừng"]:visible')
+        .waitFor({ state: 'visible', timeout: guard === 0 ? 5000 : 1000 })
+        .then(() => true)
+        .catch(() => false);
+      if (!opened) break;
+      await dismissLevelUpCelebration(page);
       await page.waitForTimeout(300);
     }
 

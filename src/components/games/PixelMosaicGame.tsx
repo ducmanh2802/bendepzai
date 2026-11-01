@@ -50,7 +50,7 @@ export const PixelMosaicGame: React.FC<{ onExit: () => void }> = ({ onExit }) =>
       audioInstruction="Chọn một màu, rồi chạm vào các ô để ghép bức tranh giống hình mẫu"
       praiseSubject="MATH"
     >
-      {current && <PixelMosaicStage key={current.id} stage={stage} round={current} />}
+      {current && <PixelMosaicStage key={`${current.id}-${stage.nonce}`} stage={stage} round={current} />}
     </GameModalWrapper>
   );
 };
@@ -97,9 +97,7 @@ const PixelMosaicStage: React.FC<{ stage: GameStage; round: MosaicRound }> = ({ 
       setFilled(next);
       if (isMosaicComplete(round.goal, next)) {
         sound.playCorrect();
-        window.setTimeout(() => {
-          sound.speak(`Tuyệt vời! Bé đã ghép xong bức tranh ${round.pattern.name}!`, 'vi-VN');
-        }, 250);
+        sound.speakLater(`Tuyệt vời! Bé đã ghép xong bức tranh ${round.pattern.name}!`, 'vi-VN', 250);
         reportCorrect(round.pattern.name);
         stage.submitCorrect();
       } else {

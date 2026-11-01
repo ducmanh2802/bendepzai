@@ -184,7 +184,7 @@ export default async function run(page) {
     // hộp quà lên level khi app khởi động lại — đó là hành vi đúng, phải đóng nó
     // trước khi bấm tiếp (giống qa/golden-path.mjs).
     await page.reload();
-    const levelUp = page.locator('[role="dialog"][aria-label="Chúc mừng lên level"]:visible');
+    const levelUp = page.locator('[role="dialog"][aria-label^="Chúc mừng"]:visible');
     const levelUpShown = await levelUp
       .waitFor({ state: 'visible', timeout: 5000 })
       .then(() => true)

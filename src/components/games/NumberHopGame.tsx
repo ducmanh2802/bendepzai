@@ -96,15 +96,14 @@ const NumberHopStage: React.FC<{ stage: GameStage; current: HopRound }> = ({ sta
     setPreview(current.start);
     setHops(0);
     doneRef.current = false;
-  }, [current.id]);
+    // "Chơi lại" đổi nonce nhưng id vòng có thể trùng → reset theo cả hai.
+  }, [current.id, stage.nonce]);
 
   const answerRight = (value: number, how: string) => {
     if (stage.locked || doneRef.current) return;
     doneRef.current = true;
     sound.playCorrect();
-    window.setTimeout(() => {
-      sound.speak(`Đúng rồi! Ếch tới số ${current.target}!`, 'vi-VN');
-    }, 350);
+    sound.speakLater(`Đúng rồi! Ếch tới số ${current.target}!`, 'vi-VN', 350);
     reportCorrect(how);
     stage.submitCorrect();
   };

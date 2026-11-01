@@ -90,17 +90,16 @@ const RhymeTrainStage: React.FC<{ stage: GameStage; current: RhymeTrainRound }> 
 
   useEffect(() => {
     setAttached(null);
-  }, [current.id]);
+    // "Chơi lại" đổi nonce nhưng id vòng có thể trùng → reset theo cả hai.
+  }, [current.id, stage.nonce]);
 
   const handleCarPick = (tail: string) => {
     if (stage.locked || attached) return;
     if (tail === current.answerTail) {
       sound.playCorrect();
       setAttached(tail);
-      window.setTimeout(() => {
-        sound.playStar();
-        sound.speak(current.word);
-      }, 350);
+      sound.playStar();
+      sound.speakLater(current.word, 'vi-VN', 350);
       reportCorrect(current.word);
       stage.submitCorrect();
     } else {

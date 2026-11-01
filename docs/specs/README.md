@@ -10,13 +10,13 @@ của sản phẩm, từ nghiệp vụ tới từng test. Đọc theo thứ tự
 | 3 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | *Ghép như thế nào, dữ liệu đi đâu, vì sao chọn vậy?* | 17 ADR, sơ đồ tầng + luồng dữ liệu |
 | 4 | [`RTM.md`](RTM.md) | *Yêu cầu nào được chứng minh ở đâu? Test nào không phục vụ gì?* | ma trận xuôi + ngược, tổng kết độ phủ |
 | 5 | [`../plan/TASK_PLAN.md`](../plan/TASK_PLAN.md) | *Đã làm gì (P25→P43) và sẽ làm gì tiếp (EP-A…EP-F)?* | WBS 12 gói, 4 milestone |
-| 6 | [`../plan/TEST_PLAN.md`](../plan/TEST_PLAN.md) | *Kiểm bằng lớp nào, chạy lệnh nào, khi nào xanh?* | 5 lớp, 26 probe, bảng "đổi gì → chạy gì" |
+| 6 | [`../plan/TEST_PLAN.md`](../plan/TEST_PLAN.md) | *Kiểm bằng lớp nào, chạy lệnh nào, khi nào xanh?* | 5 lớp, 27 probe, bảng "đổi gì → chạy gì" |
 
 ## Quy ước chung của bộ tài liệu
 
-1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1091 test / 77 file,
-   533.5 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-10-31** — lần cuối ngay sau
-   vòng soát bug T31 (bẫy focus popup bài học, header tràn nút "Ba Mẹ", thoại gấu lẫn chữ Hàn,
+1. **Chỉ số liệu đo được.** Mọi con số (31 trò chơi, 475 câu thi, 1111 test / 78 file,
+   533.8 kB entry, 8 dependency runtime, 17 key…) đo ngày **2026-11-01** — lần cuối ngay sau
+   vòng soát bug T31 rồi T32 (bẫy focus popup bài học, header tràn nút "Ba Mẹ", thoại gấu lẫn chữ Hàn,
    cờ vua 3D thiếu fallback WebGL), sau khi đã sửa vòng bug T26/T27 và audit UI T28; trên nền
    hai merge `origin/main`
    (cloud-sync + cờ vua WebGL, rồi `3727f04` auth/chess) và merge `fd3e7da` — bằng

@@ -87,7 +87,8 @@ const ReadAndDoStage: React.FC<{ stage: GameStage; current: ReadDoRound }> = ({ 
   useEffect(() => {
     setSelectedObject(null);
     setDoneMoves(0);
-  }, [current.id]);
+    // "Chơi lại" đổi nonce nhưng id vòng có thể trùng → reset theo cả hai.
+  }, [current.id, stage.nonce]);
 
   const pendingMove = current.moves[doneMoves];
   const pendingObject = pendingMove
@@ -103,10 +104,9 @@ const ReadAndDoStage: React.FC<{ stage: GameStage; current: ReadDoRound }> = ({ 
     if (obj) sound.speak(obj.label, 'vi-VN');
   };
 
+  // Câu 2 bước yêu cầu ĐÚNG THỨ TỰ: chỉ bước kế tiếp (pendingMove) mới được tính.
   const isCorrectDrop = (objectId: string, placeId: string) =>
-    current.moves.some(
-      (m, idx) => idx >= doneMoves && m.objectId === objectId && m.placeId === placeId,
-    );
+    !!pendingMove && pendingMove.objectId === objectId && pendingMove.placeId === placeId;
 
   const dropObjectOnPlace = (objectId: string, placeId: string) => {
     if (stage.locked || roundDone) return;

@@ -67,6 +67,8 @@ interface GameModalWrapperProps {
   /** Subject for praise engine (VIETNAMESE, MATH, ENGLISH) */
   praiseSubject?: PraiseSubject;
   isRealtime?: boolean;
+  /** Bảng chơi đang bị lớp phủ "Chọn màn" che khuất — game có đồng hồ phải ngừng đếm. */
+  onOverlayOpenChange?: (open: boolean) => void;
 }
 
 const MASCOT_REACTIONS = {
@@ -119,6 +121,7 @@ export const GameModalWrapper: React.FC<GameModalWrapperProps> = ({
   onSelectTier,
   praiseSubject: propsPraiseSubject,
   isRealtime = false,
+  onOverlayOpenChange,
 }) => {
   const [isMuted, setIsMuted] = React.useState(sound.getMuted());
   const [isPaused, setIsPaused] = React.useState(false);
@@ -128,9 +131,13 @@ export const GameModalWrapper: React.FC<GameModalWrapperProps> = ({
   const dialogRef = useFocusTrap<HTMLDivElement>(true);
   const { requestClose } = useModalHistory(onExit);
 
+  // Bé tắt trò chơi khi gấu còn đang nói → cắt tiếng, kẻo lời khen vang ở màn hình khác.
+  React.useEffect(() => () => sound.stopSpeaking(), []);
+
   const handleSelectTier = (t: number) => {
     sound.playClick();
     setShowTierModal(false);
+    resetRewardState();
     if (onSelectTier) {
       onSelectTier(t);
     } else if (gameId) {
@@ -151,6 +158,17 @@ export const GameModalWrapper: React.FC<GameModalWrapperProps> = ({
   const [mascotReaction, setMascotReaction] = useState<string>(mascotEmoji);
   const [praiseText, setPraiseText] = useState<string | null>(null);
   const questionAttemptRef = useRef(0);
+
+  /** Phần thưởng chỉ được phát một lần mỗi lượt — xoá dấu vết khi sang màn/chơi lại. */
+  const resetRewardState = () => {
+    claimedKeys.current.clear();
+    setReceipt(null);
+    setCombo(0);
+    setWrongAttempts(0);
+    setShowCorrectAnswer(false);
+    setCorrectAnswer('');
+    setPraiseText(null);
+  };
 
   const praiseSubject = propsPraiseSubject || getPraiseSubjectFromGameId(gameId);
 
@@ -248,6 +266,12 @@ export const GameModalWrapper: React.FC<GameModalWrapperProps> = ({
     }
   }, [isLevelGame, phase, isGameOver, rewardKey, earnedXp, earnedStars, starsEarned, prevBestStars, gameId, tier, score]);
 
+  // Đồng hồ của game phải ngừng đếm khi bảng chơi bị lớp phủ che — nếu không
+  // bé vẫn bị tính "hết giờ" trong lúc đang chọn màn.
+  React.useEffect(() => {
+    onOverlayOpenChange?.(showTierModal);
+  }, [showTierModal, onOverlayOpenChange]);
+
   const toggleSound = () => {
     const next = !isMuted;
     setIsMuted(next);
@@ -265,13 +289,7 @@ export const GameModalWrapper: React.FC<GameModalWrapperProps> = ({
   }, [instructions, audioInstruction, audioLang]);
 
   const handleRestart = () => {
-    claimedKeys.current.clear();
-    setReceipt(null);
-    setCombo(0);
-    setWrongAttempts(0);
-    setShowCorrectAnswer(false);
-    setCorrectAnswer('');
-    setPraiseText(null);
+    resetRewardState();
     onRestart();
   };
 
@@ -548,6 +566,8 @@ export const GameModalWrapper: React.FC<GameModalWrapperProps> = ({
                   </h3>
                   <button
                     onClick={() => setShowTierModal(false)}
+                    aria-label="Đóng bảng chọn màn"
+                    title="Đóng"
                     className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-sm"
                   >
                     ✕

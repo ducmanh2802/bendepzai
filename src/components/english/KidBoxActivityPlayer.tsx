@@ -100,6 +100,10 @@ export const KidBoxActivityPlayer: React.FC<KidBoxActivityPlayerProps> = ({
     }
   }, [presentation.speaks, target]);
 
+  // Bé rời hoạt động khi lời đọc còn đang chờ → cắt tiếng, kẻo giọng Anh
+  // vẫn đọc vang lên ở màn hình khác.
+  useEffect(() => () => sound.stopSpeaking(), []);
+
   const submit = useCallback(
     (response: KidBoxResponse, responseKey: string, extra?: { speechUsed?: boolean }) => {
       const result = submitActivityResponse({
@@ -222,7 +226,7 @@ export const KidBoxActivityPlayer: React.FC<KidBoxActivityPlayerProps> = ({
     if (!target) return;
     setUsedReplay(true);
     sound.speak(target.speakText, BRITISH_LOCALE);
-    if (slow) setTimeout(() => sound.speak(target.speakText, BRITISH_LOCALE), 900);
+    if (slow) sound.speakLater(target.speakText, BRITISH_LOCALE, 900);
   };
 
   const goNext = () => {

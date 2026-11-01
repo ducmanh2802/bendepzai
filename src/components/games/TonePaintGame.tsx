@@ -102,7 +102,8 @@ const TonePaintStage: React.FC<{ stage: GameStage; current: TonePaintRound }> = 
   useEffect(() => {
     setPickedTone(null);
     setToneOk(false);
-  }, [current.id]);
+    // "Chơi lại" đổi nonce nhưng id vòng có thể trùng → reset theo cả hai.
+  }, [current.id, stage.nonce]);
 
   const handleTonePick = (tone: ToneName) => {
     if (stage.locked || toneOk) return;

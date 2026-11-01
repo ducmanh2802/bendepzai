@@ -93,7 +93,8 @@ const TenFrameMarketStage: React.FC<{ stage: GameStage; current: MarketRound }> 
 
   useEffect(() => {
     setAdded(0);
-  }, [current.id]);
+    // "Chơi lại" đổi nonce nhưng id vòng có thể trùng → reset theo cả hai.
+  }, [current.id, stage.nonce]);
 
   const filled = Math.min(current.have + added, current.target);
   const showChuc = Math.floor(filled / 10);
@@ -111,9 +112,7 @@ const TenFrameMarketStage: React.FC<{ stage: GameStage; current: MarketRound }> 
     if (stage.locked) return;
     if (opt === current.need) {
       sound.playCorrect();
-      window.setTimeout(() => {
-        sound.speak(`Đúng rồi! Cần thêm ${current.need}!`, 'vi-VN');
-      }, 350);
+      sound.speakLater(`Đúng rồi! Cần thêm ${current.need}!`, 'vi-VN', 350);
       reportCorrect(String(opt));
       stage.submitCorrect();
     } else {

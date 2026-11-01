@@ -67,6 +67,7 @@ class SoundService {
   private isMuted: boolean = false;
   private voiceEnabled: boolean = true;
   private cachedVoices: SpeechSynthesisVoice[] = [];
+  private pendingSpeech: number[] = [];
 
   private bgMusicEnabled: boolean = false;
   private bgMusicContext: AudioContext | null = null;
@@ -398,7 +399,30 @@ class SoundService {
   }
 
 
+  /**
+   * Đọc lời thoại sau một độ trễ (lời khen nối tiếp tiếng "đúng rồi") — cùng thứ
+   * tự tham số với speak(), chỉ thêm delayMs ở cuối.
+   * Qua speakLater thì lời này nằm trong sổ hẹn giờ và stopSpeaking() cắt được
+   * khi bé đóng trò chơi — nếu không gấu vẫn khen vang lên ở màn hình khác.
+   */
+  public speakLater(
+    text: string,
+    lang: 'vi-VN' | 'en-US' | 'en-GB' = 'vi-VN',
+    delayMs = 300
+  ) {
+    if (typeof window === 'undefined') return;
+    const id = window.setTimeout(() => {
+      this.pendingSpeech = this.pendingSpeech.filter((t) => t !== id);
+      this.speak(text, lang);
+    }, delayMs);
+    this.pendingSpeech.push(id);
+  }
+
   public stopSpeaking() {
+    if (typeof window !== 'undefined') {
+      this.pendingSpeech.forEach((id) => window.clearTimeout(id));
+    }
+    this.pendingSpeech = [];
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }

@@ -102,9 +102,11 @@ export const CompetitionResultModal: React.FC<CompetitionResultModalProps> = ({
               sound.playClick();
               onClose();
             }}
+            aria-label="Đóng bảng kết quả bài thi"
+            title="Đóng"
             className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-all cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 

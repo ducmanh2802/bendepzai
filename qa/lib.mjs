@@ -73,12 +73,16 @@ export async function describeBlocker(page, selector) {
 }
 
 /**
- * T20A — finishing a lesson can stack the "Chúc mừng lên level" celebration on
+ * T20A — finishing a lesson can stack the level-up celebration on
  * top of the lesson result screen (both are dialogs). The celebration is
  * dismissible, so a probe must clear it before it can reach the screen below.
+ *
+ * Khớp theo tiền tố "Chúc mừng" thay vì cả nhãn: nhãn này là chữ tiếng Việt
+ * hiển thị cho bé (AGENTS §3) và có thể đổi câu chữ — khớp tuyệt đối thì mỗi lần
+ * đổi câu là cả đàn probe đỏ theo.
  */
 export async function dismissLevelUpCelebration(page, click = { timeout: 8000 }) {
-  const dialog = page.locator('[role="dialog"][aria-label="Chúc mừng lên level"]:visible');
+  const dialog = page.locator('[role="dialog"][aria-label^="Chúc mừng"]:visible');
   if (!(await dialog.count())) return false;
   const done = dialog.getByRole('button', { name: /Tuyệt Vời/ }).first();
   if (await done.count()) await done.click(click).catch(() => {});

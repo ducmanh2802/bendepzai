@@ -104,7 +104,7 @@ const SHORTCUT_CARDS: readonly ShortcutCard[] = [
     screen: 'reading_fluency',
     label: 'Luyện Đọc',
     icon: '📖',
-    desc: 'Đọc fluently',
+    desc: 'Đọc trôi chảy',
     gradient: 'from-sky-500 to-cyan-600',
     border: 'border-sky-300',
   },

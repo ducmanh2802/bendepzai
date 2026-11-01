@@ -13,6 +13,7 @@ export const MathSpeedRacingGame: React.FC<{ onExit: () => void }> = ({ onExit }
   const roundsPerTier = useMemo(() => defaultRoundsPerTier(), []);
   const stage = useGameStage({ gameId: 'speed_racing', roundsPerTier, advanceDelayMs: 1200 });
   const [turboActive, setTurboActive] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const questions = useMemo(() => buildRaceQuestions(stage.tier, stage.nonce), [stage.tier, stage.nonce]);
   const current = questions[stage.roundIdx];
@@ -26,12 +27,12 @@ export const MathSpeedRacingGame: React.FC<{ onExit: () => void }> = ({ onExit }
     setRemainingMs(budgetMs);
   }, [budgetMs, stage.roundIdx, stage.nonce]);
   useEffect(() => {
-    if (!budgetMs || stage.locked || stage.phase !== 'playing') return;
+    if (!budgetMs || stage.locked || stage.phase !== 'playing' || pickerOpen) return;
     const tick = window.setInterval(() => {
       setRemainingMs((r) => (r === null ? null : Math.max(0, r - 100)));
     }, 100);
     return () => window.clearInterval(tick);
-  }, [budgetMs, stage.roundIdx, stage.locked, stage.phase]);
+  }, [budgetMs, stage.roundIdx, stage.locked, stage.phase, pickerOpen]);
   useEffect(() => {
     if (remainingMs !== 0) return;
     sound.playWrong();
@@ -81,6 +82,7 @@ export const MathSpeedRacingGame: React.FC<{ onExit: () => void }> = ({ onExit }
       onExit={onExit}
       instructions="Bé hãy chọn kết quả đúng của phép tính để nạp năng lượng Nitro cho xe đua!"
       audioInstruction="Hãy chọn kết quả đúng của phép tính để xe đua phóng nhanh về đích"
+      onOverlayOpenChange={setPickerOpen}
     >
       <div className="w-full h-full flex flex-col justify-between items-center bg-gradient-to-b from-slate-800 to-slate-900 rounded-3xl p-4 md:p-6 border-4 border-amber-400 text-white relative overflow-hidden select-none">
         {/* Racetrack View */}

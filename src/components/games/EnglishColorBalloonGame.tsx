@@ -44,9 +44,10 @@ export const EnglishColorBalloonGame: React.FC<{ onExit: () => void }> = ({ onEx
   useEffect(() => {
     setBalloons([]);
     setTargetIdx(0);
-    window.setTimeout(playVoice, 300);
+    const timer = window.setTimeout(playVoice, 300);
+    return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stage.tier]);
+  }, [stage.tier, stage.nonce]);
 
   // Spawn balloons
   useEffect(() => {

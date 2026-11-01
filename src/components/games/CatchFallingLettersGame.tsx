@@ -37,10 +37,12 @@ export const CatchFallingLettersGame: React.FC<{ onExit: () => void }> = ({ onEx
       seed: stage.nonce,
     });
     const letters = [...new Set(items.flatMap(item => item.options))].filter(l => l.length === 1);
-    setTargetPool(letters.length > 0 ? letters : config.pool);
-    if (items.length > 0 && items[0].options.length > 0) {
-      setTargetChar(items[0].options[0]);
-    }
+    const pool = letters.length > 0 ? letters : config.pool;
+    setTargetPool(pool);
+    // Bảng chữ mới chỉ có sau bước nạp ở trên, nên chữ đầu tiên lấy thẳng từ pool —
+    // nếu để pickNewTarget chạy ở effect khác nó đọc pool cũ và đổi chữ lung tung.
+    setTargetChar(pool[0] ?? config.pool[0]);
+    setBubbles([]);
     setCurrentRoundIdx(0);
   }, [stage.tier, stage.nonce, roundsPerTier]);
 
@@ -50,11 +52,6 @@ export const CatchFallingLettersGame: React.FC<{ onExit: () => void }> = ({ onEx
     setTargetChar(randomChar);
     sound.speak(`Hãy tìm và bắt chữ ${randomChar} nhé!`);
   };
-
-  useEffect(() => {
-    setBubbles([]);
-    pickNewTarget();
-  }, [stage.tier]);
 
   useEffect(() => {
     if (stage.phase !== 'playing') return;

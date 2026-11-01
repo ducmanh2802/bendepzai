@@ -116,7 +116,8 @@ describe('T31 — sửa lỗi tìm được khi quét toàn bộ probe', () => {
 
     it('p41 font: đóng hộp mừng lên level trước khi bấm tiếp', () => {
       const src = read('qa/p41-font-visual.mjs');
-      expect(src).toContain("name: 'Tuyệt Vời!'");
+      expect(src).toContain('dismissLevelUpCelebration(page)');
+      expect(src).toContain('[aria-label^="Chúc mừng"]');
     });
   });
 });

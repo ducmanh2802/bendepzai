@@ -101,7 +101,7 @@ describe('T20A — shouldCelebrateLevelUp gates sound, confetti and the modal al
 
   it('shows the claimed level, the new title and every reward', () => {
     const html = render({ isOpen: true, result: claimed, currentLevel: 2, levelTitle: 'Nhà thám hiểm' });
-    expect(html).toContain('Level Mới');
+    expect(html).toContain('Cấp độ mới');
     expect(html).toContain('Nhà thám hiểm');
     expect(html).toContain('+5 Sao Vàng');
     expect(html).toContain('+1 Vé Máy Gắp');
@@ -116,10 +116,10 @@ describe('T20A — shouldCelebrateLevelUp gates sound, confetti and the modal al
       currentLevel: 5,
       levelTitle: 'Ca thủ',
     });
-    expect(html).toContain('Các Level Vừa Nhận Thưởng');
-    expect(html).toContain('Level 3');
-    expect(html).toContain('Level 4');
-    expect(html).toContain('Level 5');
+    expect(html).toContain('Các Cấp Độ Vừa Nhận Thưởng');
+    expect(html).toContain('Cấp 3');
+    expect(html).toContain('Cấp 4');
+    expect(html).toContain('Cấp 5');
     expect(html).toContain('Bé Đã Lên Cấp!');
   });
 

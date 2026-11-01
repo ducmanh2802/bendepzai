@@ -38,7 +38,7 @@ export const ShadowMatchGame: React.FC<{ onExit: () => void }> = ({ onExit }) =>
       audioInstruction="Nhìn bóng đen và chạm vào hình đúng"
       praiseSubject="MATH"
     >
-      {current && <ShadowMatchStage key={current.id} stage={stage} round={current} />}
+      {current && <ShadowMatchStage key={`${current.id}-${stage.nonce}`} stage={stage} round={current} />}
     </GameModalWrapper>
   );
 };
@@ -58,7 +58,7 @@ const ShadowMatchStage: React.FC<{ stage: GameStage; round: ShadowRound }> = ({ 
     if (id === round.answer.id) {
       setPickedId(id);
       sound.playCorrect();
-      window.setTimeout(() => sound.speak(`Chính xác! Đây là ${item.label}!`, 'vi-VN'), 250);
+      sound.speakLater(`Chính xác! Đây là ${item.label}!`, 'vi-VN', 250);
       reportCorrect(item.label);
       stage.submitCorrect();
     } else {

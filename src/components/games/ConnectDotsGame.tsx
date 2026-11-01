@@ -49,7 +49,7 @@ export const ConnectDotsGame: React.FC<{ onExit: () => void }> = ({ onExit }) =>
       }
       praiseSubject="MATH"
     >
-      {current && <ConnectDotsStage key={current.id} stage={stage} round={current} />}
+      {current && <ConnectDotsStage key={`${current.id}-${stage.nonce}`} stage={stage} round={current} />}
     </GameModalWrapper>
   );
 };
@@ -79,9 +79,7 @@ const ConnectDotsStage: React.FC<{ stage: GameStage; round: ConnectRound }> = ({
       setProgress(next);
       if (next === total) {
         sound.playCorrect();
-        window.setTimeout(() => {
-          sound.speak(`Đã nối xong hình ${round.shape.name}!`, 'vi-VN');
-        }, 300);
+        sound.speakLater(`Đã nối xong hình ${round.shape.name}!`, 'vi-VN', 300);
         reportCorrect(round.shape.name);
         stage.submitCorrect();
       } else {

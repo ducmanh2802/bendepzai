@@ -101,7 +101,8 @@ const SimonSaysStage: React.FC<{ stage: GameStage; current: SimonRound }> = ({ s
 
   useEffect(() => {
     setPicked([]);
-  }, [current.id]);
+    // "Chơi lại" đổi nonce nhưng id vòng có thể trùng → reset theo cả hai.
+  }, [current.id, stage.nonce]);
 
   const done = picked.length >= current.answers.length;
 
@@ -113,16 +114,12 @@ const SimonSaysStage: React.FC<{ stage: GameStage; current: SimonRound }> = ({ s
       setPicked(next);
       if (next.length === current.answers.length) {
         sound.playCorrect();
-        window.setTimeout(() => {
-          sound.speak('Great job!', 'en-GB');
-        }, 350);
+        sound.speakLater('Great job!', 'en-GB', 350);
         reportCorrect(current.command);
         stage.submitCorrect();
       } else {
         sound.playClick();
-        window.setTimeout(() => {
-          sound.speak(opt.label, 'en-GB');
-        }, 100);
+        sound.speakLater(opt.label, 'en-GB', 100);
       }
     } else {
       sound.playWrong();

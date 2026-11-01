@@ -94,7 +94,8 @@ const WordTrainStage: React.FC<{ stage: GameStage; current: WordTrainRound }> = 
 
   useEffect(() => {
     setPlaced([]);
-  }, [current.id]);
+    // "Chơi lại" đổi nonce nhưng id vòng có thể trùng → reset theo cả hai.
+  }, [current.id, stage.nonce]);
 
   const done = placed.length >= current.cars.length;
   const expectedNext = current.cars[placed.length];
@@ -110,9 +111,7 @@ const WordTrainStage: React.FC<{ stage: GameStage; current: WordTrainRound }> = 
       setPlaced(next);
       if (next.length === current.cars.length) {
         sound.playCorrect();
-        window.setTimeout(() => {
-          sound.speak(current.word, 'en-GB');
-        }, 350);
+        sound.speakLater(current.word, 'en-GB', 350);
         reportCorrect(current.word);
         stage.submitCorrect();
       } else {

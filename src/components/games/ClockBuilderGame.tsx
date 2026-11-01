@@ -94,7 +94,8 @@ const ClockBuilderStage: React.FC<{ stage: GameStage; current: ClockRound }> = (
   useEffect(() => {
     setPickedHour(null);
     setPickedAmPm('sáng');
-  }, [current.id]);
+    // "Chơi lại" đổi nonce nhưng id vòng có thể trùng → reset theo cả hai.
+  }, [current.id, stage.nonce]);
 
   // Màn 3+ mới hỏi buổi; màn 1–2 chỉ chấm giờ.
   const needsAmPm = stage.tier >= 3 && current.kind === 'clock';
@@ -107,9 +108,7 @@ const ClockBuilderStage: React.FC<{ stage: GameStage; current: ClockRound }> = (
   const speakResult = (ok: boolean, text: string) => {
     if (ok) {
       sound.playCorrect();
-      window.setTimeout(() => {
-        sound.speak(text, 'vi-VN');
-      }, 350);
+      sound.speakLater(text, 'vi-VN', 350);
     } else {
       sound.playWrong();
       setShakeKey((k) => k + 1);

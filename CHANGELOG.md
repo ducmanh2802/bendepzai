@@ -265,6 +265,42 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
     khi tạo renderer và báo `onUnsupported`; `ChessGame` tự chuyển sang bàn 2D.
   - **Rò rỉ GPU khi đổi bàn cờ:** mỗi lần cập nhật thế cờ, mesh cũ bị bỏ khỏi scene nhưng
     `geometry` không `dispose()`; dọn kèm geometry của mọi mesh con.
+- **Vòng soát bug T32 (khung trò chơi — lỗi nào cũng có bằng chứng trên build thật):**
+  - **Chơi lại không xoá lượt cũ, bảng bị khoá mềm:** 13 trò reset trạng thái vòng theo
+    `current.id`, nhưng builder sinh **id lặp lại ở cùng chỉ số** khi `nonce` đổi (đo trực tiếp
+    trên `buildRounds` của `read_and_do` và `clock_builder`), nên sau khi bấm "Chơi lại" hoặc
+    chọn lại màn, đồ vật đã chọn / đã đặt / số đã chạm vẫn treo nguyên và bé không chơi tiếp
+    được. Đổi khoá reset sang `[current.id, stage.nonce]` (10 trò) và remount theo
+    `key={`${current.id}-${stage.nonce}`}` (3 trò Nối Số Tô Màu, Bé Xếp Hình Mosaic, Đoán Bóng Hình).
+  - **Chọn lại màn làm mất phần thưởng đã hứa:** `claimedKeys`, `receipt`, combo và dấu câu sai
+    không được xoá trong `handleSelectTier`, nên lượt chơi mới ở cùng màn không còn được ghi
+    sao/XP. Thêm `resetRewardState()` dùng chung cho đổi màn và "Chơi lại".
+  - **Đồng hồ vẫn đếm khi bảng chơi bị che:** Đường Đua Thần Tốc trừ giờ của bé trong lúc lớp
+    phủ "Chọn Màn & Độ Khó" đang mở. `GameModalWrapper` báo `onOverlayOpenChange`, game dừng
+    tick khi bị che (bằng chứng: 15s → 15s sau 3 giây mở lớp phủ, rồi 15s → 12s sau khi đóng).
+  - **Lời khen của gấu vang ở màn hình khác:** phản hồi đúng/sai hẹn giờ 250–900 ms bằng
+    `setTimeout(() => sound.speak(...))` và không ai huỷ khi bé tắt trò chơi. Thêm
+    `sound.speakLater()` + `sound.stopSpeaking()`, cắt tiếng khi `GameModalWrapper` và
+    `KidBoxActivityPlayer` unmount; 12 chỗ gọi hẹn giờ chuyển sang `speakLater`.
+  - **Nút chỉ có icon, không tên truy cập:** lớp phủ chọn màn, bảng điều khiển phụ huynh và bảng
+    kết quả bài thi dùng nút ✕ không nhãn → bàn phím và máy đọc màn hình không đóng được.
+    Thêm `aria-label` + `title="Đóng"`.
+  - **Chữ Anh lẫn trong giao diện của bé (AGENTS §3):** "Đọc fluently" và bốn chuỗi
+    `Level …` trong hộp chúc mừng lên cấp → viết lại tiếng Việt có dấu.
+  - **Bắt Chữ Cái Bay đổi chữ đích lung tung:** hai effect cùng ghi `targetChar`, effect thứ hai
+    đọc pool trước khi pool kịp nạp. Gộp thành một effect, chữ đầu tiên lấy thẳng pool vừa sinh.
+  - **Nhận đủ mọi bước của câu thay vì theo thứ tự (Đọc Câu Làm Theo):** `isCorrectDrop` so khớp
+    toàn bộ danh sách bước, nên câu nhiều bước cho phép làm bước sau trước. Siết lại thành
+    "chỉ bước kế tiếp". Dữ liệu hiện tại mới có một bước mỗi vòng nên đây là phòng ngừa, chưa
+    phải lỗi quan sát được trên màn hình.
+  - **Hồi quy do chính đợt sửa:** đổi `aria-label` hộp chúc mừng lên cấp làm
+    `dismissLevelUpCelebration()` khớp tuyệt đối trong `qa/lib.mjs` (và `qa/cotuong-puzzles.mjs`)
+    bị lệch, kéo `qa/golden-path.mjs` đỏ vì hộp thoại chặn điều hướng. Probe chuyển sang khớp tiền tố.
+  - **`qa/p41-font-visual.mjs` đỏ vì race trong chính probe:** sau `reload` probe chỉ *đếm* hộp mừng
+    lên cấp một lần rồi bấm tiếp, nhưng hộp mount muộn hơn `[data-testid="nav-home"]` nên cú click
+    bị chặn tới timeout 12 s (3 lần chạy đều đỏ — không phải lỗi may rủi của app). Probe giờ chờ hộp
+    hiện (5 s) và đóng lặp lại tối đa 3 hộp; `tests/t31-bug-hunt-fixes.test.ts` đổi hợp đồng sang
+    `dismissLevelUpCelebration(page)`.
 
 ### Tests
 - `tests/t24-speech-math-operators.test.ts` — 18 test cho lớp phát âm phép tính: cộng/trừ/
@@ -384,6 +420,30 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   `question-types` 9 step, `lesson-smooth` 8 step, `cotuong-puzzles` 8 step, `lesson-engagement` /
   `gacha-machine` / `cotuong-depth` / `responsive-a11y` / `mobile` / `mobile-golden` /
   `kidbox-focus` / `decision-engine-a11y` / `t01-hotfix` / `t01b-fixes` / `tier6-ladder-evidence`.
+- `tests/t32-game-stage-reset.test.ts` — 20 test cho vòng soát bug T32: 13 trò phải reset theo
+  `stage.nonce` (quét nguồn, chặn `}, [current.id]);` và `key={current.id}` còn sót), đo id va
+    chạm thật của builder `read_and_do` / `clock_builder`, hợp đồng `resetRewardState` khi đổi
+  màn, khoá `pickerOpen` của đồng hồ đua, thứ tự bước của Đọc Câu Làm Theo, một effect cấp đích
+  của Bắt Chữ Cái Bay, `sound.speakLater` / `stopSpeaking` bằng fake timer, không còn
+  `setTimeout` gọi thẳng `sound.speak`, `aria-label` cho nút icon-only và chữ tiếng Việt trong
+  `HomeScreen` / `LevelUpCelebrationModal`.
+- `qa/t32-game-replay-evidence.mjs` — probe thứ 27: bằng chứng trên build thật cho ba lỗi khung
+  trò chơi (chơi lại xoá lượt dở, đồng hồ đứng khi bị lớp phủ che rồi chạy tiếp, ✕ đóng lớp phủ
+  chọn màn) + 4 ảnh chụp, chạy với `?qa` để DOM lộ bước hợp lệ.
+- **Sửa probe do đổi nhãn:** `dismissLevelUpCelebration()` (`qa/lib.mjs`) và
+  `qa/cotuong-puzzles.mjs` khớp `aria-label` tuyệt đối của hộp chúc mừng lên cấp, đổi câu chữ
+  tiếng Việt là cả `qa/golden-path.mjs` đỏ; chuyển sang khớp tiền tố `aria-label^="Chúc mừng"`.
+- **Đo lại sau T32**: `npm run verify` **EXIT=0** — typecheck sạch, **78 file / 1111 test** passed
+  (+20 test `t32`), main chunk `index-BNbdkwuO.js` **533.8 kB PASS** (trần 600). Quét lại **toàn bộ
+  27 probe** trên đúng dist đó: 25 probe chạy qua `qa/run-one.mjs` in `QA PASS — 0 errors`
+  (`t32-game-replay-evidence` 5 step, `golden-path` 28, `lesson-types` 137, `p41-font-visual` 13,
+  `p41-curriculum-quality` 5, `question-types` 9, `offline-pwa` 10, `audio` 9, `decision-engine` 12,
+  `games` 31/31 mount + thưởng `0→0→1→2`, `cotuong-puzzles` 8, `cotuong-depth` 3, `lesson-smooth` 8,
+  `lesson-engagement` 5, `gacha-machine` 4, `tier6-ladder-evidence`, `focus`, `mobile`, `mobile-home`,
+  `mobile-golden`, `responsive-a11y`, `kidbox-focus`, `decision-engine-a11y`, `t01-hotfix`,
+  `t01b-fixes`), `qa/t02-smoke.mjs` chạy trực tiếp `ERRORS: []` exit 0; **riêng
+  `qa/p38-browser-probe.cjs` exit 1 vì `require('puppeteer')` mà repo không có dependency đó**
+  (không tự thêm theo `AGENTS.md` §1.4) — xem ghi chú nợ ở `docs/plan/TEST_PLAN.md` §6.
 
 ## [1.0.0] - baseline
 
