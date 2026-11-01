@@ -62,14 +62,16 @@ describe('T31 — sửa lỗi tìm được khi quét toàn bộ probe', () => {
     const game = read('src/components/learning/chess/ChessGame.tsx');
 
     it('kiểm tra context webgl trước khi dựng scene', () => {
-      expect(canvas).toContain("getContext('webgl2') || probeCanvas.getContext('webgl')");
-      expect(canvas).toMatch(/if \(!gl\) \{\s*onUnsupported\?\.\(\)/);
+      // T38: phép thử chuyển vào module thuần `webglSupport.probeWebGL` (test được
+      // bằng canvas giả) — ở đây chỉ khoá rằng canvas gọi nó và rút bàn khi không có.
+      expect(canvas).toContain('probeWebGL(');
+      expect(canvas).toMatch(/if \(!probe\.supported\) \{\s*onUnsupported\?\.\(\)/);
     });
 
     it('bắt lỗi khi tạo WebGLRenderer và chuyển sang bàn 2D', () => {
       expect(canvas).toMatch(/try \{\s*renderer = new THREE\.WebGLRenderer/);
       expect(canvas).toContain('onUnsupported?.();');
-      expect(game).toContain("onUnsupported={() => setViewMode('2d')}");
+      expect(game).toMatch(/onUnsupported=\{\(\) => \{\s*setViewMode\('2d'\)/);
     });
 
     it('giải phóng hình học của quân khi dựng lại thế cờ', () => {

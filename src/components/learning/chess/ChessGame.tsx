@@ -49,6 +49,9 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [capturedB, setCapturedB] = useState<CapturedPiece[]>([]);
   const [boardTheme, setBoardTheme] = useState<'emerald' | 'walnut' | 'midnight'>('emerald');
   const [viewMode, setViewMode] = useState<'3d' | '2d'>('3d');
+  // Máy không dựng được WebGL → bé đang chơi bàn 2D vì bắt buộc, không phải vì
+  // ba mẹ chọn; phải nói rõ kẻo họ tưởng ứng dụng hỏng.
+  const [glFallback, setGlFallback] = useState(false);
   const [hintMove, setHintMove] = useState<E.Move | null>(null);
   const [history, setHistory] = useState<HistorySnap[]>([]);
   const startedAt = useRef(Date.now());
@@ -257,6 +260,7 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <button
               onClick={() => {
                 sound.playClick();
+                setGlFallback(false);
                 setViewMode('3d');
               }}
               className={`px-3 py-1.5 rounded-xl font-black text-xs sm:text-sm flex items-center gap-1.5 transition-all cursor-pointer ${
@@ -346,6 +350,20 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       </div>
 
       {/* Main Expansive 3D Board Arena (Full Screen Width) */}
+      {glFallback && (
+        <div
+          role="status"
+          data-testid="chess-3d-fallback"
+          className="w-full max-w-[520px] mb-2 px-3 py-2 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-900 text-xs sm:text-sm font-bold flex items-start gap-2"
+        >
+          <span aria-hidden className="shrink-0">ℹ️</span>
+          <span>
+            Máy này chưa vẽ được bàn cờ 3D nên bé chuyển sang bàn cờ 2D — đánh cờ vẫn đủ
+            mọi nước. Ba mẹ có thể tắt chế độ tiết kiệm pin hoặc mở lại trình duyệt rồi bấm
+            nút <b>3D Sống Động</b>.
+          </span>
+        </div>
+      )}
       <div className="w-full flex flex-col items-center">
         {viewMode === '3d' ? (
           <Chess3DCanvas
@@ -358,7 +376,10 @@ export const ChessGame: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             status={status}
             isThinking={thinking}
             onSquareClick={onSquareClick}
-            onUnsupported={() => setViewMode('2d')}
+            onUnsupported={() => {
+              setViewMode('2d');
+              setGlFallback(true);
+            }}
           />
         ) : (
           /* 2D Fallback Board — khung gỗ óc chó, ô cờ hai tông phong/gụ */

@@ -5,7 +5,7 @@
 > coi là xanh**. Danh sách yêu cầu cần kiểm: [`SRS.md`](../specs/SRS.md); ánh xạ
 > yêu cầu ↔ test ↔ probe ↔ gate: [`RTM.md`](../specs/RTM.md); quy trình: [`../SDLC.md`](../SDLC.md).
 >
-> **Số liệu chốt 2026-11-01** (đo lại sau vòng sửa bug T26 cờ tướng, T27 học hấp dẫn hơn, audit UI T28, làm mượt luồng học T29, độ dày quân cờ T30, vòng soát bug T31, T32 (khung trò chơi), T33 (hẹn giờ phản hồi) và T34 (bộ cờ vua giống cờ gỗ) và T35 (đường kẻ ô cờ), T36 (Việt hoá nhãn còn sót), T37 (kẻ đậm đường ô)): 81 file test / 1155 test ·
+> **Số liệu chốt 2026-11-01** (đo lại sau vòng sửa bug T26 cờ tướng, T27 học hấp dẫn hơn, audit UI T28, làm mượt luồng học T29, độ dày quân cờ T30, vòng soát bug T31, T32 (khung trò chơi), T33 (hẹn giờ phản hồi) và T34 (bộ cờ vua giống cờ gỗ) và T35 (đường kẻ ô cờ), T36 (Việt hoá nhãn còn sót), T37 (kẻ đậm đường ô), T38 (đường lùi WebGL cho bàn cờ 3D)): 82 file test / 1164 test ·
 > 28 probe (27 `.mjs` + 1 `.cjs`) · 4 workflow CI · 3 git hook · main chunk 534 kB / trần
 > 600 kB; vendor ngoài entry: `three-vendor` 572.6 kB, `firebase-vendor` 537.9 kB.
 
@@ -35,7 +35,7 @@ Lớp 5  Người lớn đọc to + beta trẻ thật          → §11   (2 phi
 Lớp 4  Thiết bị thật: Android/iOS, offline, audio → §7    (qa/mobile.mjs + tay người)
 Lớp 3  Probe trình duyệt trên dist/ (28 probe)    → §6    (npm run qa:smoke)
 Lớp 2  Build + ngân sách + precache               → §9    (npm run build && npm run check:budget)
-Lớp 1  Unit/integration Vitest (1155 test)        → §5    (npm run test:ci)
+Lớp 1  Unit/integration Vitest (1164 test)        → §5    (npm run test:ci)
 ────────────────────────────────────────────────────────────────────────────────────────────
               npm run verify = typecheck + Lớp 1 + Lớp 2   ← cổng duy nhất
 ```
@@ -211,7 +211,7 @@ không còn là bằng chứng xanh cho vùng praise/parity; muốn dùng lại 
 | Precache | `tests/sw-precache.test.ts`, `qa/offline-pwa.mjs` | manifest đủ `/assets/*`; placeholder dev ⇒ danh sách rỗng nhưng SW vẫn sống | — |
 | Loại trừ | `node_modules`, `.git`, `dist` không vào manifest | — | — |
 
-**Số đo gần nhất (2026-11-01):** `index-BdiF4Xw9.js = 534.3 kB` → PASS trần, **trên** mục tiêu 450 kB.
+**Số đo gần nhất (2026-11-01):** `index-DX4Q6eIH.js = 534.3 kB` → PASS trần, **trên** mục tiêu 450 kB.
 
 ---
 

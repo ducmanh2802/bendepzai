@@ -12,6 +12,7 @@ import {
   createHintMarker,
   type BoardMeshRefs,
 } from './boardBuilder';
+import { probeWebGL, type WebGLProbeCanvas } from './webglSupport';
 import { sound } from '../../../../services/sound';
 import {
   Maximize2,
@@ -103,23 +104,6 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
 
-  // Detect software WebGL safely
-  const isSoftwareGl = useRef<boolean>(false);
-  useEffect(() => {
-    try {
-      const gl = document.createElement('canvas').getContext('webgl2');
-      if (gl) {
-        const ext = gl.getExtension('WEBGL_debug_renderer_info');
-        const param = ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER;
-        const gpu = String(gl.getParameter(param));
-        gl.getExtension('WEBGL_lose_context')?.loseContext();
-        isSoftwareGl.current = /SwiftShader|llvmpipe|softpipe|Software|Basic Render/i.test(gpu);
-      }
-    } catch {
-      isSoftwareGl.current = true;
-    }
-  }, []);
-
   // Raycaster for mouse / touch clicks
   const raycaster = useRef(new THREE.Raycaster());
   const pointer = useRef(new THREE.Vector2());
@@ -190,9 +174,9 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
 
     // Máy không có WebGL2/WebGL thì dựng renderer sẽ ném lỗi và cả màn hình
     // của bé trắng xoá (app chưa có ErrorBoundary). Chuyển hẳn sang bàn 2D.
-    const probeCanvas = document.createElement('canvas');
-    const gl = probeCanvas.getContext('webgl2') || probeCanvas.getContext('webgl');
-    if (!gl) {
+    const probe = probeWebGL(() => document.createElement('canvas') as unknown as WebGLProbeCanvas);
+    const softwareGl = probe.software;
+    if (!probe.supported) {
       onUnsupported?.();
       return;
     }
@@ -217,27 +201,36 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
-        antialias: !isSoftwareGl.current,
+        antialias: !softwareGl,
         powerPreference: 'high-performance',
         alpha: false,
       });
     } catch {
       // Trình duyệt báo có WebGL nhưng tạo context thất bại (hết bộ nhớ GPU,
-      // bị chặn theo chính sách). Bàn 2D vẫn chơi được nên không chặn bé.
+      // bị chặn theo chính sách, hoặc hết slot context). Bàn 2D vẫn chơi được
+      // nên không chặn bé.
       onUnsupported?.();
       return;
     }
     rendererRef.current = renderer;
     renderer.setSize(width, height);
-    renderer.setPixelRatio(isSoftwareGl.current ? 1 : Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(softwareGl ? 1 : Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.25;
-    if (!isSoftwareGl.current) {
+    if (!softwareGl) {
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     }
     container.appendChild(renderer.domElement);
+
+    // Context rớt giữa ván (driver reset, tab bị thu hồi GPU, tiết kiệm pin):
+    // if không bắt thì canvas đứng hình vĩnh viễn, bé tưởng bàn cờ hỏng.
+    const handleContextLost = (event: Event) => {
+      event.preventDefault();
+      onUnsupported?.();
+    };
+    renderer.domElement.addEventListener('webglcontextlost', handleContextLost);
 
     // 4. OrbitControls
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -257,7 +250,7 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
     // Main warm directional key light
     const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
     keyLight.position.set(6, 14, 7);
-    keyLight.castShadow = !isSoftwareGl.current;
+    keyLight.castShadow = !softwareGl;
     if (keyLight.castShadow) {
       keyLight.shadow.mapSize.width = 1024;
       keyLight.shadow.mapSize.height = 1024;
@@ -367,9 +360,13 @@ export const Chess3DCanvas: React.FC<Chess3DCanvasProps> = ({
     return () => {
       cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
+      renderer.domElement.removeEventListener('webglcontextlost', handleContextLost);
       if (renderer.domElement && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
+      // dispose() không nhả context. Browser chỉ giữ ~16 context sống, nên bé
+      // vào/ra màn cờ nhiều lần là lần sau `new WebGLRenderer()` ném.
+      renderer.forceContextLoss();
       renderer.dispose();
       controls.dispose();
     };

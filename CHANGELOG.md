@@ -178,6 +178,17 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   `git show "99edd29:<đường-dẫn>"` (xem `docs/MASTER_ROADMAP.md` §"Cấu trúc docs/ sau khi gỡ prompt").
 
 ### Fixed
+- **Bàn cờ vua 3D không còn để bé gặp màn trắng (EP-G3, đợt T38):** `Chess3DCanvas` đã có thăm dò
+  WebGL nhưng còn ba lỗ hổng — (1) mỗi lần mở màn cờ tạo **hai** canvas thăm dò và không nhả
+  context nào, mà trình duyệt chỉ giữ ~16 context sống, nên vào/ra vài lần là
+  `new THREE.WebGLRenderer()` ném; (2) không bắt `webglcontextlost`, nên khi driver reset hoặc máy
+  bật tiết kiệm pin thì canvas đứng hình vĩnh viễn giữa ván; (3) bé bị đá sang bàn 2D **im lặng**,
+  ba mẹ tưởng ứng dụng hỏng. Nay phép thăm dò nằm trong module thuần
+  `src/components/learning/chess/chess3d/webglSupport.ts` (`probeWebGL`: một canvas, thử `webgl2`
+  rồi `webgl`, luôn nhả context ở `finally`, không import `three` nên bàn 2D không phải tải
+  `three-vendor`), renderer mới được `forceContextLoss()` khi rút bàn, và `ChessGame` hiện banner
+  `role="status"` (`data-testid="chess-3d-fallback"`) nói rõ bé đang chơi bàn 2D vì máy không vẽ
+  được 3D + cách thử lại bằng nút "3D Sống Động".
 - Luật cờ tướng được khoá lại bằng test (cản chân Mã, mắt Tượng, Pháo phải có đúng một
   screen khi ăn, tốt chỉ ngang sau khi qua hà, hai Tướng không đối mặt, không tự bỏ
   chiếu, `applyMove` cập nhật bàn cờ).
@@ -390,6 +401,16 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
     `memory-card`, `karaoke-read-all` và `answer-option` + `data-correct` cho `spelling_duel`.
 
 ### Tests
+- `tests/t38-webgl-fallback.test.ts` — **9 test** cho đường lùi WebGL: `probeWebGL` chạy được
+  trong node nên test được bằng canvas giả (không WebGL; `webgl2` hỏng nhưng `webgl` được — phải
+  là **cùng một canvas**; GPU SwiftShader/llvmpipe/Basic Render → `software`; luôn gọi
+  `WEBGL_lose_context.loseContext()`; `getContext` ném → coi như không hỗ trợ), cộng hợp đồng nguồn
+  khoá `try/catch` quanh `WebGLRenderer`, `webglcontextlost` + `forceContextLoss` và banner fallback.
+  Hai assertion cũ trong `tests/t31-bug-hunt-fixes.test.ts` đổi sang `probeWebGL` (nội dung test
+  T31 vẫn giữ ý "có đường lùi", chỉ chuỗi nguồn đã bị refactor).
+- Đo lại sau đợt T38 (`npm run verify` **EXIT=0**): **82 file / 1164 test**, main chunk
+  `index-DX4Q6eIH.js` **534.3 kB PASS**, 80 file `.ts` + 2 `.tsx`, 28 probe, 39 service,
+  95 component `.tsx`, 31 trò chơi khớp 4 nơi đăng ký.
 - `tests/t34-chess-real-set.test.ts` — **12 test** (thêm 1 cho đợt T37): test mới khoá tấm lưới
   `board_grid_lines` phải 8×8, nằm dưới mặt lát không quá 0.002 và `transparent`; test rãnh kẻ
   siết thêm điều kiện **khe ≥ 0.1 pitch** (trước chỉ buộc "hẹp hơn 1"); test đường kẻ 2D đổi hằng
