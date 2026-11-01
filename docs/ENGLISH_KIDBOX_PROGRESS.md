@@ -1,5 +1,5 @@
 # ENGLISH KIDBOX COMPANION — PROGRESS, ADAPTIVE & REVIEW
-### Bé đang yếu gì trong English? (§18) · English hôm nay (§19) · Ôn ở nhà (§20) · Ôn tập (§25)
+### Bé đang yếu gì trong tiếng Anh? (§18) · Tiếng Anh hôm nay (§19) · Ôn ở nhà (§20) · Ôn tập (§25)
 
 ---
 
@@ -39,7 +39,7 @@ Quy tắc chọn focus:
 3. Nhóm đã `SECURE` → focus **củng cố** thay vì dạy lại (`STRENGTHENING_FOCUS`).
 4. Không có nhóm yếu → `VOCABULARY_RECALL`.
 
-## 3. English hôm nay (§19)
+## 3. Tiếng Anh hôm nay (§19)
 
 `buildDailyEnglishPlan({ store, knowledge, ageYears, isFatigued })`:
 

@@ -17,7 +17,7 @@
 8. **Xây Tháp Số (Number Tower)**: Tìm số còn thiếu để hoàn thành phép cộng và xếp chồng gạch lên đến cầu vồng.
 9. **Câu Cá Đại Dương (Ocean Fishing)**: Cáo thuyền trưởng thả cần câu bắt chú cá mang đáp án phép trừ.
 10. **Phân Loại Hình Học (Shape Sorting)**: 4 giỏ phân loại hình học; đồ vật chạy trên băng chuyền để trẻ phân loại.
-11. **Safari Tiếng Anh (Animal Safari)**: Nhận diện động vật và nghe phát âm tiếng Anh chuẩn.
+11. **Safari Tiếng Anh — Loài Vật**: Nhận diện động vật và nghe phát âm tiếng Anh chuẩn.
 12. **Đập Bóng Màu Sắc (Color Balloon Pop)**: Đập bóng bay theo màu sắc tiếng Anh kèm âm thanh bóng nổ giòn tan.
 13. **Lật Thẻ Trí Nhớ (Memory Cards)**: Tìm các cặp thẻ giống nhau để rèn luyện trí nhớ ngắn hạn.
 14. **Bé Tập Vẽ & Tô Màu (Coloring Canvas)**: Bảng vẽ canvas HTML5 với cọ vẽ, bảng màu, tẩy và sticker dán hình.

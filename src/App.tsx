@@ -302,7 +302,7 @@ export default function App() {
         )}
 
         {currentScreen === 'sticker_album' && (
-          <Suspense fallback={<ScreenFallback label="Album Sticker" />}>
+          <Suspense fallback={<ScreenFallback label="Bộ Sưu Tập Sticker" />}>
             <StickerAlbumScreen
               profile={profile}
               onBack={() => setCurrentScreen('home')}

@@ -9,7 +9,7 @@ Vị trí: **Parent Dashboard → tab “Kid's Box”** (sau khi vượt cổng 
 
 | Trường | Ghi chú |
 | :--- | :--- |
-| Current English Course | `Kid's Box New Generation 1` (read-only) |
+| Khóa học tiếng Anh hiện tại | `Kid's Box New Generation 1` (read-only) |
 | Current Unit | danh sách Unit đã ánh xạ; hiện chỉ có bridge pack vì chưa có nội dung giáo trình |
 | Current Lesson | tuỳ chọn, lấy từ `unit.lessons` |
 | Center homework | ghi chú tuỳ chọn của trung tâm, hiện ở màn "Ôn ở nhà" |

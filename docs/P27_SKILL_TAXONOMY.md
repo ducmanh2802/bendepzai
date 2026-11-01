@@ -40,10 +40,10 @@
 
 | Mã Kỹ Năng | Tên Kỹ Năng | Nhóm | Mô Tả |
 | :--- | :--- | :--- | :--- |
-| `EN-PHONICS` | Phonics & Alphabet Sounds | Phonics | Letter sounds (A, B, C, S...) and initial phonemes |
-| `EN-NUMBERS` | Numbers 1–10 | Từ vựng | Đếm đồ vật và nhận diện chữ số tiếng Anh |
-| `EN-COLORS` | Colors & Sights | Từ vựng | Red, blue, green, yellow, pink, orange |
-| `EN-ANIMALS` | Animals & Pets | Từ vựng | Con vật quen thuộc: cat, dog, fish, bird |
-| `EN-FAMILY` | Family Members | Từ vựng | Mom, dad, brother, sister, grandma |
-| `EN-SCHOOL` | School Supplies | Từ vựng | Book, pen, ruler, bag, pencil |
-| `EN-BODY` | Body Parts | Từ vựng | Eye, nose, ear, mouth, hand, feet |
+| `EN-PHONICS` | Âm chữ & âm đầu | Phonics | Letter sounds (A, B, C, S...) and initial phonemes |
+| `EN-NUMBERS` | Số đếm 1 – 10 | Từ vựng | Đếm đồ vật và nhận diện chữ số tiếng Anh |
+| `EN-COLORS` | Màu sắc | Từ vựng | Red, blue, green, yellow, pink, orange |
+| `EN-ANIMALS` | Động vật & thú cưng | Từ vựng | Con vật quen thuộc: cat, dog, fish, bird |
+| `EN-FAMILY` | Gia đình | Từ vựng | Mom, dad, brother, sister, grandma |
+| `EN-SCHOOL` | Đồ dùng học tập | Từ vựng | Book, pen, ruler, bag, pencil |
+| `EN-BODY` | Các bộ phận cơ thể | Từ vựng | Eye, nose, ear, mouth, hand, feet |

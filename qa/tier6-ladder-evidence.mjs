@@ -30,7 +30,7 @@ const TITLES = {
   syllable_builder: 'Xưởng Ghép Tiếng Lớp 1',
   rhyme_hunter: 'Săn Vần Trong Vườn Cây',
   listen_pick: 'Đôi Tai Thính — Nghe & Chọn',
-  animal_safari: 'Safari Tiếng Anh — Animals',
+  animal_safari: 'Safari Tiếng Anh — Loài Vật',
   treasure_coding: 'Lập Trình Tìm Kho Báu',
   memory_cards: 'Lật Thẻ Trí Nhớ Vàng',
   connect_dots: 'Nối Số Tô Màu',

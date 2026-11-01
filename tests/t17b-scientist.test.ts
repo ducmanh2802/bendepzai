@@ -134,12 +134,12 @@ describe('T17B little_scientist: vong choi', () => {
 // Dang ky 4 noi + GameCategory logic + tong 28 game
 // ---------------------------------------------------------------------------
 describe('T17B dang ky game', () => {
-  it('catalog: 2 game moi thuoc Logic & Khoa hoc, nhan MOI, du skillIds', () => {
+  it('catalog: 2 game moi thuoc Tu Duy & Khoa Hoc, nhan MOI, du skillIds', () => {
     for (const id of NEW_IDS) {
       const g = GAMES_CATALOG.find((x) => x.id === id);
       expect(g, id).toBeDefined();
       expect(g!.category).toBe('logic');
-      expect(g!.categoryLabel).toBe('Logic & Khoa học');
+      expect(g!.categoryLabel).toBe('Tư Duy & Khoa Học');
       expect(g!.isNew).toBe(true);
       expect(g!.title.trim().length).toBeGreaterThan(0);
       expect((g!.skillIds ?? []).length).toBeGreaterThan(0);
@@ -177,11 +177,11 @@ describe('T17B dang ky game', () => {
     }
   });
 
-  it('Hub co tab Logic & Khoa hoc (GameCategory logic)', () => {
+  it('Hub co tab Tu Duy & Khoa Hoc (GameCategory logic)', () => {
     const cat = src('src/data/gamesCatalog.ts');
     expect(cat).toContain(`'logic'`);
     const hub = src('src/components/games/GamesHubScreen.tsx');
-    expect(hub).toContain('Logic & Khoa học');
+    expect(hub).toContain('Tư Duy & Khoa Học');
     expect(hub).toContain(`'logic'`);
   });
 });

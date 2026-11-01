@@ -642,7 +642,7 @@ export class LearningOS {
       type: 'GAME',
       subject: 'toan',
       gameId: 'color_balloon',
-      gameTitle: 'Pop The Color Balloons!',
+      gameTitle: 'Đập Bóng Màu',
       title: 'Trò Chơi: Bóng Bay Màu Sắc',
       description: 'Bận vỡ bóng bay mang đúng màu sắc tiếng Anh',
       reason: 'Củng cố từ vựng thông qua tương tác phản xạ trò chơi giải trí có thưởng.',

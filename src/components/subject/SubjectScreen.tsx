@@ -72,12 +72,12 @@ export const SubjectScreen: React.FC<SubjectScreenProps> = ({
       variant: 'subject-math' as const,
     },
     'english': {
-      title: 'English Adventure Island',
-      subtitle: 'Phonics, Numbers, Colors, Animals, Family, School and Body',
+      title: 'Đảo Phiêu Lưu Tiếng Anh',
+      subtitle: 'Ngữ âm, số đếm, màu sắc, động vật, gia đình và bộ phận cơ thể',
       mascotEmoji: '🐰',
-      mascotName: 'Thỏ English',
+      mascotName: 'Thỏ Tiếng Anh',
       color: 'from-emerald-400 to-teal-500',
-      welcome: 'Welcome to English Island! Let us learn English together!',
+      welcome: 'Chào bé đến với Đảo Tiếng Anh! Cùng học tiếng Anh thật vui nhé!',
       variant: 'subject-english' as const,
     },
     'cuoc-song': {
@@ -327,7 +327,7 @@ export const SubjectScreen: React.FC<SubjectScreenProps> = ({
             return (
               <div
                 key={`topic-label-${topic.id}`}
-                className="absolute pointer-events-none"
+                className="absolute pointer-events-none z-20"
                 style={{
                   left: isEvenRow ? '10px' : 'auto',
                   right: isEvenRow ? 'auto' : '10px',

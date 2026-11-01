@@ -44,7 +44,7 @@ export const EnglishAnimalSoundGame: React.FC<{ onExit: () => void }> = ({ onExi
   return (
     <GameModalWrapper
       gameId="animal_safari"
-      title="Safari Tiếng Anh — Animal Explorer"
+      title="Safari Tiếng Anh — Loài Vật"
       subtitle="Lắng nghe tên loài vật bằng tiếng Anh và chạm đúng con thú"
       mascotEmoji="🦁"
       score={stage.score}
@@ -72,7 +72,7 @@ export const EnglishAnimalSoundGame: React.FC<{ onExit: () => void }> = ({ onExi
         <div className="flex flex-col items-center my-auto">
           <div className="flex items-center gap-3 bg-white/95 px-6 py-3 rounded-3xl shadow-lg border-2 border-emerald-400">
             <div>
-              <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider block">Find the animal:</span>
+              <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider block">Tìm con vật:</span>
               <span className="text-3xl md:text-4xl font-black text-emerald-950 font-display">
                 {current.target.englishName}
               </span>

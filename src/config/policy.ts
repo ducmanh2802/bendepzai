@@ -366,7 +366,7 @@ export const KIDBOX_POLICY = {
   AGE_MIN: 6,
   AGE_MAX: 7,
 
-  /** §19 — "English hôm nay" plan budget, aligned with the daily screen limit. */
+  /** §19 — "Tiếng Anh hôm nay" plan budget, aligned with the daily screen limit. */
   MIN_DAILY_MINUTES: 4,
   MAX_DAILY_MINUTES: 12,
   /**
@@ -443,9 +443,9 @@ export const KIDBOX_POLICY = {
  * `pronunciation` is listed only as a banned claim so a test can enforce it.
  */
 export const SPEECH_REPORTING_POLICY = {
-  RECOGNITION_LABEL: 'speech recognition match',
-  SELF_CHECK_LABEL: 'self-check',
-  PARENT_CHECK_LABEL: 'parent-assisted check',
+  RECOGNITION_LABEL: 'khớp giọng nói với từ cần nói',
+  SELF_CHECK_LABEL: 'bé tự kiểm tra',
+  PARENT_CHECK_LABEL: 'ba mẹ hỗ trợ kiểm tra',
   BANNED_CLAIMS: ['pronunciation =', 'pronunciation score', 'phát âm chuẩn', 'pronunciation quality'],
   /** Voice preference chain (§7). */
   VOICE_PREFERENCE: ['en-GB', 'en-GB-*', 'en-*'],

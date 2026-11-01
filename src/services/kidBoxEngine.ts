@@ -73,7 +73,7 @@ const FOCUS_LABEL: Record<KidBoxPracticeFocus, { title: string; emoji: string }>
   READING_WORD: { title: 'Luyện đọc từ', emoji: '📖' },
   READING_COMPREHENSION: { title: 'Luyện đọc hiểu', emoji: '📚' },
   PATTERN_USE: { title: 'Luyện dùng mẫu câu', emoji: '✨' },
-  GENTLE_BASELINE: { title: 'Khám phá English thật nhẹ nhàng', emoji: '🐣' },
+  GENTLE_BASELINE: { title: 'Khám phá tiếng Anh thật nhẹ nhàng', emoji: '🐣' },
 };
 
 export interface KidBoxKnowledgeSnapshot {
@@ -271,7 +271,7 @@ export function analyseEnglishProfile(knowledge: KidBoxKnowledgeMap): KidBoxEngl
   const explanation = isColdStart
     ? 'Bé mới bắt đầu. Hôm nay mình làm quen nhẹ nhàng với hình và tiếng Anh, chưa cần điểm số.'
     : !weakest
-      ? 'Các phần English của bé đều ổn rồi, hôm nay mình ôn lại cho nhẹ nhàng.'
+      ? 'Các phần tiếng Anh của bé đều ổn rồi, hôm nay mình ôn lại cho nhẹ nhàng.'
       : strands[weakest].status === 'SECURE'
         ? `${KIDBOX_STRAND_LABELS[weakest].vi} của bé đã khá vững (${strands[weakest].accuracy}%), nên hôm nay mình cho bé ôn lại để nhớ lâu hơn.`
         : `Dữ liệu cho thấy phần ${KIDBOX_STRAND_LABELS[weakest].vi.toLowerCase()} của bé còn yếu hơn (${strands[weakest].accuracy}% sau ${strands[weakest].attemptCount} lượt), nên mình ưu tiên luyện phần đó trước.`;
@@ -766,7 +766,7 @@ export function buildWeeklyReport(input: {
 
   const notes: string[] = [];
   if (totals.daysPractised === 0) {
-    notes.push('Bé chưa luyện English trong tuần này. Gợi ý: bắt đầu bằng 5 phút mỗi ngày.');
+    notes.push('Bé chưa luyện tiếng Anh trong tuần này. Gợi ý: bắt đầu bằng 5 phút mỗi ngày.');
   } else {
     if (totals.listeningSessions === 0) notes.push('Chưa có hoạt động nghe trong tuần — nên bổ sung 3 phút nghe mỗi ngày.');
     if (totals.speakingAttempts === 0) notes.push('Chưa có hoạt động nói trong tuần — nên cho bé nói lại từ cùng ba mẹ.');

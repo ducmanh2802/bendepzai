@@ -49,7 +49,7 @@ const categoryTabs = [
   { id: 'viet' as GameCategory, label: 'Tiếng Việt', icon: '📚' },
   { id: 'math' as GameCategory, label: 'Toán Học', icon: '🔢' },
   { id: 'english' as GameCategory, label: 'Tiếng Anh', icon: '🇬🇧' },
-  { id: 'logic' as GameCategory, label: 'Logic & Khoa học', icon: '🔬' },
+  { id: 'logic' as GameCategory, label: 'Tư Duy & Khoa Học', icon: '🔬' },
   { id: 'fun' as GameCategory, label: 'Giải Trí', icon: '🎨' },
 ];
 

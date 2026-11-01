@@ -69,7 +69,7 @@ const SUBJECT_CARDS: readonly SubjectCard[] = [
   {
     id: 'english',
     title: 'Tiếng Anh',
-    subtitle: 'ABC Phonics · Numbers · Colors · Animals',
+    subtitle: 'Chữ cái · Số đếm · Màu sắc · Động vật',
     icon: '🇬🇧',
     gradient: 'from-emerald-500 to-teal-500',
     border: 'border-emerald-300',
@@ -546,7 +546,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           >
             <div className="flex-1 flex flex-col items-center justify-center gap-1 min-w-0">
               <span className="text-2xl min-[400px]:text-3xl md:text-4xl leading-none" aria-hidden="true">📚</span>
-              <h4 className="font-black text-sm md:text-base leading-tight font-display [overflow-wrap:anywhere]">Album Sticker</h4>
+              <h4 className="font-black text-sm md:text-base leading-tight font-display [overflow-wrap:anywhere]">Bộ Sưu Tập Sticker</h4>
               <p className="text-[11px] leading-snug font-semibold opacity-90 [overflow-wrap:anywhere]">Sưu tầm 60 sticker</p>
             </div>
           </KidButton>

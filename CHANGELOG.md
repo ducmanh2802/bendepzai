@@ -57,6 +57,19 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   Binh Nhập Cung, Mã Hậu Pháo, Song Xe Tảo Cung).
 
 ### Changed
+- **Việt hoá các chuỗi còn sót (đợt T36):** toàn bộ nhãn hiển thị cho bé/ba mẹ đổi sang tiếng
+  Việt — 186 dòng trong 34 file `src/`. Nhãn đảo & bài học (`Đảo Phiêu Lưu Tiếng Anh`,
+  `Chữ Cái ABC`, `Những Con Số 1 – 10`, `Dạng Bài Mới`), tên linh vật `Thỏ Tiếng Anh`,
+  `Bộ Sưu Tập Sticker`, nhóm trò chơi `Tư Duy & Khoa Học`, hai trò đổi tên `Đập Bóng Màu` /
+  `Safari Tiếng Anh — Loài Vật` (đủ 4 nơi đăng ký), huy hiệu `Nhà Khám Phá Tiếng Anh` /
+  `Siêu Sao Tiếng Anh`, 24 `skillName` bảng kỹ năng + 7 kỹ năng đấu trường, đề thi
+  `Thử Tài Tiếng Anh`. Dọn mã máy lộ ra màn hình: `(DISCOVERY)` → `(khám phá)`,
+  `CONTENT_SOURCE_REQUIRED` → `Chưa có nội dung sách`, tiêu đề hoạt động không còn
+  `picture to word`, nhãn phương pháp nói đổi sang tiếng Việt, `Đạt level 5` → `Đạt cấp độ 5`.
+  `ChessTutorial` (màn chết, chưa được import) viết lại cho đúng 6 quân cờ vua thay vì lẫn
+  tên cờ tướng. **Không đổi** nội dung dạy học tiếng Anh có chủ đích: từ vựng/mẫu câu/`hint`
+  trong `englishCurriculum`, tên Unit sách Kid's Box, ngân hàng lời khen EN/VI, `British English`.
+  Nhãn đảo còn được đẩy lên `z-20` để không bị rương/mascot che mất chữ.
 - **Kẻ đường ô + tăng tương phản sáng/tối cho dễ theo dõi (đợt T35):** bàn 3D giờ ghép 64 mặt
   lát 0.93 trên pitch 1.0 nên tấm lát tối `board_inlay` bên dưới lộ ra thành 14 đường rãnh
   (ô vẫn liền mạch, hitbox giữ nguyên 1.0 nên bé bấm không khó hơn); ô sáng `#f5e6c8` / ô tối
@@ -367,6 +380,11 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
     `memory-card`, `karaoke-read-all` và `answer-option` + `data-correct` cho `spelling_duel`.
 
 ### Tests
+- `tests/t36-viet-labels.test.ts` — 9 test khoá đợt Việt hoá: nhãn `GAMES_CATALOG` /
+  huy hiệu / kỹ năng đấu trường / bảng kỹ năng tiếng Anh phải có dấu và không lẫn từ đã có
+  từ Việt; 12 nhãn đảo + tiêu đề bài học của `ENGLISH_TOPICS` (trừ Unit sách Kid's Box) cũng
+  phải là tiếng Việt; không còn chuỗi "English" trong nhãn hiển thị ở 13 file (đã bỏ comment);
+  `ChessTutorial` đủ 6 quân và không còn tên cờ tướng.
 - Hai test mới trong `tests/t34-chess-real-set.test.ts` cho đợt kẻ ô: (1) 64 mặt lát phải hẹp
   hơn pitch (còn khe) nhưng > 0.85 (không rời thành ô rời), tâm hai ô kề nhau cách đúng 1.0,
   và `board_inlay` phủ 8×8 nằm **dưới** mặt ô; (2) góc a1 tối – h1 sáng theo quy tắc bàn thật

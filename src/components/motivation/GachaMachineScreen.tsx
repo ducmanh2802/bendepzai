@@ -334,7 +334,7 @@ export const GachaMachineScreen: React.FC<GachaMachineScreenProps> = ({
                 <div className="flex items-center justify-center gap-3 mb-6">
                   {result.isNew && <CheckCircle className="w-8 h-8 text-emerald-500" />}
                   <span className={`${result.isNew ? 'text-emerald-700' : 'text-amber-700'} font-black`}>
-                    {result.isNew ? 'Đã lưu vào Album!' : 'Đã cộng vào số lượng'}
+                    {result.isNew ? 'Đã lưu vào Bộ Sưu Tập!' : 'Đã cộng vào số lượng'}
                   </span>
                 </div>
                 <KidButton

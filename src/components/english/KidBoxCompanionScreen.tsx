@@ -113,7 +113,7 @@ export const KidBoxCompanionScreen: React.FC<KidBoxCompanionScreenProps> = ({
             </div>
             <div>
               <p className="text-[11px] font-black uppercase tracking-wider text-emerald-50">
-                English · British English · {course.levels[0].label}
+                Tiếng Anh · British English · {course.levels[0].label}
               </p>
               <h1 className="text-xl md:text-2xl font-black font-display">Kid&apos;s Box Companion</h1>
               <p className="text-xs font-bold text-emerald-50 mt-1">
@@ -126,7 +126,7 @@ export const KidBoxCompanionScreen: React.FC<KidBoxCompanionScreenProps> = ({
               🔊 {voice.label}
             </span>
             <span className="px-3 py-1.5 rounded-full bg-white/20 text-[11px] font-black text-center">
-              {readiness.status === 'READY' ? '✅ Đủ nội dung' : '📋 CONTENT_SOURCE_REQUIRED'}
+              {readiness.status === 'READY' ? '✅ Đủ nội dung' : '📋 Chưa có nội dung sách'}
             </span>
           </div>
         </div>
@@ -153,12 +153,12 @@ export const KidBoxCompanionScreen: React.FC<KidBoxCompanionScreenProps> = ({
         </section>
       )}
 
-      {/* §19 English hôm nay */}
+      {/* §19 Tiếng Anh hôm nay */}
       <section className="bg-white rounded-3xl p-5 border-2 border-amber-200 shadow-sm space-y-3">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-base font-black text-slate-900 font-display flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-amber-500" />
-            English hôm nay
+            Tiếng Anh hôm nay
           </h2>
           <span className="text-[11px] font-black text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1">
             ~{plan.estimatedMinutes} phút
@@ -250,11 +250,11 @@ export const KidBoxCompanionScreen: React.FC<KidBoxCompanionScreenProps> = ({
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-black text-slate-900">
-                    {entry.step} · {entry.label}
+                    {entry.label}
                   </p>
                   <p className="text-[11px] font-semibold text-slate-600">
                     {isMissing
-                      ? 'Chưa có nội dung nguồn cho bước này (CONTENT_SOURCE_REQUIRED)'
+                      ? 'Chưa có nội dung sách cho bước này'
                       : entry.progress.evidenceCount > 0
                         ? `Đã luyện ${entry.progress.evidenceCount} lượt có ghi nhận`
                         : `${stepActivities.length} hoạt động sẵn sàng`}

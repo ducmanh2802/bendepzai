@@ -35,7 +35,7 @@
 | **Idempotency** | Bấm lại / tải lại trang | Không đếm hai lần (test tự động) | **PASS** |
 | **Trò chơi → evidence** | Word Safari | Taps đúng/sai đều thành evidence; điểm game **không** thành mastery | **PASS** |
 | **Adaptive English** | Persona A/B/C/D/E | A→nghe, B→nói, C→từ vựng, D→khám phá nhẹ, E→không ép tốc độ | **PASS** |
-| **English hôm nay** | Bé mới / bé mệt | 8–12 phút theo tuổi; bé mệt ⇒ bỏ nghe, nói, game | **PASS** |
+| **Tiếng Anh hôm nay** | Bé mới / bé mệt | 8–12 phút theo tuổi; bé mệt ⇒ bỏ nghe, nói, game | **PASS** |
 | **Ôn tập quên** | Sai một lần | `correctCount` giữ nguyên, chỉ rút ngắn khoảng cách ôn | **PASS** |
 | **Ôn ở nhà** | Chọn Unit → xem gói ôn | 5 phần từ chính hoạt động của Unit | **PASS** |
 | **Parent Mode** | Cổng phép tính → tab Kid's Box | Current Unit/Lesson/Homework, sao theo bằng chứng, báo cáo tuần | **PASS** |

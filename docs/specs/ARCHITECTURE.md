@@ -457,7 +457,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 
 ---
 
-## 12. Kiểm kê kiến trúc (đo 2026-11-01, sau vòng sửa bug T26/T27, audit UI T28, làm mượt luồng học T29, độ dày quân cờ T30, vòng soát bug T31 + T32, T33, đợt bộ cờ vua gỗ T34 và đường kẻ ô cờ T35)
+## 12. Kiểm kê kiến trúc (đo 2026-11-01, sau vòng sửa bug T26/T27, audit UI T28, làm mượt luồng học T29, độ dày quân cờ T30, vòng soát bug T31 + T32, T33, đợt bộ cờ vua gỗ T34, đường kẻ ô cờ T35 và Việt hoá nhãn T36)
 
 | Hạng | Số | Nguồn |
 |---|---|---|
@@ -471,7 +471,7 @@ Khuôn mẫu: **Bối cảnh → Lựa chọn → Quyết định → Hệ quả
 | Export policy | 17 (693 dòng) | `src/config/policy.ts` |
 | Key `localStorage` | 17 | `STORAGE_KEYS` (16) + key cục bộ IOE (1) |
 | Dependency runtime | 8 | `package.json` → `dependencies` |
-| Test file / test | 80 / 1145 | `npx vitest run` (78 `.ts` + 2 `.tsx`) |
+| Test file / test | 81 / 1154 | `npx vitest run` (79 `.ts` + 2 `.tsx`) |
 | Probe QA | 28 (27 `.mjs` + 1 `.cjs`) | `ls qa/*.mjs qa/*.cjs` (trừ `lib.mjs`, `run-one.mjs`) |
 | Workflow CI | 4 | `.github/workflows/` |
 | MCP server / tool | 5 / 27 | `mcp/` |

@@ -465,7 +465,7 @@ describe("Kid's Box Companion — parent reporting (§23, §24)", () => {
 
     const empty = buildWeeklyReport({ store: createEmptyKidBoxStore(), knowledge: {} });
     expect(empty.wordsPractised).toBe(0);
-    expect(empty.notes[0]).toContain('chưa luyện English');
+    expect(empty.notes[0]).toContain('chưa luyện tiếng Anh');
   });
 
   it('keeps every star row tied to a real skill in the taxonomy', () => {

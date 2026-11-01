@@ -1,18 +1,20 @@
 /**
  * ENGLISH SKILL TAXONOMY & MAPPING MODEL — P32
  *
- * Implements canonical English skills aligned with Grade 1 & Cambridge Pre A1 Starters:
- * - Alphabet: Letter Recognition, Letter Sound, Phonics, Initial Sound
- * - Numbers: Counting, Number Recognition, Quantity
- * - Colors: Color Recognition, Color Vocabulary
- * - Animals: Animal Vocabulary, Animal Recognition
- * - Family: Family Vocabulary
- * - School Supplies: School Vocabulary
- * - Body: Body Vocabulary
- * - Food: Food Vocabulary, Fruit Vocabulary
- * - Toys & Playground: Toy Vocabulary, Playground Vocabulary
- * - Greetings: Greeting Recognition, Greeting Usage
- * - Core Skills: Listening, Speaking, Reading, Writing
+ * Bộ kỹ năng tiếng Anh chuẩn lớp 1, đối chiếu khung Cambridge Pre A1 Starters.
+ * skillName là nhãn hiển thị trong bảng kỹ năng cho ba mẹ nên viết tiếng Việt;
+ * machine key là skillId/category/subSkills (không đổi khi sửa nhãn).
+ * - Alphabet: Nhận biết chữ cái, Âm của chữ cái, Đánh vần, Âm đầu của từ
+ * - Numbers: Đếm số, Nhận biết số, So sánh số lượng
+ * - Colors: Nhận biết màu, Từ vựng màu sắc
+ * - Animals: Từ vựng động vật, Nhận biết động vật
+ * - Family: Từ vựng gia đình
+ * - School Supplies: Từ vựng đồ dùng học tập
+ * - Body: Từ vựng về cơ thể
+ * - Food: Từ vựng đồ ăn, Từ vựng trái cây
+ * - Toys & Playground: Từ vựng đồ chơi, Từ vựng sân chơi
+ * - Greetings: Nhận biết lời chào, Dùng lời chào
+ * - Core Skills: Kỹ năng Nghe, Nói, Đọc, Viết
  */
 
 import type { EnglishDifficultyLevel, EnglishSkillDescriptor, EnglishSkillType } from '../types/englishMastery';
@@ -22,7 +24,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   // --- Alphabet & Phonics ---
   {
     skillId: 'eng_alphabet_recognition',
-    skillName: 'Letter Recognition',
+    skillName: 'Nhận biết chữ cái',
     category: 'alphabet',
     topicId: 'eng-alphabet',
     description: 'Nhận biết mặt chữ cái tiếng Anh in hoa và in thường.',
@@ -31,7 +33,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   },
   {
     skillId: 'eng_alphabet_sound',
-    skillName: 'Letter Sound',
+    skillName: 'Âm của chữ cái',
     category: 'phonics',
     topicId: 'eng-alphabet',
     description: 'Nghe và nhận ra âm thanh đặc trưng của từng chữ cái.',
@@ -40,7 +42,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   },
   {
     skillId: 'eng_alphabet_phonics',
-    skillName: 'Phonics',
+    skillName: 'Đánh vần',
     category: 'phonics',
     topicId: 'eng-alphabet',
     description: 'Ghép âm và giải mã từ đơn giản CVC.',
@@ -49,7 +51,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   },
   {
     skillId: 'eng_alphabet_initial_sound',
-    skillName: 'Initial Sound',
+    skillName: 'Âm đầu của từ',
     category: 'phonics',
     topicId: 'eng-alphabet',
     description: 'Nhận biết âm đầu của từ vựng (ví dụ: A in Apple, B in Ball).',
@@ -60,7 +62,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   // --- Numbers & Counting ---
   {
     skillId: 'eng_numbers_counting',
-    skillName: 'Counting',
+    skillName: 'Đếm số',
     category: 'numbers',
     topicId: 'eng-numbers',
     description: 'Đếm số lượng đồ vật từ 1 đến 10 bằng tiếng Anh.',
@@ -69,7 +71,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   },
   {
     skillId: 'eng_numbers_recognition',
-    skillName: 'Number Recognition',
+    skillName: 'Nhận biết số',
     category: 'numbers',
     topicId: 'eng-numbers',
     description: 'Nhận diện chữ số và tên gọi tiếng Anh (One, Two, Three...).',
@@ -78,7 +80,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   },
   {
     skillId: 'eng_numbers_quantity',
-    skillName: 'Quantity',
+    skillName: 'So sánh số lượng',
     category: 'numbers',
     topicId: 'eng-numbers',
     description: 'So khớp số lượng thực tế với số đếm và danh từ số nhiều.',
@@ -89,7 +91,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   // --- Colors ---
   {
     skillId: 'eng_colors_recognition',
-    skillName: 'Color Recognition',
+    skillName: 'Nhận biết màu',
     category: 'colors',
     topicId: 'eng-colors',
     description: 'Nhận diện các màu sắc cơ bản qua hình ảnh trực quan.',
@@ -98,7 +100,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   },
   {
     skillId: 'eng_colors_vocabulary',
-    skillName: 'Color Vocabulary',
+    skillName: 'Từ vựng màu sắc',
     category: 'colors',
     topicId: 'eng-colors',
     description: 'Vận dụng từ vựng chỉ màu sắc trong câu đơn miêu tả đồ vật.',
@@ -109,7 +111,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   // --- Animals ---
   {
     skillId: 'eng_animals_vocabulary',
-    skillName: 'Animal Vocabulary',
+    skillName: 'Từ vựng động vật',
     category: 'animals',
     topicId: 'eng-animals',
     description: 'Từ vựng các con vật quen thuộc (cat, dog, bird, duck, rabbit, etc.).',
@@ -118,7 +120,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   },
   {
     skillId: 'eng_animals_recognition',
-    skillName: 'Animal Recognition',
+    skillName: 'Nhận biết động vật',
     category: 'animals',
     topicId: 'eng-animals',
     description: 'Nhận diện tiếng kêu và đặc điểm nhận dạng của loài vật.',
@@ -129,7 +131,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   // --- Family ---
   {
     skillId: 'eng_family_vocabulary',
-    skillName: 'Family Vocabulary',
+    skillName: 'Từ vựng gia đình',
     category: 'family',
     topicId: 'eng-family',
     description: 'Từ vựng các thành viên gia đình (dad, mum, brother, sister, baby).',
@@ -140,7 +142,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   // --- School Supplies ---
   {
     skillId: 'eng_school_vocabulary',
-    skillName: 'School Vocabulary',
+    skillName: 'Từ vựng đồ dùng học tập',
     category: 'school',
     topicId: 'eng-school',
     description: 'Đồ dùng học tập (book, pencil, pen, eraser, ruler, school bag).',
@@ -151,7 +153,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   // --- Body ---
   {
     skillId: 'eng_body_vocabulary',
-    skillName: 'Body Vocabulary',
+    skillName: 'Từ vựng về cơ thể',
     category: 'body',
     topicId: 'eng-body',
     description: 'Các bộ phận cơ thể và khuôn mặt (eyes, ears, nose, mouth, hands, legs).',
@@ -162,7 +164,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   // --- Food & Fruit ---
   {
     skillId: 'eng_food_vocabulary',
-    skillName: 'Food Vocabulary',
+    skillName: 'Từ vựng đồ ăn',
     category: 'food',
     topicId: 'eng-food',
     description: 'Từ vựng đồ ăn, thức uống hàng ngày (bread, milk, water, rice, egg).',
@@ -171,7 +173,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   },
   {
     skillId: 'eng_food_fruit',
-    skillName: 'Fruit Vocabulary',
+    skillName: 'Từ vựng trái cây',
     category: 'food',
     topicId: 'eng-food',
     description: 'Từ vựng các loại trái cây thơm ngon (apple, banana, orange, mango).',
@@ -182,7 +184,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   // --- Toys & Playground ---
   {
     skillId: 'eng_toys_vocabulary',
-    skillName: 'Toy Vocabulary',
+    skillName: 'Từ vựng đồ chơi',
     category: 'toys',
     topicId: 'eng-toys',
     description: 'Từ vựng đồ chơi yêu thích (ball, doll, robot, teddy, car, kite).',
@@ -191,7 +193,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   },
   {
     skillId: 'eng_playground_vocabulary',
-    skillName: 'Playground Vocabulary',
+    skillName: 'Từ vựng sân chơi',
     category: 'toys',
     topicId: 'eng-toys',
     description: 'Hoạt động và trò chơi sân chơi (slide, swing, see-saw, sandbox).',
@@ -202,7 +204,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   // --- Greetings ---
   {
     skillId: 'eng_greetings_recognition',
-    skillName: 'Greeting Recognition',
+    skillName: 'Nhận biết lời chào',
     category: 'greetings',
     topicId: 'eng-greetings',
     description: 'Nhận biết lời chào hỏi căn bản (Hello, Hi, Goodbye, Bye bye).',
@@ -211,7 +213,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   },
   {
     skillId: 'eng_greetings_usage',
-    skillName: 'Greeting Usage',
+    skillName: 'Dùng lời chào',
     category: 'greetings',
     topicId: 'eng-greetings',
     description: 'Vận dụng câu chào và hỏi thăm theo thời điểm (Good morning, How are you?).',
@@ -222,7 +224,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   // --- 4 Core Skills ---
   {
     skillId: 'eng_skill_listening',
-    skillName: 'Listening',
+    skillName: 'Kỹ năng Nghe',
     category: 'listening',
     topicId: 'eng-skills-listening',
     description: 'Nghe hiểu từ và câu chỉ dẫn đơn giản của giáo viên / người bản ngữ.',
@@ -231,7 +233,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   },
   {
     skillId: 'eng_skill_speaking',
-    skillName: 'Speaking',
+    skillName: 'Kỹ năng Nói',
     category: 'speaking',
     topicId: 'eng-skills-speaking',
     description: 'Nói lặp lại từ, gọi tên đồ vật và trả lời câu hỏi ngắn có hướng dẫn.',
@@ -240,7 +242,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   },
   {
     skillId: 'eng_skill_reading',
-    skillName: 'Reading',
+    skillName: 'Kỹ năng Đọc',
     category: 'reading',
     topicId: 'eng-skills-reading',
     description: 'Đọc từ đơn, ghép từ với hình và đọc câu miêu tả ngắn.',
@@ -249,7 +251,7 @@ export const CANONICAL_ENGLISH_SKILLS: readonly EnglishSkillDescriptor[] = [
   },
   {
     skillId: 'eng_skill_writing',
-    skillName: 'Writing',
+    skillName: 'Kỹ năng Viết',
     category: 'writing',
     topicId: 'eng-skills-writing',
     description: 'Tập chép chữ cái, điền chữ còn thiếu vào từ vựng quen thuộc.',

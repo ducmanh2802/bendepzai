@@ -272,7 +272,7 @@ export function toPraiseSubject(
 /* ------------------------------------------------------------------ */
 
 const CHARACTER_META: Record<PraiseCharacter, { emoji: string; name: string }> = {
-  THO_ENGLISH: { emoji: '🐰', name: 'Thỏ English' },
+  THO_ENGLISH: { emoji: '🐰', name: 'Thỏ Tiếng Anh' },
   CAO_TOAN_HOC: { emoji: '🦊', name: 'Cáo Toán Học' },
   GAU_BUT_CHI: { emoji: '🐻', name: 'Gấu Bút Chì' },
   CU_THONG_THAI: { emoji: '🦉', name: 'Cú Thông Thái' },

@@ -10,7 +10,7 @@ import type { KidBoxActivity, KidBoxUnit } from '../src/types/kidBox';
 import { findKidBoxUnit, KIDBOX_BRIDGE_UNIT_ID } from '../src/data/kidBoxCurriculum';
 
 /**
- * Regression cover for: "Luyện tập nền (English Island) — file nghe và 4 hình
+ * Regression cover for: "Luyện tập nền (Đảo Tiếng Anh) — file nghe và 4 hình
  * đáp án không liên quan tới nhau."
  *
  * Root cause: `buildRounds()` discarded the items each activity builder had

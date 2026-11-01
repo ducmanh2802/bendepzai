@@ -18,9 +18,9 @@ export const QUEST_POOL: readonly QuestPoolEntry[] = [
   { id: 'quest_math_2', title: 'Chinh phục 2 bài Toán thật vui', type: 'lesson_math', targetCount: 2, rewardStars: 4, rewardXp: 40, subjects: ['toan'], isFun: false },
   { id: 'quest_correct_math', title: 'Trả lời đúng 5 câu Toán', type: 'correct_5', targetCount: 5, rewardStars: 3, rewardXp: 30, subjects: ['toan'], isFun: false },
   // --- Tiếng Anh ---
-  { id: 'quest_english', title: 'Khám phá 1 bài English vui nhộn', type: 'lesson_english', targetCount: 1, rewardStars: 3, rewardXp: 30, subjects: ['english'], isFun: false },
-  { id: 'quest_english_2', title: 'Học 2 bài English thật giỏi', type: 'lesson_english', targetCount: 2, rewardStars: 4, rewardXp: 40, subjects: ['english'], isFun: false },
-  { id: 'quest_correct_en', title: 'Trả lời đúng 5 câu English', type: 'correct_5', targetCount: 5, rewardStars: 3, rewardXp: 30, subjects: ['english'], isFun: false },
+  { id: 'quest_english', title: 'Khám phá 1 bài tiếng Anh vui nhộn', type: 'lesson_english', targetCount: 1, rewardStars: 3, rewardXp: 30, subjects: ['english'], isFun: false },
+  { id: 'quest_english_2', title: 'Học 2 bài tiếng Anh thật giỏi', type: 'lesson_english', targetCount: 2, rewardStars: 4, rewardXp: 40, subjects: ['english'], isFun: false },
+  { id: 'quest_correct_en', title: 'Trả lời đúng 5 câu tiếng Anh', type: 'correct_5', targetCount: 5, rewardStars: 3, rewardXp: 30, subjects: ['english'], isFun: false },
   { id: 'quest_game_en', title: 'Chơi 1 game Tiếng Anh', type: 'game_english', targetCount: 1, rewardStars: 3, rewardXp: 30, subjects: ['english'], isFun: false },
   { id: 'quest_game_en_2', title: 'Chơi 2 game Tiếng Anh thật vui', type: 'game_english', targetCount: 2, rewardStars: 4, rewardXp: 40, subjects: ['english'], isFun: false },
   // --- Em & Cuộc sống ---

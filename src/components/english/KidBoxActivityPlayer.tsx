@@ -252,7 +252,7 @@ export const KidBoxActivityPlayer: React.FC<KidBoxActivityPlayerProps> = ({
         <div className="flex items-center justify-between gap-3 px-5 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white">
           <div className="min-w-0">
             <p className="text-[11px] font-black uppercase tracking-wider text-emerald-50">
-              {stepLabel.emoji} {stepLabel.vi} · {activity.kind.replace(/_/g, ' ').toLowerCase()}
+              {stepLabel.emoji} {stepLabel.vi}
             </p>
             <h3 className="text-base md:text-lg font-black font-display truncate">{activity.titleVi}</h3>
           </div>

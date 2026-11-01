@@ -25,7 +25,7 @@ import {
 export const KIDBOX_BRIDGE_UNIT_ID = 'unit-bridge-level1';
 
 const BRIDGE_MAPPING_NOTE =
-  'Gói luyện tập nền, chỉ dùng từ vựng đã có sẵn trong chương trình English của ứng dụng. KHÔNG phải nội dung giáo trình Kid\u2019s Box.';
+  'Gói luyện tập nền, chỉ dùng từ vựng đã có sẵn trong chương trình tiếng Anh của ứng dụng. KHÔNG phải nội dung giáo trình Kid\u2019s Box.';
 
 /* ------------------------------------------------------------------ */
 /* §10 VOCABULARY ENGINE                                               */
@@ -317,7 +317,7 @@ export const BRIDGE_UNIT: KidBoxUnit = {
   courseId: 'kids-box-new-generation-1',
   levelId: 'LEVEL_1',
   index: 0,
-  title: 'Luyện tập nền (English Island)',
+  title: 'Luyện tập nền (Đảo Tiếng Anh)',
   topicLabel: 'BRIDGE',
   sourceType: 'APP_BRIDGE',
   contentStatus: 'READY',
@@ -351,7 +351,7 @@ export const BRIDGE_UNIT: KidBoxUnit = {
       id: 'kb-bridge-lesson-1',
       unitId: KIDBOX_BRIDGE_UNIT_ID,
       index: 1,
-      title: 'Words we can see and hear',
+      title: 'Từ bé nhìn thấy và nghe được',
       learningObjective: 'Gọi tên đúng các từ vựng quen thuộc sau khi nghe giọng British English.',
       skills: ['EN-VOCAB-RECOGNITION', 'EN-VOCAB-LISTENING'],
       mascotTip: 'Bấm loa nghe thật chăm chỉ, rồi chọn đúng hình nhé!',
@@ -360,7 +360,7 @@ export const BRIDGE_UNIT: KidBoxUnit = {
       id: 'kb-bridge-lesson-2',
       unitId: KIDBOX_BRIDGE_UNIT_ID,
       index: 2,
-      title: 'Sounds and patterns',
+      title: 'Âm thanh và quy luật',
       learningObjective: 'Nghe phân biệt âm đầu và dùng được mẫu câu ngắn.',
       skills: ['EN-PHONICS-DISCRIMINATION', 'EN-LANGUAGE-PATTERN'],
       mascotTip: 'Nghe âm đầu, rồi ghép câu ngắn thật dễ thôi!',

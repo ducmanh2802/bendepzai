@@ -222,7 +222,7 @@ async function runLessonTypeSweep(page) {
     raw.unlockAllLessons = true;
     localStorage.setItem('kho_bau_child_profile', JSON.stringify(raw));
   });
-  const subjects = ['Tiếng Việt', 'Toán Học', 'English'];
+  const subjects = ['Tiếng Việt', 'Toán Học', 'Tiếng Anh'];
   const expectedTypes = TYPE_LABELS.map(([, t]) => t);
 
   for (const subject of subjects) {

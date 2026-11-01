@@ -27,7 +27,7 @@ export default async function run(page, ui) {
     await page.waitForTimeout(1200);
 
     // Bridge-pack activities (the only openers until real units land).
-    const opener = page.getByRole('button', { name: /Luyện nghe hiểu|Luyện nói lại từ|Khám phá English/ }).first();
+    const opener = page.getByRole('button', { name: /Luyện nghe hiểu|Luyện nói lại từ|Khám phá tiếng Anh/ }).first();
     if (!(await opener.count())) {
       out.tests.push({ dialog: 'kidbox', skipped: 'no activity button rendered' });
       return out;

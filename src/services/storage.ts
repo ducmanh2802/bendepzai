@@ -2342,10 +2342,10 @@ public static getParentSettings(): ParentSettings {
     StorageService.saveMotivationState(motivation);
     StorageService.checkAchievements();
     if (result.stars > 0) {
-      StorageService.addRewardHistory({ type: 'stars', amount: result.stars, description: `Quà level ${result.claimed.join(', ')}`, itemId: `level_${result.claimed[0]}` });
+      StorageService.addRewardHistory({ type: 'stars', amount: result.stars, description: `Quà cấp độ ${result.claimed.join(', ')}`, itemId: `level_${result.claimed[0]}` });
     }
     if (result.tickets > 0) {
-      StorageService.addRewardHistory({ type: 'tickets', amount: result.tickets, description: `Quà level ${result.claimed.join(', ')}`, itemId: `level_${result.claimed[0]}` });
+      StorageService.addRewardHistory({ type: 'tickets', amount: result.tickets, description: `Quà cấp độ ${result.claimed.join(', ')}`, itemId: `level_${result.claimed[0]}` });
     }
     for (const stickerId of result.stickerIds) {
       StorageService.addRewardHistory({ type: 'sticker', amount: 1, description: `Sticker từ quà level`, itemId: stickerId });

@@ -59,43 +59,43 @@ describe('P32 — 1. English Mastery Contracts & Skill Model', () => {
   });
 
   it('verifies exact sub-skill taxonomy for each required domain', () => {
-    // Alphabet: Letter Recognition, Letter Sound, Phonics, Initial Sound
+    // Alphabet: Nhận biết chữ cái, Âm của chữ cái, Đánh vần, Âm đầu của từ
     expect(ENGLISH_SKILL_MAP.has('eng_alphabet_recognition')).toBe(true);
     expect(ENGLISH_SKILL_MAP.has('eng_alphabet_sound')).toBe(true);
     expect(ENGLISH_SKILL_MAP.has('eng_alphabet_phonics')).toBe(true);
     expect(ENGLISH_SKILL_MAP.has('eng_alphabet_initial_sound')).toBe(true);
 
-    // Numbers: Counting, Number Recognition, Quantity
+    // Numbers: Đếm số, Nhận biết số, So sánh số lượng
     expect(ENGLISH_SKILL_MAP.has('eng_numbers_counting')).toBe(true);
     expect(ENGLISH_SKILL_MAP.has('eng_numbers_recognition')).toBe(true);
     expect(ENGLISH_SKILL_MAP.has('eng_numbers_quantity')).toBe(true);
 
-    // Colors: Color Recognition, Color Vocabulary
+    // Colors: Nhận biết màu, Từ vựng màu sắc
     expect(ENGLISH_SKILL_MAP.has('eng_colors_recognition')).toBe(true);
     expect(ENGLISH_SKILL_MAP.has('eng_colors_vocabulary')).toBe(true);
 
-    // Animals: Animal Vocabulary, Animal Recognition
+    // Animals: Từ vựng động vật, Nhận biết động vật
     expect(ENGLISH_SKILL_MAP.has('eng_animals_vocabulary')).toBe(true);
     expect(ENGLISH_SKILL_MAP.has('eng_animals_recognition')).toBe(true);
 
-    // Family: Family Vocabulary
+    // Family: Từ vựng gia đình
     expect(ENGLISH_SKILL_MAP.has('eng_family_vocabulary')).toBe(true);
 
-    // School Supplies: School Vocabulary
+    // School Supplies: Từ vựng đồ dùng học tập
     expect(ENGLISH_SKILL_MAP.has('eng_school_vocabulary')).toBe(true);
 
-    // Body: Body Vocabulary
+    // Body: Từ vựng về cơ thể
     expect(ENGLISH_SKILL_MAP.has('eng_body_vocabulary')).toBe(true);
 
-    // Food & Fruit: Food Vocabulary, Fruit Vocabulary
+    // Food & Fruit: Từ vựng đồ ăn, Từ vựng trái cây
     expect(ENGLISH_SKILL_MAP.has('eng_food_vocabulary')).toBe(true);
     expect(ENGLISH_SKILL_MAP.has('eng_food_fruit')).toBe(true);
 
-    // Toys & Playground: Toy Vocabulary, Playground Vocabulary
+    // Toys & Playground: Từ vựng đồ chơi, Từ vựng sân chơi
     expect(ENGLISH_SKILL_MAP.has('eng_toys_vocabulary')).toBe(true);
     expect(ENGLISH_SKILL_MAP.has('eng_playground_vocabulary')).toBe(true);
 
-    // Greetings: Greeting Recognition, Greeting Usage
+    // Greetings: Nhận biết lời chào, Dùng lời chào
     expect(ENGLISH_SKILL_MAP.has('eng_greetings_recognition')).toBe(true);
     expect(ENGLISH_SKILL_MAP.has('eng_greetings_usage')).toBe(true);
   });

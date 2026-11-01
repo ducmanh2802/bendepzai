@@ -113,7 +113,7 @@ describe('P38 language resolution (§6)', () => {
 });
 
 describe('P38 character consistency (§10, centralized)', () => {
-  it('English → Thỏ English, Math → Cáo Toán Học, Vietnamese → Gấu Bút Chì', () => {
+  it('Tiếng Anh → Thỏ Tiếng Anh, Math → Cáo Toán Học, Vietnamese → Gấu Bút Chì', () => {
     expect(resolvePraiseCharacter('ENGLISH')).toBe('THO_ENGLISH');
     expect(resolvePraiseCharacter('MATH')).toBe('CAO_TOAN_HOC');
     expect(resolvePraiseCharacter('VIETNAMESE')).toBe('GAU_BUT_CHI');

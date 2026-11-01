@@ -39,7 +39,7 @@ export const KIDBOX_REQUIRED_ARTIFACTS: KidBoxRequiredArtifact[] = [
   {
     artifactId: 'table-of-contents',
     label: 'Mục lục (table of contents) của Kid\u2019s Box New Generation 1 Level 1',
-    unlocks: 'Danh sách Unit thật kèm tiêu đề và thứ tự, thay cho các ô trống CONTENT_SOURCE_REQUIRED.',
+    unlocks: 'Danh sách Unit thật kèm tiêu đề và thứ tự, thay cho các ô chưa có nội dung.',
     satisfied: false,
   },
   {

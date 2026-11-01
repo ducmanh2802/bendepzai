@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActiveScreen, LearningAction } from '../../types';
-import type { DecisionOutput, DecisionRecommendation, SessionKind } from '../../types';
+import type { DecisionOutput, DecisionRecommendation, SessionKind, SessionPhase } from '../../types';
 // T02C — DecisionEngine (competition/Kid's Box/curriculum) is loaded on
 // demand so Home's first paint does not pay for the whole content bank.
 import { StorageService } from '../../services/storage';
@@ -51,6 +51,17 @@ const SESSION_BADGE: Record<SessionKind, string> = {
   FULL: 'Đầy đủ 15–20 phút',
   RECOVERY: 'Phục hồi ngắn',
   DISCOVERY: 'Khám phá',
+};
+
+/** Nhãn pha của từng hoạt động trong kế hoạch phiên — bé đọc được, không phải mã máy. */
+const PHASE_LABEL: Record<SessionPhase, string> = {
+  WARM_UP: 'khởi động',
+  REVIEW: 'ôn lại',
+  PRACTICE: 'luyện tập',
+  REINFORCEMENT: 'củng cố',
+  CHECK: 'kiểm tra',
+  DISCOVERY: 'khám phá',
+  REST: 'nghỉ tay',
 };
 
 /**
@@ -340,7 +351,7 @@ export const NextBestActionCard: React.FC<NextBestActionCardProps> = ({ onNaviga
               <span className="opacity-90">
                 {item.title} · ~{item.estimatedMinutes} phút
               </span>
-              <span className="opacity-50">({item.phase})</span>
+              <span className="opacity-50">({PHASE_LABEL[item.phase]})</span>
             </li>
           ))}
         </ul>

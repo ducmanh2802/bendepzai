@@ -183,8 +183,8 @@ export const EXAM_BLUEPRINTS: ExamBlueprint[] = [
   // --- ENGLISH ---
   {
     id: 'bp-eng-practice',
-    title: 'English Challenge Practice',
-    subtitle: 'Phonics sounds, numbers, colors and cute animals',
+    title: 'Thử Tài Tiếng Anh',
+    subtitle: 'Âm đầu, số đếm, màu sắc và các con vật dễ thương',
     subject: 'english',
     mode: 'mini_test',
     difficulty: 'EASY',
@@ -372,8 +372,8 @@ export const EXAM_BLUEPRINTS: ExamBlueprint[] = [
   },
   {
     id: 'bp-tn-english',
-    title: 'English Little Champion 🇬🇧',
-    subtitle: 'Đấu trường tiếng Anh: 15 câu / 12 phút — phonics, words, sentences',
+    title: 'Nhà Vô Địch Tiếng Anh Nhí 🇬🇧',
+    subtitle: 'Đấu trường tiếng Anh: 15 câu / 12 phút — âm đầu, từ vựng, câu',
     subject: 'english',
     mode: 'tournament',
     difficulty: 'MEDIUM',
@@ -386,8 +386,8 @@ export const EXAM_BLUEPRINTS: ExamBlueprint[] = [
     difficultyDistribution: { EASY: 0.3, MEDIUM: 0.4, HARD: 0.2, CHALLENGE: 0.1 },
     questionTypeDistribution: { 'multiple-choice': 0.5, 'true-false': 0.13, 'fill-blank': 0.12, matching: 0.1, ordering: 0.08, classify: 0.07 },
     sections: [
-      { id: 'sec-tn-eng-a', title: 'Part 1 — Phonics & Words', instruction: 'Listen and pick the right beginning sound.', skillIds: ['EN-PHONICS', 'EN-NUMBERS', 'EN-COLORS'] },
-      { id: 'sec-tn-eng-b', title: 'Part 2 — Animals, Family, School', instruction: 'Match words with cute pictures.', skillIds: ['EN-ANIMALS', 'EN-FAMILY', 'EN-SCHOOL', 'EN-BODY'] },
+      { id: 'sec-tn-eng-a', title: 'Phần 1 — Âm chữ & Từ vựng', instruction: 'Nghe và chọn đúng âm đầu.', skillIds: ['EN-PHONICS', 'EN-NUMBERS', 'EN-COLORS'] },
+      { id: 'sec-tn-eng-b', title: 'Phần 2 — Động vật, Gia đình, Trường lớp', instruction: 'Nối từ với bức tranh cho đúng.', skillIds: ['EN-ANIMALS', 'EN-FAMILY', 'EN-SCHOOL', 'EN-BODY'] },
     ],
     sourceNote: ORIGINAL_SOURCE_NOTE,
     version: 1,

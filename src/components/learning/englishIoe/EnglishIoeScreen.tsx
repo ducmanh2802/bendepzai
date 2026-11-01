@@ -220,7 +220,7 @@ function MockExam({
           {expired ? '⏰ Hết giờ' : '🎉 Hoàn thành'}: {correct}/{questions.length}
         </div>
         <p className="text-sm text-emerald-800 font-bold">
-          {expired ? 'Hết giờ nhưng điểm đã được ghi nhận.' : 'Xem tab Báo cáo để biết cần ôn kỹ năng nào.'}
+          {expired ? 'Hết giờ nhưng điểm đã được ghi nhận.' : 'Xem thẻ Báo cáo để biết cần ôn kỹ năng nào.'}
         </p>
       </div>
     );

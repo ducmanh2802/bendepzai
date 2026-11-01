@@ -1,5 +1,5 @@
 /**
- * T02B/B10+A — Pop The Color Balloons data. Pure TypeScript.
+ * T02B/B10+A — dữ liệu trò Đập Bóng Màu. Pure TypeScript.
  * T02B/B10: GRAY (Mỹ) → GREY (Anh–Anh); bóng trắng dùng chữ/viền tối.
  */
 

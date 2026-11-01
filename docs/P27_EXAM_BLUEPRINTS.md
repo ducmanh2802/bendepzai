@@ -13,7 +13,7 @@
 | `bp-math-mini-01` | Toán Học Mini Test 01 | Toán | Mini Test | 5 phút (300s) | 6 câu | Cơ bản (EASY) | +50 XP, +4 Sao |
 | `bp-math-mini-02` | Toán Học Mini Test 02 | Toán | Mini Test | 6 phút (360s) | 8 câu | Tiêu chuẩn (MEDIUM) | +70 XP, +5 Sao |
 | `bp-math-full` | Đấu Trường Toán Học Toàn Diện | Toán | Full Mock | 10 phút (600s) | 12 câu | Nâng cao (HARD) | +120 XP, +8 Sao |
-| `bp-eng-practice` | English Challenge Practice | English | Mini Test | 5 phút (300s) | 6 câu | Cơ bản (EASY) | +60 XP, +5 Sao |
+| `bp-eng-practice` | Thử Tài Tiếng Anh | Tiếng Anh | Mini Test | 5 phút (300s) | 6 câu | Cơ bản (EASY) | +60 XP, +5 Sao |
 | `bp-speed-math` | Thử Thách Tốc Độ: Phép Tính Nhanh | Toán | Speed Trial | 3 phút (180s) | 6 câu | Tiêu chuẩn (MEDIUM) | +60 XP, +4 Sao |
 | `bp-speed-viet` | Thử Thách Tốc Độ: Nhận Diện Từ Nhanh | Tiếng Việt | Speed Trial | 3 phút (180s) | 6 câu | Tiêu chuẩn (MEDIUM) | +60 XP, +4 Sao |
 

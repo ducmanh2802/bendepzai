@@ -63,7 +63,7 @@ const DAY_MS = 24 * 3600 * 1000;
 const SUBJECT_LABEL: Record<SubjectType, string> = {
   'tieng-viet': 'Tiếng Việt',
   toan: 'Toán',
-  english: 'English',
+  english: 'Tiếng Anh',
   'cuoc-song': 'Em & Cuộc sống',
 };
 
@@ -73,7 +73,7 @@ const REASON_LABEL_VI: Record<DecisionReasonCode, string> = {
   RECENT_ACCURACY_DROP: 'độ chính xác gần đây giảm',
   NEEDS_REVIEW: 'cần ôn lại kỹ năng',
   FOUNDATION_GAP: 'thiếu kiến thức nền',
-  CURRENT_UNIT: 'thuộc Unit English hiện tại',
+  CURRENT_UNIT: 'thuộc Unit tiếng Anh hiện tại',
   LOW_FLUENCY: 'lưu loát còn thấp',
   LOW_COMPREHENSION: 'hiểu nội dung còn thấp',
   LOW_STABILITY: 'độ ổn định chính xác chưa đủ',
@@ -409,7 +409,7 @@ function buildPriorityFactors(
   }
 
   if (context.currentUnit) {
-    push('CURRENT_UNIT', 'Thuộc Unit English hiện tại của bé');
+    push('CURRENT_UNIT', 'Thuộc Unit tiếng Anh hiện tại của bé');
   }
 
   if (context.subjectBalanceBoost > 0) {

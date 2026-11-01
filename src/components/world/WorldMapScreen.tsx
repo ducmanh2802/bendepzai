@@ -77,10 +77,10 @@ export const WorldMapScreen: React.FC<WorldMapScreenProps> = ({
     },
     {
       id: 'english',
-      title: 'Đảo Thần Thoại English',
-      subtitle: 'Bến cảng Phonics & Vườn thú Safari',
+      title: 'Đảo Thần Thoại Tiếng Anh',
+      subtitle: 'Bến cảng Âm Chữ & Vườn Thú Loài Vật',
       emoji: '🏝️',
-      mascot: '🐰 Thỏ English',
+      mascot: '🐰 Thỏ Tiếng Anh',
       color: 'from-emerald-400 to-teal-500',
       borderColor: 'border-emerald-300',
       action: () => onSelectSubject('english'),
@@ -104,7 +104,7 @@ export const WorldMapScreen: React.FC<WorldMapScreenProps> = ({
     {
       id: 'games',
       title: 'Đấu Trường Trò Chơi',
-      subtitle: `${GAMES_CATALOG.length} Mini-Game trí tuệ bổ ích`,
+      subtitle: `${GAMES_CATALOG.length} trò chơi trí tuệ bổ ích`,
       emoji: '🎪',
       mascot: '🦉 Cú Thông Thái',
       color: 'from-purple-400 to-pink-500',

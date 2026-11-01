@@ -20,7 +20,7 @@ export const AvatarShopScreen: React.FC<AvatarShopScreenProps> = ({
   const MASCOTS = [
     { id: 'bear', name: 'Gấu Bút Chì', emoji: '🐻', desc: 'Chăm chỉ & Thân thiện' },
     { id: 'fox', name: 'Cáo Toán Học', emoji: '🦊', desc: 'Thông minh & Tinh anh' },
-    { id: 'rabbit', name: 'Thỏ English', emoji: '🐰', desc: 'Nhanh nhẹn & Đáng yêu' },
+    { id: 'rabbit', name: 'Thỏ Tiếng Anh', emoji: '🐰', desc: 'Nhanh nhẹn & Đáng yêu' },
     { id: 'owl', name: 'Cú Thông Thái', emoji: '🦉', desc: 'Uyên bác & Điềm đạm' },
   ];
 

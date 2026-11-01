@@ -1228,7 +1228,7 @@ const [activeTab, setActiveTab] = useState<
                     <div className="flex items-center justify-between py-2 text-xs">
                       <div>
                         <span className="font-bold text-slate-800 block">Bật/Tắt Toàn Bộ Phần Thưởng</span>
-                        <span className="text-slate-500">Sao, XP, vé, sticker, đồ Shop, quà level, quà nhiệm vụ</span>
+                        <span className="text-slate-500">Sao, điểm XP, vé, sticker, đồ trong Tủ Đồ, quà theo cấp độ, quà nhiệm vụ</span>
                       </div>
                       <button
                         onClick={handleToggleRewardsEnabled}

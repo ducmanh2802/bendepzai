@@ -109,7 +109,7 @@ export const EnglishColorBalloonGame: React.FC<{ onExit: () => void }> = ({ onEx
   return (
     <GameModalWrapper
       gameId="color_balloon"
-      title="Pop The Color Balloons!"
+      title="Đập Bóng Màu"
       subtitle="Đập vỡ những quả bóng bay đúng màu sắc tiếng Anh"
       mascotEmoji="🎈"
       score={stage.score}
@@ -139,7 +139,7 @@ export const EnglishColorBalloonGame: React.FC<{ onExit: () => void }> = ({ onEx
 
         {/* Color Target Banner */}
         <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-white/95 px-6 py-2.5 rounded-2xl shadow-lg border-2 border-sky-300 flex items-center gap-3 z-10">
-          <span className="text-xs md:text-sm font-bold text-slate-700">Pop the color:</span>
+          <span className="text-xs md:text-sm font-bold text-slate-700">Bấm bóng màu:</span>
           <span
             className={`px-4 py-1.5 font-black text-lg md:text-xl rounded-xl shadow-md border-2 ${currentTarget.cssColor} ${balloonTextClass(currentTarget.name)} animate-pulse-subtle`}
           >

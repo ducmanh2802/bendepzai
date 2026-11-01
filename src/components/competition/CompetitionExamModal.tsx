@@ -359,7 +359,7 @@ export const CompetitionExamModal: React.FC<CompetitionExamModalProps> = ({
                     ? 'Tiếng Việt'
                     : blueprint.subject === 'toan'
                     ? 'Toán Học'
-                    : 'English')}
+                    : 'Tiếng Anh')}
               </span>
               <h3 className="text-sm md:text-base font-black text-white truncate max-w-[220px] md:max-w-md">
                 {blueprint.title}

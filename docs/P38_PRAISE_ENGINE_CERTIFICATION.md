@@ -53,7 +53,7 @@ Kid's Box/English context → subject language → Math UI language (default
 `vi-VN`) → safe default `vi-VN`. Cross-language borrowing is a thrown error,
 never a silent fallback.
 
-**Character resolver** (centralized): ENGLISH → 🐰 Thỏ English ·
+**Character resolver** (centralized): ENGLISH → 🐰 Thỏ Tiếng Anh ·
 MATH → 🦊 Cáo Toán Học · VIETNAMESE → 🐻 Gấu Bút Chì.
 
 **Outcome priority:** MASTERED > PERSONAL_BEST > RECOVERY_AFTER_ERROR >

@@ -89,7 +89,7 @@ export const KidBoxParentPanel: React.FC<KidBoxParentPanelProps> = ({ onDataChan
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="text-xs font-bold text-slate-700 space-y-1">
-            <span>Current English Course</span>
+            <span>Khóa học tiếng Anh hiện tại</span>
             <input
               value={course.title}
               readOnly
@@ -98,7 +98,7 @@ export const KidBoxParentPanel: React.FC<KidBoxParentPanelProps> = ({ onDataChan
           </label>
 
           <label className="text-xs font-bold text-slate-700 space-y-1">
-            <span>Current Unit</span>
+            <span>Unit hiện tại</span>
             <select
               value={currentUnit?.id ?? ''}
               onChange={(e) => handleUnitChange(e.target.value)}
@@ -113,7 +113,7 @@ export const KidBoxParentPanel: React.FC<KidBoxParentPanelProps> = ({ onDataChan
           </label>
 
           <label className="text-xs font-bold text-slate-700 space-y-1">
-            <span>Current Lesson (tuỳ chọn)</span>
+            <span>Bài học hiện tại (tuỳ chọn)</span>
             <select
               value={store.courseState.currentLessonId ?? ''}
               onChange={(e) => handleLessonChange(e.target.value)}
@@ -129,7 +129,7 @@ export const KidBoxParentPanel: React.FC<KidBoxParentPanelProps> = ({ onDataChan
           </label>
 
           <label className="text-xs font-bold text-slate-700 space-y-1">
-            <span>Center homework (tuỳ chọn)</span>
+            <span>Bài tập ở lớp (tuỳ chọn)</span>
             <div className="flex gap-2">
               <input
                 value={homework}
@@ -147,7 +147,7 @@ export const KidBoxParentPanel: React.FC<KidBoxParentPanelProps> = ({ onDataChan
           </label>
         </div>
         <p className="text-[11px] font-bold text-slate-500">
-          Đổi Unit ở đây sẽ khiến phần “English hôm nay” và gợi ý của hệ thống ưu tiên Unit mới.
+          Đổi Unit ở đây sẽ khiến phần “Tiếng Anh hôm nay” và gợi ý của hệ thống ưu tiên Unit mới.
         </p>
       </div>
 
