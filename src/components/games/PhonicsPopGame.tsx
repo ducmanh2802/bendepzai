@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { GameModalWrapper } from './GameModalWrapper';
 import { useGameStage } from '../../hooks/useGameStage';
+import { useRoundFeedbackTimer } from '../../hooks/useRoundFeedbackTimer';
 import { sound } from '../../services/sound';
 import { GAME_LEVEL_POLICY } from '../../config/policy';
 import { getTierMeta } from '../../data/gameLevels';
@@ -14,6 +15,10 @@ export const PhonicsPopGame: React.FC<{ onExit: () => void }> = ({ onExit }) => 
   const roundsPerTier = useMemo(() => GAME_LEVEL_POLICY.ROUNDS_PER_TIER.slice() as unknown as number[], []);
   const stage = useGameStage({ gameId: 'phonics_pop', roundsPerTier, advanceDelayMs: 900 });
   const [picked, setPicked] = useState<string | null>(null);
+  const { schedule: scheduleUnpick } = useRoundFeedbackTimer(
+    () => setPicked(null),
+    [stage.roundIdx, stage.tier, stage.nonce]
+  );
 
   const rounds = useMemo(
     () => buildPhonicsPopRounds(stage.tier, stage.nonce),
@@ -32,12 +37,12 @@ export const PhonicsPopGame: React.FC<{ onExit: () => void }> = ({ onExit }) => 
       sound.playCorrect();
       sound.speak(`Great! ${item.word}!`, 'en-GB');
       stage.submitCorrect();
-      setTimeout(() => setPicked(null), 900);
+      scheduleUnpick(() => setPicked(null), 900);
     } else {
       sound.playWrong();
       sound.speak(`Listen again: ${item.word}`, 'en-GB');
       stage.submitWrong();
-      setTimeout(() => setPicked(null), 900);
+      scheduleUnpick(() => setPicked(null), 900);
     }
   };
 

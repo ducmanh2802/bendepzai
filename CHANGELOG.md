@@ -302,6 +302,48 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
     hiện (5 s) và đóng lặp lại tối đa 3 hộp; `tests/t31-bug-hunt-fixes.test.ts` đổi hợp đồng sang
     `dismissLevelUpCelebration(page)`.
 
+- **Vòng soát bug T33 (hẹn giờ phản hồi sống lâu hơn lượt chơi):**
+  - **Lời khen và gấu bị lượt trước xoá:** `GameModalWrapper` hẹn 1.500 ms (nhãn gấu) và
+    2.500 ms (bóng lời khen) bằng `setTimeout` trần, nên bé trả lời liên tiếp trong vòng
+    2,5 s thì hẹn giờ của lượt cũ vẫn chạy và làm phản hồi của lượt mới biến mất giữa
+    chừng. Gom vào `showFeedback()` dùng hai ref, cắt khi lên lịch mới, khi đóng bảng chơi
+    và khi sang màn/chơi lại.
+  - **Lật Thẻ Trí Nhớ bị màn cũ "úp hộ":** id thẻ đánh số 1..2N nên **trùng nhau giữa mọi
+    màn**; hẹn giờ 900 ms úp lại thẻ của Màn 1 còn sống khi bé đã nhảy sang Màn 4 sẽ úp
+    luôn hai thẻ bé vừa lật, mất lượt (bằng chứng probe: lật hai thẻ ở màn mới mà bộ đếm
+    "Đã thử" vẫn là 0). Hẹn giờ giờ nằm trong ref và bị cắt khi đổi màn/vòng.
+  - **Luyện đọc có hai chuỗi highlight cùng chạy:** bấm "Đọc cả câu" lần hai là thêm một
+    chuỗi `setTimeout` thứ hai (và hẹn giờ dò `onboundary` không nằm trong ref nào) ⇒ ô
+    sáng nhảy lùi về đầu, bé không theo kịp chữ nào đang được đọc. Cả chuỗi lẫn hẹn giờ
+    dò boundary giờ ở trong `karaokeTimersRef` và bị cắt khi bấm lại / sang đoạn / rời màn.
+  - **Bấm "Thoát" mà đoạn văn vẫn được đọc:** `backToLobby()` chỉ đổi `phase` nên giọng
+    đọc và chuỗi highlight vẫn chạy trên thang luyện đọc. Nay cắt `speechSynthesis` và
+    chuỗi hẹn giờ ngay khi thoát (probe: `speakingDuringRead: true` → `speakingAfterExit: false`).
+  - **Tiếng hò reo ăn mừng chết âm thầm:** mỗi lần bắn confetti mở một `new AudioContext()`
+    (Chrome chỉ cho ~6 context mỗi tab) ⇒ sau vài lần ăn mừng lớn, lời reo không phát nữa
+    dù hình vẫn bay. Một context dùng chung, tôn trọng công tắc tắt tiếng của Ba Mẹ.
+  - **Nhạc nền thành tiếng rè:** `playBgMusicLoop` tự gọi lại bằng `requestAnimationFrame`
+    (restart cùng một nốt G4 mỗi frame), sáu nốt của chuỗi đều `start(currentTime)` thay vì
+    nối tiếp nhau, và `stopBgMusic` chỉ `suspend()` nên không giải phóng context. Chuỗi nốt
+    giờ nối tiếp (`start` lệch theo trường độ), vòng lặp hẹn bằng `setTimeout` đúng lúc chuỗi
+    kết thúc, và `close()` khi tắt.
+  - **Bấm sai liên tiếp làm mất highlight và tụt sao (6 trò):** Phonics Pop, Đấu Trường Chính
+    Tả, Chuyện Kể Toán Học, Thám Hiểm Giờ & Tiền, Xưởng Ghép Tiếng, Câu Cá Đại Dương tắt
+    highlight bằng `setTimeout` trần, mà đáp án **sai thì không khoá bàn chơi** — lần bấm sau
+    trong 900 ms bị hẹn giờ của lần trước xoá phản hồi, bé tưởng app chưa nhận nên bấm tiếp,
+    mỗi lần bấm cộng thêm một lỗi và sao tụt 3→2→1 trên cùng một câu. Hook mới
+    `src/hooks/useRoundFeedbackTimer.ts` bảo mỗi lượt chỉ có một hẹn giờ còn sống.
+  - **Máy Gắp kéo vé và nổ confetti trên trang chủ:** vòng quay 2 s là chuỗi
+    `requestAnimationFrame` không huỷ ⇒ bé bấm "Về Trang Chủ" giữa lúc quay vẫn bị trừ vé,
+    tiếng "lên cấp" và confetti bắn ngay trên màn hình khác (rAF còn bị treo khi tab ẩn nên
+    phần thưởng giật ra lúc bé quay lại). chu kỳ quay giờ lưu id frame và `cancelAnimationFrame`
+    khi rời màn (probe: vé 5→5, 0 canvas).
+  - **Cảnh báo "số liệu mẫu" chết sau ~1 s:** `ParentDashboardModal` cho hai thao tác dùng
+    chung một trạng thái với hẹn giờ 3 s/6 s; bấm nạp dữ liệu thử nghiệm ngay sau khi đặt lại
+    thì hẹn giờ 3 s của thao tác trước xoá cảnh báo sớm. Gom vào `showResetNotice()` một hẹn giờ.
+  - **Điểm neo cho probe (không đổi câu chữ tiếng Việt):** thêm `data-testid="praise-toast"`,
+    `memory-card`, `karaoke-read-all` và `answer-option` + `data-correct` cho `spelling_duel`.
+
 ### Tests
 - `tests/t24-speech-math-operators.test.ts` — 18 test cho lớp phát âm phép tính: cộng/trừ/
   bằng và `= ?` → "bằng mấy", U+2212, chuỗi `12 + 3 + 2 = ?`, mệnh đề có kết quả
@@ -420,6 +462,13 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   `question-types` 9 step, `lesson-smooth` 8 step, `cotuong-puzzles` 8 step, `lesson-engagement` /
   `gacha-machine` / `cotuong-depth` / `responsive-a11y` / `mobile` / `mobile-golden` /
   `kidbox-focus` / `decision-engine-a11y` / `t01-hotfix` / `t01b-fixes` / `tier6-ladder-evidence`.
+- `tests/t33-feedback-timers.test.ts` — 23 test cho vòng soát bug T33: deck mọi màn của
+  Lật Thẻ trùng id 1..6 (nguyên nhân khiến hẹn giờ cũ úp nhầm thẻ màn mới); hẹn giờ úp thẻ
+  phải nằm trong ref và bị cắt khi sang màn/chơi lại/unmount; `GameModalWrapper` không còn
+  `setTimeout` trần cho `mascotReaction`/`praiseText`; chuỗi karaoke chỉ một nguồn sáng, có
+  boundary thì chuỗi tự chạy bị tắt, rời màn thì cắt tiếng; `backToLobby` cắt cả hai; sáu trò
+  phải dùng `useRoundFeedbackTimer` (đo bằng fake `window`/fake timer: mười lần ăn mừng lớn
+  chỉ một `AudioContext`, sáu nốt nhạc nền sáu thời điểm khác nhau, tắt nhạc là `close()`).
 - `tests/t32-game-stage-reset.test.ts` — 20 test cho vòng soát bug T32: 13 trò phải reset theo
   `stage.nonce` (quét nguồn, chặn `}, [current.id]);` và `key={current.id}` còn sót), đo id va
     chạm thật của builder `read_and_do` / `clock_builder`, hợp đồng `resetRewardState` khi đổi
@@ -444,6 +493,19 @@ Quy trình tạo ra các mục này: xem `docs/SDLC.md` §6.
   `t01b-fixes`), `qa/t02-smoke.mjs` chạy trực tiếp `ERRORS: []` exit 0; **riêng
   `qa/p38-browser-probe.cjs` exit 1 vì `require('puppeteer')` mà repo không có dependency đó**
   (không tự thêm theo `AGENTS.md` §1.4) — xem ghi chú nợ ở `docs/plan/TEST_PLAN.md` §6.
+- **Đo lại sau T33**: `npm run verify` **EXIT=0** — typecheck sạch, **79 file / 1134 test** passed
+  (+23 test `t33`), main chunk `index-RJBSh_JH.js` **534 kB PASS** (trần 600; `check:budget` chia
+  1024 nên bản chất là 534 KiB, log `vite build` in 546.84 kB thập phân). Quét lại **toàn bộ
+  28 probe** trên đúng dist đó (build 16:14): 26 probe chạy qua `qa/run-one.mjs` in
+  `QA PASS — 0 errors` (`t33-feedback-timers` 6 step, `t32-game-replay-evidence` 5, `lesson-types`
+  137, `golden-path` 28, `p41-font-visual` 13, `decision-engine` 12, `offline-pwa` 10, `audio` 9,
+  `question-types` 9, `cotuong-puzzles` 8, `lesson-smooth` 8, `lesson-engagement` 5,
+  `p41-curriculum-quality` 5, `gacha-machine` 4, `cotuong-depth` 3, `games` (`catalogCount` 31),
+  `tier6-ladder-evidence`, `focus`, `mobile`, `mobile-home`, `mobile-golden`, `responsive-a11y`,
+  `kidbox-focus`, `decision-engine-a11y`, `t01-hotfix`, `t01b-fixes`), `qa/t02-smoke.mjs` chạy trực
+  tiếp `play buttons: 31` / `dialog buttons: 8` / `ERRORS: []` exit 0; **riêng
+  `qa/p38-browser-probe.cjs` vẫn exit 1 vì `require('puppeteer')` mà repo không có dependency đó**
+  (không tự thêm theo `AGENTS.md` §1.4).
 
 ## [1.0.0] - baseline
 

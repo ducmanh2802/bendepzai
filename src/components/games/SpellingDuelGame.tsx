@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { GameModalWrapper } from './GameModalWrapper';
 import { useGameStage } from '../../hooks/useGameStage';
+import { useRoundFeedbackTimer } from '../../hooks/useRoundFeedbackTimer';
 import { sound } from '../../services/sound';
 import { GAME_LEVEL_POLICY } from '../../config/policy';
 import { getTierMeta } from '../../data/gameLevels';
@@ -10,10 +11,23 @@ import type { SpellingItem } from '../../data/games/spelling_duel';
 export { POOLS };
 export type { SpellingItem };
 
+function isQaMode(): boolean {
+  try {
+    return new URLSearchParams(window.location.search).has('qa');
+  } catch {
+    return false;
+  }
+}
+
 export const SpellingDuelGame: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   const roundsPerTier = useMemo(() => GAME_LEVEL_POLICY.ROUNDS_PER_TIER.slice() as unknown as number[], []);
   const stage = useGameStage({ gameId: 'spelling_duel', roundsPerTier });
   const [picked, setPicked] = useState<string | null>(null);
+  const [qa] = useState(isQaMode);
+  const { schedule: scheduleUnpick } = useRoundFeedbackTimer(
+    () => setPicked(null),
+    [stage.roundIdx, stage.tier, stage.nonce]
+  );
 
   const rounds = useMemo(
     () => buildSpellingRounds(stage.tier, stage.nonce),
@@ -30,12 +44,12 @@ export const SpellingDuelGame: React.FC<{ onExit: () => void }> = ({ onExit }) =
       sound.playCorrect();
       sound.speak('Đúng rồi! Bé giỏi quá!', 'vi-VN');
       stage.submitCorrect();
-      setTimeout(() => setPicked(null), 900);
+      scheduleUnpick(() => setPicked(null), 900);
     } else {
       sound.playWrong();
       sound.speak(`Chưa đúng. ${item.hint}`, 'vi-VN');
       stage.submitWrong();
-      setTimeout(() => setPicked(null), 900);
+      scheduleUnpick(() => setPicked(null), 900);
     }
   };
 
@@ -76,6 +90,8 @@ export const SpellingDuelGame: React.FC<{ onExit: () => void }> = ({ onExit }) =
             <button
               key={opt}
               onClick={() => choose(opt)}
+              data-testid="answer-option"
+              {...(qa ? { 'data-correct': opt === item.answer } : {})}
               className={`min-h-[56px] px-4 py-3 rounded-2xl font-black text-base md:text-lg border-3 transition-all active:scale-95 cursor-pointer ${
                 picked === opt
                   ? opt === item.answer

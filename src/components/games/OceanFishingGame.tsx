@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { GameModalWrapper } from './GameModalWrapper';
 import { sound } from '../../services/sound';
 import { useGameStage } from '../../hooks/useGameStage';
+import { useRoundFeedbackTimer } from '../../hooks/useRoundFeedbackTimer';
 import { defaultRoundsPerTier, getTierMeta } from '../../data/gameLevels';
 import { buildFishRounds } from '../../data/games/ocean_fishing';
 import type { FishItem, FishQuestion } from '../../data/games/ocean_fishing';
@@ -13,6 +14,10 @@ export const OceanFishingGame: React.FC<{ onExit: () => void }> = ({ onExit }) =
   const roundsPerTier = useMemo(() => defaultRoundsPerTier(), []);
   const stage = useGameStage({ gameId: 'ocean_fishing', roundsPerTier, advanceDelayMs: 1400 });
   const [hookedFish, setHookedFish] = useState<number | null>(null);
+  const { schedule: scheduleUnhook } = useRoundFeedbackTimer(
+    () => setHookedFish(null),
+    [stage.roundIdx, stage.tier, stage.nonce]
+  );
 
   const rounds = useMemo(() => buildFishRounds(stage.tier, stage.nonce), [stage.tier, stage.nonce]);
   const current = rounds[stage.roundIdx];
@@ -24,7 +29,7 @@ export const OceanFishingGame: React.FC<{ onExit: () => void }> = ({ onExit }) =
       sound.speak(`Cắn câu rồi! ${current.expr} bằng ${current.ans}!`);
       setHookedFish(val);
       stage.submitCorrect();
-      window.setTimeout(() => setHookedFish(null), 1400);
+      scheduleUnhook(() => setHookedFish(null), 1400);
     } else {
       sound.playWrong();
       sound.speak(`Chú cá mang số ${val} chưa đúng phép tính rồi, bé thử lại nhé!`);

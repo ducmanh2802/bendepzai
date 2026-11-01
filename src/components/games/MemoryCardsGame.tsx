@@ -31,6 +31,14 @@ export const MemoryCardsGame: React.FC<{ onExit: () => void }> = ({ onExit }) =>
   // T02B/B12 — track individual CARD ids the child has flipped, not pair ids.
   const [seenCardIds, setSeenCardIds] = useState<number[]>([]);
   const submittedRef = useRef(false);
+  const flipBackTimerRef = useRef<number | null>(null);
+
+  const clearFlipBack = () => {
+    if (flipBackTimerRef.current !== null) {
+      window.clearTimeout(flipBackTimerRef.current);
+      flipBackTimerRef.current = null;
+    }
+  };
 
   const goalPairs = GOALS_PER_TIER[Math.min(stage.tier - 1, GOALS_PER_TIER.length - 1)];
 
@@ -50,9 +58,12 @@ export const MemoryCardsGame: React.FC<{ onExit: () => void }> = ({ onExit }) =>
   };
 
   useEffect(() => {
+    clearFlipBack();
     initGame();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage.tier, stage.nonce]);
+
+  useEffect(() => () => clearFlipBack(), []);
 
   const handleCardClick = (id: number) => {
     if (stage.locked || stage.phase !== 'playing') return;
@@ -101,7 +112,12 @@ export const MemoryCardsGame: React.FC<{ onExit: () => void }> = ({ onExit }) =>
           sound.playClick();
           sound.speak('Chưa giống nhau, bé nhớ vị trí hai thẻ này nhé!');
         }
-        setTimeout(() => {
+        // Hẹn giờ úp lại thẻ PHẢI nằm trong ref: id thẻ đánh số 1..2N và trùng
+        // nhau giữa mọi màn, nên hẹn giờ còn sót từ màn cũ sẽ úp nhầm hai thẻ mà
+        // bé vừa lật ở màn mới (bấm xong thẻ tự đóng, mất lượt).
+        clearFlipBack();
+        flipBackTimerRef.current = window.setTimeout(() => {
+          flipBackTimerRef.current = null;
           setCards((prev) =>
             prev.map((c) =>
               c.id === firstId || c.id === secondId ? { ...c, isFlipped: false } : c

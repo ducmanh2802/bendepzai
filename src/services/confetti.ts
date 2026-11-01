@@ -3,6 +3,8 @@
  * Zero external dependencies.
  */
 
+import { sound } from './sound';
+
 interface Particle {
   x: number;
   y: number;
@@ -19,6 +21,59 @@ interface Particle {
 
 const celebrationHistory: Array<'small' | 'medium' | 'large' | 'extreme'> = [];
 const MAX_HISTORY = 3;
+
+/**
+ * tiếng "hò reo" dùng lại MỘT AudioContext. Tạo mới mỗi lần ăn mừng thì chạm
+ * trần của trình duyệt (Chrome chỉ cho ~6 context/tab): sau vài lần ăn mừng lớn,
+ * `new AudioContext()` ném lỗi, khối try nuốt lỗi và bé mất hẳn âm thanh chiến
+ * thắng dù hình vẫn bắn. Context dùng chung cũng không cần đóng — dao động tự
+ * stop() sau 0,5s.
+ */
+let cheerCtx: AudioContext | null = null;
+
+function getCheerContext(): AudioContext | null {
+  if (typeof window === 'undefined') return null;
+  if (!cheerCtx) {
+    const AudioCtx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return null;
+    try {
+      cheerCtx = new AudioCtx();
+    } catch {
+      return null;
+    }
+  }
+  if (cheerCtx.state === 'suspended') {
+    cheerCtx.resume().catch(() => {});
+  }
+  return cheerCtx;
+}
+
+function playCheer() {
+  if (sound.getMuted()) return;
+  const ctx = getCheerContext();
+  if (!ctx) return;
+  try {
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(523.25, ctx.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.1);
+
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+
+    oscillator.start();
+    oscillator.stop(ctx.currentTime + 0.5);
+  } catch {
+    // Ignore audio error
+  }
+}
 
 export function fireCelebrationSmall() {
   if (typeof document === 'undefined') return;
@@ -288,26 +343,7 @@ export function fireCelebrationLarge() {
   if (celebrationHistory.length > MAX_HISTORY) celebrationHistory.shift();
 
   // Play cheer sound effect
-  try {
-    const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-    const oscillator = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(523.25, ctx.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.1);
-
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-
-    oscillator.connect(gain);
-    gain.connect(ctx.destination);
-
-    oscillator.start();
-    oscillator.stop(ctx.currentTime + 0.5);
-  } catch {
-    // Ignore audio error
-  }
+  playCheer();
 
   const canvas = document.createElement('canvas');
   canvas.style.position = 'fixed';

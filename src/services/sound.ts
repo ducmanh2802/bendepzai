@@ -73,6 +73,7 @@ class SoundService {
   private bgMusicContext: AudioContext | null = null;
   private bgMusicGain: GainNode | null = null;
   private bgMusicOscillators: OscillatorNode[] = [];
+  private bgMusicNextTimer: number | null = null;
   private bgMusicVolume: number = 0.1; // Low volume by default
 
   constructor() {
@@ -450,6 +451,7 @@ class SoundService {
   /** Start background music with initial delay. */
   private startBgMusic(): void {
     if (typeof window === 'undefined') return;
+    if (this.bgMusicContext) return;
     try {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (AudioCtx) {
@@ -469,10 +471,17 @@ class SoundService {
 
   /** Stop background music. */
   private stopBgMusic(): void {
+    if (this.bgMusicNextTimer !== null) {
+      window.clearTimeout(this.bgMusicNextTimer);
+      this.bgMusicNextTimer = null;
+    }
     if (this.bgMusicContext) {
       this.stopBgMusicInner();
       try {
-        this.bgMusicContext.suspend();
+        // close() giải phóng hardware context; suspend() chỉ tạm dừng nên bật
+        // tắt vài lần là đụng trần ~6 context/tab của Chrome và nhạc nền chết
+        // vĩnh viễn (khối try ở trên nuốt lỗi).
+        void this.bgMusicContext.close();
       } catch {
         // ignore
       }
@@ -493,35 +502,41 @@ class SoundService {
 
     // Create oscillators for the pattern
     this.bgMusicOscillators = [];
+    const startAt = this.bgMusicContext.currentTime;
+    let cursor = startAt;
     for (let i = 0; i < pattern.length; i++) {
       const note = pattern[i];
       const osc = this.bgMusicContext!.createOscillator();
       const gain = this.bgMusicContext!.createGain();
 
+      // Mỗi nốt phải nối tiếp nhau. Trước đây tất cả đều start(currentTime) nên
+      // vòng lặp dưới (chạy mỗi frame) luôn restart cùng một nốt G4 — thành một
+      // tiếng rè liên tục thay vì giai điệu.
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(note.freq, this.bgMusicContext.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(
-        note.freq,
-        this.bgMusicContext.currentTime + note.duration,
-      );
+      osc.frequency.setValueAtTime(note.freq, cursor);
 
-      gain.gain.setValueAtTime(this.bgMusicVolume, this.bgMusicContext.currentTime);
+      gain.gain.setValueAtTime(this.bgMusicVolume, cursor);
       gain.gain.exponentialRampToValueAtTime(
         this.bgMusicVolume * 0.8,
-        this.bgMusicContext.currentTime + note.duration,
+        cursor + note.duration,
       );
 
       osc.connect(gain);
       gain.connect(this.bgMusicGain!);
 
-      osc.start(this.bgMusicContext.currentTime);
-      osc.stop(this.bgMusicContext.currentTime + note.duration);
+      osc.start(cursor);
+      osc.stop(cursor + note.duration);
 
       this.bgMusicOscillators.push(osc);
+      cursor += note.duration;
     }
 
-    // Schedule next loop
-    requestAnimationFrame(() => this.playBgMusicLoop());
+    // Schedule next loop khi chuỗi nốt kết thúc (không phải mỗi frame).
+    const loopMs = Math.max(0, (cursor - startAt) * 1000);
+    this.bgMusicNextTimer = window.setTimeout(() => {
+      this.bgMusicNextTimer = null;
+      this.playBgMusicLoop();
+    }, loopMs);
   }
 
   /** Home/Map music pattern: gentle, ascending/descending sequences. */

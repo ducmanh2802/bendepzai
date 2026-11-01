@@ -5,8 +5,8 @@
 > coi là xanh**. Danh sách yêu cầu cần kiểm: [`SRS.md`](../specs/SRS.md); ánh xạ
 > yêu cầu ↔ test ↔ probe ↔ gate: [`RTM.md`](../specs/RTM.md); quy trình: [`../SDLC.md`](../SDLC.md).
 >
-> **Số liệu chốt 2026-11-01** (đo lại sau vòng sửa bug T26 cờ tướng, T27 học hấp dẫn hơn, audit UI T28, làm mượt luồng học T29, độ dày quân cờ T30, vòng soát bug T31 và T32 (khung trò chơi)): 78 file test / 1111 test ·
-> 27 probe (26 `.mjs` + 1 `.cjs`) · 4 workflow CI · 3 git hook · main chunk 533.8 kB / trần
+> **Số liệu chốt 2026-11-01** (đo lại sau vòng sửa bug T26 cờ tướng, T27 học hấp dẫn hơn, audit UI T28, làm mượt luồng học T29, độ dày quân cờ T30, vòng soát bug T31, T32 (khung trò chơi) và T33 (hẹn giờ phản hồi)): 79 file test / 1134 test ·
+> 28 probe (27 `.mjs` + 1 `.cjs`) · 4 workflow CI · 3 git hook · main chunk 534 kB / trần
 > 600 kB; vendor ngoài entry: `three-vendor` 545.4 kB, `firebase-vendor` 537.9 kB.
 
 ---
@@ -33,9 +33,9 @@
 ```
 Lớp 5  Người lớn đọc to + beta trẻ thật          → §11   (2 phiên/milestone, không tự động)
 Lớp 4  Thiết bị thật: Android/iOS, offline, audio → §7    (qa/mobile.mjs + tay người)
-Lớp 3  Probe trình duyệt trên dist/ (27 probe)    → §6    (npm run qa:smoke)
+Lớp 3  Probe trình duyệt trên dist/ (28 probe)    → §6    (npm run qa:smoke)
 Lớp 2  Build + ngân sách + precache               → §9    (npm run build && npm run check:budget)
-Lớp 1  Unit/integration Vitest (1111 test)        → §5    (npm run test:ci)
+Lớp 1  Unit/integration Vitest (1134 test)        → §5    (npm run test:ci)
 ────────────────────────────────────────────────────────────────────────────────────────────
               npm run verify = typecheck + Lớp 1 + Lớp 2   ← cổng duy nhất
 ```
@@ -123,7 +123,7 @@ registry của Playwright, cộng `--no-sandbox` khi `CI` được set.
 **Hợp đồng exit code:** in `QA PASS`/`QA FAIL` và **chỉ** exit khác 0 khi probe ghi `errors[]`
 hoặc tự khai `ok: false` (nhiều probe không set `ok` ⇒ thiếu `ok` **không** phải lỗi).
 
-**Danh mục 27 probe:**
+**Danh mục 28 probe:**
 
 | Probe | Kịch bản | Tiêu chí xanh | Chạy khi |
 |---|---|---|---|
@@ -154,13 +154,14 @@ hoặc tự khai `ok: false` (nhiều probe không set `ok` ⇒ thiếu `ok` **k
 | `lesson-smooth.mjs` | Luồng học @390×844: đo thanh hành động, vị trí cuộn sau mỗi câu, ô combo và phản hồi | thanh "Kiểm tra/Câu tiếp theo" **ngoài** vùng cuộn và luôn thấy, `scrollTop = 0` khi sang câu mới, ô combo cao 24 px nên dải hiện không đẩy đề (shift ≤ 2 px), phản hồi nằm trong tầm nhìn, 0 tràn ngang | đổi `LessonPlayerModal` / combo / đồng hồ |
 | `cotuong-depth.mjs` | Độ nổi của quân cờ tướng @900×1100, đo cả chế độ 3D lẫn "Góc 2D": thứ tự vẽ 3 lớp quân so với lưới, đế thò dưới mặt quân, **giải mã PNG** ảnh chụp để so độ sáng nền bàn ngay dưới quân với phía trên | mặt quân vẽ **trên** lưới, `rimBelowFacePx ≥ 2`, nền dưới quân tối hơn nền trên ≥ 8 mức sáng (có bóng tiếp đất), mặt quân sáng ≥ 150 | đổi `src/index.css` khối `.ct-piece*` / `CotuongBoard3D.tsx` |
 | `t32-game-replay-evidence.mjs` | Khung trò chơi @390×844 với `?qa`: Đọc Câu Làm Theo - chạm đồ vật rồi chọn lại Màn 1, đếm số ô được đánh dấu "bước hợp lệ" trong 8 lượt ở Màn 4; Đường Đua Thần Tốc Màn 4 - mở lớp phủ "Chọn Màn" giữ 3 giây rồi đóng | lựa chọn dở bị xoá sau khi chơi lại, mỗi lúc đúng 1 bước hợp lệ, đồng hồ đứng yên khi bị che (15s → 15s) và chạy tiếp khi đóng (15s → 12s), nút ✕ đóng lớp phủ có tên truy cập | đổi `GameModalWrapper` / `useGameStage` / `sound.ts` |
+| `t33-feedback-timers.mjs` | Hẹn giờ phản hồi @390×844 với `?qa`: Ếch Nhảy Tia Số — bấm đúng rồi bấm sai trong 2,5 s; Lật Thẻ Trí Nhớ — đang hẹn giờ úp thẻ ở Màn 1 thì nhảy sang Màn 4 rồi lật tiếp hai thẻ; Luyện Đọc — bấm "Đọc cả câu" hai lần rồi bấm "Thoát" giữa lúc đọc; Đấu Trường Chính Tả — bấm hai phương án sai cách nhau ~0,5 s; Máy Gắp — bấm gắp rồi về Trang Chủ sau 300 ms | bóng lời khen của lượt mới còn nguyên tới mẫu 2.300 ms, Màn 4 vẫn tính 1 lượt, ô sáng karaoke đi một chiều và `speechSynthesis.speaking` về `false` khi bấm "Thoát", phương án bấm sau vẫn tô đỏ qua mốc 900 ms của lượt trước (đối chứng trên bản lỗi: `red` tụt 1→0 tại 1.104 ms), rời máy gắp giữa vòng quay không mất vé và không bắn confetti trên trang chủ | đổi `GameModalWrapper` / `useRoundFeedbackTimer` / karaoke `ReadingFluencyScreen` / `confetti.ts` / `sound.ts` |
 
 **Chính sách probe đỏ vì timing (đã ghi `AGENTS.md` §1.3):** chạy lại **một** lần;
 nếu vẫn đỏ ⇒ là lỗi thật; khi báo cáo phải dán `errors[]` + `failedAt`, không chỉ exit code.
 Nợ đã biết: selector `qa/games.mjs` từng khiến probe `SKIPPED` ở một số phiên — khắc phục
 ở `TASK_PLAN.md` C2; khi C2 chưa xong, **không** được dùng "games.mjs skip" làm bằng chứng xanh.
 
-**Nợ ghi ngày 2026-11-01 (vòng T32):** `qa/p38-browser-probe.cjs` nằm trong danh mục 27 probe
+**Nợ ghi ngày 2026-11-01 (vòng T32):** `qa/p38-browser-probe.cjs` nằm trong danh mục 28 probe
 nhưng `require('puppeteer')` — dependency này **không** có trong `package.json` (và `AGENTS.md`
 §1.4 cấm tự thêm), nên probe chết ngay khi chạy: `Cannot find module 'puppeteer'`, exit 1. Nó
 không còn là bằng chứng xanh cho vùng praise/parity; muốn dùng lại phải port sang Playwright
@@ -210,7 +211,7 @@ không còn là bằng chứng xanh cho vùng praise/parity; muốn dùng lại 
 | Precache | `tests/sw-precache.test.ts`, `qa/offline-pwa.mjs` | manifest đủ `/assets/*`; placeholder dev ⇒ danh sách rỗng nhưng SW vẫn sống | — |
 | Loại trừ | `node_modules`, `.git`, `dist` không vào manifest | — | — |
 
-**Số đo gần nhất (2026-11-01):** `index-BNbdkwuO.js = 533.8 kB` → PASS trần, **trên** mục tiêu 450 kB.
+**Số đo gần nhất (2026-11-01):** `index-RJBSh_JH.js = 534 kB` → PASS trần, **trên** mục tiêu 450 kB.
 
 ---
 

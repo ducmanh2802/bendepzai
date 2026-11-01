@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { GameModalWrapper } from './GameModalWrapper';
 import { useGameStage } from '../../hooks/useGameStage';
+import { useRoundFeedbackTimer } from '../../hooks/useRoundFeedbackTimer';
 import { sound } from '../../services/sound';
 import { GAME_LEVEL_POLICY } from '../../config/policy';
 import { getTierMeta } from '../../data/gameLevels';
@@ -14,6 +15,10 @@ export const WordStoryGame: React.FC<{ onExit: () => void }> = ({ onExit }) => {
   const roundsPerTier = useMemo(() => GAME_LEVEL_POLICY.ROUNDS_PER_TIER.slice() as unknown as number[], []);
   const stage = useGameStage({ gameId: 'word_story', roundsPerTier });
   const [picked, setPicked] = useState<string | null>(null);
+  const { schedule: scheduleUnpick } = useRoundFeedbackTimer(
+    () => setPicked(null),
+    [stage.roundIdx, stage.tier, stage.nonce]
+  );
 
   const rounds = useMemo(
     () => buildWordStoryRounds(stage.tier, stage.nonce),
@@ -30,12 +35,12 @@ export const WordStoryGame: React.FC<{ onExit: () => void }> = ({ onExit }) => {
       sound.playCorrect();
       sound.speak('Đúng rồi! Bé giải toán lời văn siêu giỏi!', 'vi-VN');
       stage.submitCorrect();
-      setTimeout(() => setPicked(null), 1000);
+      scheduleUnpick(() => setPicked(null), 1000);
     } else {
       sound.playWrong();
       sound.speak(item.hint, 'vi-VN');
       stage.submitWrong();
-      setTimeout(() => setPicked(null), 1000);
+      scheduleUnpick(() => setPicked(null), 1000);
     }
   };
 

@@ -37,7 +37,7 @@ phí. Vì vậy mọi ràng buộc nghiệp vụ nghiêng về *niềm tin* (an 
 | BG-01 | Bé tự học 15–20 phút/ngày không cần người lớn | % phiên bé hoàn thành độc lập | ≥ 70% | Chưa có số liệu thật (dữ liệu nằm `localStorage`; cloud-sync là tuỳ chọn nên vẫn không có aggregate server-side — mới có fixture + demo seed) |
 | BG-02 | Chỉ rõ điểm yếu theo kỹ năng, không chỉ điểm tổng | Số kỹ năng có `mastery` đo được | ≥ 26 kỹ năng thi | ✚ 26 kỹ năng taxonomy, kho thi phủ đủ 26/26; trạng thái kỹ năng lưu ở key `kho_bau_learning_os_store` |
 | BG-03 | Không gây nhầm lẫn nội dung (sai đáp án, sai dấu, sai kiến thức) | Lỗi nội dung P0/P1 còn tồn tại | = 0 | ✚ `contentValidator` + `BANNED_WORDS`; P42/T20B đã xoá 18 WARNING |
-| BG-04 | Dùng được trên điện thoại gia đình, offline | Probe QA trên build thật | 0 lỗi console, 0 tràn ở 390px | ✚ 27 probe Playwright, `qa/mobile-golden.mjs` @390/@195px |
+| BG-04 | Dùng được trên điện thoại gia đình, offline | Probe QA trên build thật | 0 lỗi console, 0 tràn ở 390px | ✚ 28 probe Playwright, `qa/mobile-golden.mjs` @390/@195px |
 | BG-05 | Phụ huynh tin tưởng về dữ liệu của con | Dữ liệu rời máy? | Không, trừ khi phụ huynh tự xuất **hoặc tự bật sync** | ✚ Mặc định chỉ localStorage; `CloudSyncService` ở `status: 'offline'` cho tới khi người lớn đăng nhập Google ([src/services/cloudSync.ts:37](file:///D:/trithuc/kho-bau-tri-thuc/src/services/cloudSync.ts#L37), `firestore.rules` chắn chéo tài khoản) |
 | BG-06 | Đổi mới nội dung không phá tiến độ cũ | Migration + sanitizer có test | 100% bước migration có test | ✚ chuỗi `MIGRATIONS` P29-v2 → P42-v3 trong `src/services/storage.ts` |
 
@@ -159,9 +159,9 @@ Một bản được gọi là "phát hành được" khi:
 | Bậc độ khó mỗi trò | 6, số câu `[5, 6, 6, 7, 8, 8]` | `defaultRoundsPerTier()` trong `src/data/gameLevels.ts` |
 | Chủ đề / bài / câu nội dung học (đếm **runtime**, import array trong test tạm) | Tiếng Việt 15/58/612 · Toán 13/26/260 · Tiếng Anh 24/40/434 · Em & Cuộc sống 14/26/264 → **tổng 66 chủ đề, 150 bài, 1570 câu** | `*_TOPICS` trong `src/data/*Curriculum.ts` (đếm tĩnh bằng grep bỏ sót câu sinh qua factory) |
 | Luyện đọc | 36 đoạn · 192 câu hỏi | `READING_PASSAGES`, `READING_QUESTIONS` trong `src/data/readingContent.ts` |
-| Unit test | 78 file / 1111 test, xanh | `npx vitest run` (76 `.ts` + 2 `.tsx`) |
-| Probe trình duyệt | 27 probe (26 `.mjs` + 1 `.cjs`, không tính `lib.mjs`, `run-one.mjs`) | `ls qa/*.mjs` |
-| Main chunk | 533.8 kB (ngân sách 600, mục tiêu 450) | `npm run check:budget` |
+| Unit test | 79 file / 1134 test, xanh | `npx vitest run` (77 `.ts` + 2 `.tsx`) |
+| Probe trình duyệt | 28 probe (27 `.mjs` + 1 `.cjs`, không tính `lib.mjs`, `run-one.mjs`) | `ls qa/*.mjs` |
+| Main chunk | 534 kB (ngân sách 600, mục tiêu 450) | `npm run check:budget` |
 | Chunk vendor lớn | `three-vendor` 545.4 kB · `firebase-vendor` 537.9 kB · `react-vendor` 213.6 kB — tất cả ngoài entry | `npm run check:budget` |
 | Kho câu thi | **475 câu** (256 trắc nghiệm · 55 nối · 46 điền · 42 xếp thứ tự · 39 đúng/sai · 24 phân loại · 13 kéo-thả), phủ đủ 26/26 kỹ năng taxonomy; đề thi phân môn: Toán 165 · Tiếng Anh 162 · Tiếng Việt 148 | `COMPETITION_QUESTIONS` (gồm `EXAM_FORMAT_QUESTIONS` 29 · `EXPANSION_QUESTIONS` 54 · `P36_QUESTIONS` 271 · `TOURNAMENT_QUESTIONS` 72), bank version 6 |
 | Blueprint đề thi | 16 preset: 6 mini-test · 2 full-mock · 2 speed-trial · 6 tournament; số câu 6→30 | `EXAM_BLUEPRINTS` trong `src/data/competitionBlueprints.ts` |

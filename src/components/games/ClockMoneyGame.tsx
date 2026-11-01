@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { GameModalWrapper } from './GameModalWrapper';
 import { useGameStage } from '../../hooks/useGameStage';
+import { useRoundFeedbackTimer } from '../../hooks/useRoundFeedbackTimer';
 import { sound } from '../../services/sound';
 import { GAME_LEVEL_POLICY } from '../../config/policy';
 import { getTierMeta } from '../../data/gameLevels';
@@ -16,6 +17,10 @@ export const ClockMoneyGame: React.FC<{ onExit: () => void }> = ({ onExit }) => 
   const [picked, setPicked] = useState<string | null>(null);
   // T02B/B8 — hint hidden until the child taps "Gợi ý".
   const [showHint, setShowHint] = useState(false);
+  const { schedule: scheduleUnpick } = useRoundFeedbackTimer(
+    () => setPicked(null),
+    [stage.roundIdx, stage.tier, stage.nonce]
+  );
 
   const rounds = useMemo(
     () => buildClockMoneyRounds(stage.tier, stage.nonce),
@@ -36,13 +41,13 @@ export const ClockMoneyGame: React.FC<{ onExit: () => void }> = ({ onExit }) => 
       sound.playCorrect();
       sound.speak('Chính xác! Bé giỏi toán thực tế quá!', 'vi-VN');
       stage.submitCorrect();
-      setTimeout(() => setPicked(null), 900);
+      scheduleUnpick(() => setPicked(null), 900);
     } else {
       sound.playWrong();
       // T02B/B8 — never auto-reveal the hint; the child taps "Gợi ý".
       sound.speak('Chưa đúng rồi, bé thử lại nhé! Cần thì bấm nút Gợi ý.', 'vi-VN');
       stage.submitWrong();
-      setTimeout(() => setPicked(null), 900);
+      scheduleUnpick(() => setPicked(null), 900);
     }
   };
 

@@ -220,30 +220,48 @@ const [activeTab, setActiveTab] = useState<
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resetSuccessMessage, setResetSuccessMessage] = useState<string | null>(null);
 
+  // Hai thao tác (đặt lại / nạp dữ liệu thử nghiệm) ghi vào cùng một dòng thông
+  // báo. Không cắt hẹn giờ cũ thì bấm "nạp dữ liệu mẫu" ngay sau khi đặt lại làm
+  // cảnh báo "đây là số liệu mẫu" biến mất sau ~1s thay vì đủ 6s.
+  const resetNoticeTimerRef = React.useRef<number | null>(null);
+  const showResetNotice = (message: string, ms: number) => {
+    if (resetNoticeTimerRef.current !== null) window.clearTimeout(resetNoticeTimerRef.current);
+    setResetSuccessMessage(message);
+    resetNoticeTimerRef.current = window.setTimeout(() => {
+      resetNoticeTimerRef.current = null;
+      setResetSuccessMessage(null);
+    }, ms);
+  };
+  React.useEffect(
+    () => () => {
+      if (resetNoticeTimerRef.current !== null) window.clearTimeout(resetNoticeTimerRef.current);
+    },
+    []
+  );
+
   const handleConfirmReset = () => {
     StorageService.resetProgress();
     sound.playClick();
-    setResetSuccessMessage('Đã đặt lại tiến độ về dữ liệu mới tinh ban đầu!');
+    showResetNotice('Đã đặt lại tiến độ về dữ liệu mới tinh ban đầu!', 3000);
     setShowResetConfirm(false);
     setReport(AdaptiveService.generateParentReport());
     setReadingReport(AdaptiveService.generateReadingReport());
     setDecisionReport(DecisionEngine.decide());
     if (onDataReset) onDataReset();
-    setTimeout(() => setResetSuccessMessage(null), 3000);
   };
 
   const handleSeedDemoData = () => {
     seedDemoProfile();
     sound.playStar();
     setShowSeedConfirm(false);
-    setResetSuccessMessage(
-      'Đã nạp DỮ LIỆU THỬ NGHIỆM. Các biểu đồ đang hiển thị là số liệu mẫu, không phải tiến bộ thật của bé.'
+    showResetNotice(
+      'Đã nạp DỮ LIỆU THỬ NGHIỆM. Các biểu đồ đang hiển thị là số liệu mẫu, không phải tiến bộ thật của bé.',
+      6000
     );
     setReport(AdaptiveService.generateParentReport());
     setReadingReport(AdaptiveService.generateReadingReport());
     setDecisionReport(DecisionEngine.decide());
     if (onDataReset) onDataReset();
-    setTimeout(() => setResetSuccessMessage(null), 6000);
   };
 
   if (!isOpen) return null;

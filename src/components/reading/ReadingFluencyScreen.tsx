@@ -106,6 +106,15 @@ export const ReadingFluencyScreen: React.FC<ReadingFluencyScreenProps> = ({
   const itemStartRef = useRef<number>(0);
   const sessionIdRef = useRef<string>('');
   const committedRef = useRef(false);
+  // Chuỗi hẹn giờ karaoke: mỗi từ là một timer. Phải giữ trong ref để bấm lần hai
+  // (hoặc sang đoạn khác) cắt được chuỗi cũ — hai chuỗi chạy song song làm ô
+  // đang sáng nhảy lùi về đầu, bé không theo kịp chữ nào đang được đọc.
+  const karaokeTimersRef = useRef<number[]>([]);
+
+  const clearKaraokeChain = useCallback(() => {
+    karaokeTimersRef.current.forEach((id) => window.clearTimeout(id));
+    karaokeTimersRef.current = [];
+  }, []);
 
   useEffect(() => {
     sessionIdRef.current = `rds_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -117,9 +126,23 @@ export const ReadingFluencyScreen: React.FC<ReadingFluencyScreenProps> = ({
   const currentQuestion = useMemo(() => (current ? adaptReadingQuestion(current) : null), [current]);
 
   useEffect(() => {
+    clearKaraokeChain();
     setKaraokeIndex(-1);
     setParentGrade(passage ? (StorageService.getReadingParentRatings()[passage.id] ?? null) : null);
-  }, [passage]);
+  }, [passage, clearKaraokeChain]);
+
+  // Bé rời màn luyện đọc khi giọng đọc còn đang chạy → tắt tiếng + tắt hẹn giờ,
+  // kẻo đoạn cũ vẫn được đọc và sáng chữ trên màn hình khác.
+  useEffect(
+    () => () => {
+      karaokeTimersRef.current.forEach((id) => window.clearTimeout(id));
+      karaokeTimersRef.current = [];
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    },
+    []
+  );
 
   const startStage = useCallback(
     (target: ReadingStage) => {
@@ -191,38 +214,55 @@ export const ReadingFluencyScreen: React.FC<ReadingFluencyScreenProps> = ({
     return offsets;
   }, [karaokeWords, passage]);
 
+  const runKaraokeChain = (wordCount: number) => {
+    clearKaraokeChain();
+    const timers: number[] = [];
+    for (let i = 0; i < wordCount; i++) {
+      timers.push(window.setTimeout(() => setKaraokeIndex(i), i * 260));
+    }
+    timers.push(window.setTimeout(() => setKaraokeIndex(-1), wordCount * 260 + 200));
+    karaokeTimersRef.current = timers;
+  };
+
   const readAllSentence = () => {
     if (!passage) return;
     const text = passage.paragraphs.join(' ');
+    // Bấm lại = đọc lại từ đầu, không phải thêm một chuỗi highlight thứ hai.
+    clearKaraokeChain();
     setKaraokeIndex(0);
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(text);
       utter.lang = 'vi-VN';
       let boundarySeen = false;
-      const fallback = setTimeout(() => {
-        if (!boundarySeen) {
-          karaokeWords.forEach((_, i) => {
-            setTimeout(() => setKaraokeIndex(i), i * 260);
-          });
-          setTimeout(() => setKaraokeIndex(-1), karaokeWords.length * 260 + 200);
-        }
+      const fallback = window.setTimeout(() => {
+        karaokeTimersRef.current = karaokeTimersRef.current.filter((id) => id !== fallback);
+        if (!boundarySeen) runKaraokeChain(karaokeWords.length);
       }, 600);
+      // Hẹn giờ dò boundary cũng phải vào ref: không thì bấm lần hai trong
+      // 600ms vẫn bị chuỗi của lần một kéo ô sáng về chữ đầu.
+      karaokeTimersRef.current.push(fallback);
       utter.onboundary = (e) => {
-        boundarySeen = true;
-        clearTimeout(fallback);        const idx = wordOffsets.findIndex((o, i) => {
+        if (!boundarySeen) {
+          boundarySeen = true;
+          // Máy có boundary thì chuỗi tự chạy đã thừa — tắt để hai nguồn
+          // không cùng đánh sáng hai chữ khác nhau.
+          window.clearTimeout(fallback);
+          clearKaraokeChain();
+        }
+        const idx = wordOffsets.findIndex((o, i) => {
           const next = wordOffsets[i + 1] ?? Number.POSITIVE_INFINITY;
           return e.charIndex >= o && e.charIndex < next;
         });
         if (idx >= 0) setKaraokeIndex(idx);
       };
-      utter.onend = () => setKaraokeIndex(-1);
+      utter.onend = () => {
+        clearKaraokeChain();
+        setKaraokeIndex(-1);
+      };
       window.speechSynthesis.speak(utter);
     } else {
-      karaokeWords.forEach((_, i) => {
-        setTimeout(() => setKaraokeIndex(i), i * 260);
-      });
-      setTimeout(() => setKaraokeIndex(-1), karaokeWords.length * 260 + 200);
+      runKaraokeChain(karaokeWords.length);
     }
   };
 
@@ -288,6 +328,13 @@ export const ReadingFluencyScreen: React.FC<ReadingFluencyScreenProps> = ({
   };
 
   const backToLobby = () => {
+    // Bấm "Thoát" giữa lúc đọc: chuỗi highlight và giọng đọc phải chết ngay,
+    // không thì đoạn văn vẫn được đọc vang trên thang luyện đọc.
+    clearKaraokeChain();
+    setKaraokeIndex(-1);
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
     setPhase('lobby');
     setResult(null);
     setProfile(StorageService.getReadingProfile());

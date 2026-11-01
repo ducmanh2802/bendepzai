@@ -3,6 +3,7 @@ import { GameModalWrapper } from './GameModalWrapper';
 import { sound } from '../../services/sound';
 import { Volume2, CheckCircle2 } from 'lucide-react';
 import { useGameStage } from '../../hooks/useGameStage';
+import { useRoundFeedbackTimer } from '../../hooks/useRoundFeedbackTimer';
 import { getTierMeta } from '../../data/gameLevels';
 import {
   INITIAL_OPTIONS,
@@ -24,6 +25,10 @@ export const SyllableBuilderGame: React.FC<{ onExit: () => void }> = ({ onExit }
   const [selectedVowel, setSelectedVowel] = useState<string>('');
   const [selectedTone, setSelectedTone] = useState<string>('');
   const [feedback, setFeedback] = useState<string | null>(null);
+  const { schedule: scheduleFeedbackOff } = useRoundFeedbackTimer(
+    () => setFeedback(null),
+    [stage.roundIdx, stage.tier, stage.nonce]
+  );
 
   const rounds = useMemo(() => buildSyllableRounds(stage.tier, stage.nonce), [stage.tier, stage.nonce]);
   const current = rounds[stage.roundIdx];
@@ -48,13 +53,13 @@ export const SyllableBuilderGame: React.FC<{ onExit: () => void }> = ({ onExit }
       setSelectedVowel('');
       setSelectedTone('');
       stage.submitCorrect();
-      window.setTimeout(() => setFeedback(null), 1500);
+      scheduleFeedbackOff(() => setFeedback(null), 1500);
     } else {
       sound.playWrong();
       sound.speak(`Chưa đúng rồi! Bé thử chọn lại nhé.`);
       setFeedback('Chưa đúng rồi, bé thử lại nào!');
       stage.submitWrong();
-      window.setTimeout(() => setFeedback(null), 1200);
+      scheduleFeedbackOff(() => setFeedback(null), 1200);
     }
   };
 

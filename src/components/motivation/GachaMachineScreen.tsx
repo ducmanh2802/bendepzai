@@ -42,6 +42,18 @@ export const GachaMachineScreen: React.FC<GachaMachineScreenProps> = ({
   const [showResult, setShowResult] = useState(false);
   const [drawHistory, setDrawHistory] = useState<string[]>([]);
   const machineRef = useRef<HTMLDivElement>(null);
+  const spinFrameRef = useRef<number | null>(null);
+
+  // Bé rời màn máy kéo giữa lúc quay → dừng vòng quay. Không dừng thì vé vẫn bị
+  // kéo và tiếng "lên cấp" + confetti nổ trên màn hình kế tiếp; rAF còn bị tạm
+  // dừng khi tab ẩn nên phần thưởng giật ra lúc bé quay lại.
+  useEffect(
+    () => () => {
+      if (spinFrameRef.current !== null) cancelAnimationFrame(spinFrameRef.current);
+      spinFrameRef.current = null;
+    },
+    []
+  );
 
   useEffect(() => {
     setMotivation(StorageService.getMotivationState());
@@ -66,8 +78,9 @@ export const GachaMachineScreen: React.FC<GachaMachineScreenProps> = ({
       const progress = Math.min(elapsed / duration, 1);
 
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        spinFrameRef.current = requestAnimationFrame(animate);
       } else {
+        spinFrameRef.current = null;
         // Perform the actual draw
         const rng = () => Math.random();
         const drawResult = StorageService.drawGacha(rng);
@@ -89,7 +102,7 @@ export const GachaMachineScreen: React.FC<GachaMachineScreenProps> = ({
       }
     };
 
-    requestAnimationFrame(animate);
+    spinFrameRef.current = requestAnimationFrame(animate);
   }, [canDraw, isSpinning, onProfileUpdate]);
 
   const handleCloseResult = useCallback(() => {

@@ -134,6 +134,12 @@ export const GameModalWrapper: React.FC<GameModalWrapperProps> = ({
   // Bé tắt trò chơi khi gấu còn đang nói → cắt tiếng, kẻo lời khen vang ở màn hình khác.
   React.useEffect(() => () => sound.stopSpeaking(), []);
 
+  // Hai hẹn giờ phản hồi phải nằm trong ref: bé trả lời liên tiếp trong vòng
+  // 1,5s/2,5s thì hẹn giờ của lượt trước vẫn còn chạy và xoá mất phản hồi của
+  // lượt mới (bóng gấu + lời khen biến mất giữa chừng, trông như app giật).
+  const reactionTimerRef = useRef<number | null>(null);
+  const praiseTimerRef = useRef<number | null>(null);
+
   const handleSelectTier = (t: number) => {
     sound.playClick();
     setShowTierModal(false);
@@ -159,14 +165,43 @@ export const GameModalWrapper: React.FC<GameModalWrapperProps> = ({
   const [praiseText, setPraiseText] = useState<string | null>(null);
   const questionAttemptRef = useRef(0);
 
+  const clearFeedbackTimers = () => {
+    if (reactionTimerRef.current !== null) window.clearTimeout(reactionTimerRef.current);
+    if (praiseTimerRef.current !== null) window.clearTimeout(praiseTimerRef.current);
+    reactionTimerRef.current = null;
+    praiseTimerRef.current = null;
+  };
+
+  const showFeedback = useCallback(
+    (reaction: string, praise: string) => {
+      clearFeedbackTimers();
+      setMascotReaction(reaction);
+      reactionTimerRef.current = window.setTimeout(() => {
+        reactionTimerRef.current = null;
+        setMascotReaction(mascotEmoji);
+      }, 1500);
+      setPraiseText(praise);
+      praiseTimerRef.current = window.setTimeout(() => {
+        praiseTimerRef.current = null;
+        setPraiseText(null);
+      }, 2500);
+    },
+    [mascotEmoji]
+  );
+
+  // Bảng chơi đóng giữa chừng → đừng để hẹn giờ muộn bắn vào màn hình kế tiếp.
+  useEffect(() => () => clearFeedbackTimers(), []);
+
   /** Phần thưởng chỉ được phát một lần mỗi lượt — xoá dấu vết khi sang màn/chơi lại. */
   const resetRewardState = () => {
     claimedKeys.current.clear();
+    clearFeedbackTimers();
     setReceipt(null);
     setCombo(0);
     setWrongAttempts(0);
     setShowCorrectAnswer(false);
     setCorrectAnswer('');
+    setMascotReaction(mascotEmoji);
     setPraiseText(null);
   };
 
@@ -192,21 +227,16 @@ export const GameModalWrapper: React.FC<GameModalWrapperProps> = ({
     const newCombo = combo + 1;
     setCombo(newCombo);
 
-    // Mascot reaction
-    setMascotReaction(getRandomReaction(newCombo >= 3 ? 'combo' : 'correct'));
-    setTimeout(() => setMascotReaction(mascotEmoji), 1500);
-
-    // Praise
     const outcome: PraiseOutcome = newCombo >= 3 ? 'COMBO' : newCombo >= 2 ? 'STREAK' : 'CORRECT';
     const praise = resolvePraise({
       subject: praiseSubject,
       outcome,
       seed: `game-${gameId}-${Date.now()}`,
     });
-    setPraiseText(praise.text);
+    // Mascot reaction + lời khen dùng chung một cặp hẹn giờ (lượt mới cướp từ lượt cũ)
+    showFeedback(getRandomReaction(newCombo >= 3 ? 'combo' : 'correct'), praise.text);
     speakPraise(praise);
-    setTimeout(() => setPraiseText(null), 2500);
-  }, [combo, mascotEmoji, praiseSubject, gameId]);
+  }, [combo, praiseSubject, gameId, showFeedback]);
 
   const handleWrong = useCallback((answer: string, correct: string) => {
     questionAttemptRef.current += 1;
@@ -219,20 +249,15 @@ export const GameModalWrapper: React.FC<GameModalWrapperProps> = ({
       setCorrectAnswer(correct);
     }
 
-    // Mascot reaction - encouraging
-    setMascotReaction(getRandomReaction('wrong'));
-    setTimeout(() => setMascotReaction(mascotEmoji), 1500);
-
     // Praise - encouragement
     const praise = resolvePraise({
       subject: praiseSubject,
       outcome: 'ENCOURAGEMENT',
       seed: `game-wrong-${gameId}-${Date.now()}`,
     });
-    setPraiseText(praise.text);
+    showFeedback(getRandomReaction('wrong'), praise.text);
     speakPraise(praise);
-    setTimeout(() => setPraiseText(null), 2500);
-  }, [mascotEmoji, praiseSubject, gameId]);
+  }, [praiseSubject, gameId, showFeedback]);
 
   const feedbackContextValue = React.useMemo(() => ({
     reportCorrect: handleCorrect,
@@ -414,7 +439,7 @@ export const GameModalWrapper: React.FC<GameModalWrapperProps> = ({
 
           {/* Praise Toast */}
           {praiseText && (
-            <div className="px-4 py-2 bg-gradient-to-r from-emerald-100 to-teal-100 border-b border-emerald-200 animate-slide-down">
+            <div data-testid="praise-toast" className="px-4 py-2 bg-gradient-to-r from-emerald-100 to-teal-100 border-b border-emerald-200 animate-slide-down">
               <div className="flex items-center gap-2 max-w-full mx-auto text-center">
                 <span className="text-xl">{mascotReaction}</span>
                 <span className="text-sm md:text-base font-black text-emerald-900 truncate">{praiseText}</span>
